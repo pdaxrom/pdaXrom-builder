@@ -1,0 +1,9 @@
+config ROTATE
+	bool
+	prompt "Rotate"
+	depends on XFREE430
+
+config ROTATE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on ROTATE

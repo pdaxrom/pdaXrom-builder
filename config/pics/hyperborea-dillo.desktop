@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Dillo
+Categories=Application;Network;WebBrowser;
+Comment=Compact Web Browser
+Exec=dillo -g 500x400
+Terminal=0
+Type=Application
+Icon=dillo.png
+StartupNotify=True

@@ -1,0 +1,18 @@
+--- openobex-apps-1.0.0/src/obex_test_client.c~	2004-09-22 12:23:53.000000000 +0000
++++ openobex-apps-1.0.0/src/obex_test_client.c	2004-09-22 12:24:16.000000000 +0000
+@@ -370,13 +370,13 @@
+ 
+ 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
+ 		if(hi == OBEX_HDR_BODY)	{
+-		printf(__FUNCTION__ "() Found body\n");
++		printf("get_client_done() Found body\n");
+ 			body = hv.bs;
+ 			body_len = hlen;
+ 			break;
+ 		}
+ 		else	{
+-			printf(__FUNCTION__ "() Skipped header %02x\n", hi);
++			printf("get_client_done() Skipped header %02x\n", hi);
+ 		}
+ 	}
+ 

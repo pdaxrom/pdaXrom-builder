@@ -1,0 +1,3 @@
+URxvt*background: Black
+URxvt*foreground: Green
+URxvt*font: xft:Lucida Console:pixelsize=12

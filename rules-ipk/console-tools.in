@@ -1,0 +1,13 @@
+config CONSOLE-TOOLS
+	bool
+	prompt "console-tools"
+
+config CONSOLE-TOOLS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on CONSOLE-TOOLS
+
+config CONSOLE-TOOLS-LOADKEYS_INSTALL
+	bool
+	prompt "install loadkeys only"
+	depends on CONSOLE-TOOLS && CONSOLE-TOOLS_INSTALL

@@ -1,0 +1,9 @@
+config MB-APPLET-TASKS
+	bool
+	prompt "Compile mb-applet-tasks"
+	depends on XFREE430
+
+config MB-APPLET-TASKS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MB-APPLET-TASKS

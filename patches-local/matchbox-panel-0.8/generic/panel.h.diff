@@ -1,0 +1,12 @@
+diff -Nur matchbox-panel-0.8/src/panel.h matchbox-panel-0.8-patched/src/panel.h
+--- matchbox-panel-0.8/src/panel.h	2004-02-07 17:43:51.000000000 +0000
++++ matchbox-panel-0.8-patched/src/panel.h	2004-02-17 22:42:28.000000000 +0000
+@@ -109,7 +109,7 @@
+ 
+ 
+ #define DEFAULT_COLOR_SPEC "#e2e2de" /* Same as gnome ? */
+-#define MB_MSG_FONT        "Sans-8:bold"   
++#define MB_MSG_FONT        "Verdana-14"
+ 
+ enum {
+   BG_SOLID_COLOR,

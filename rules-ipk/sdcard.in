@@ -1,0 +1,9 @@
+config SDCARD
+	bool
+	prompt "sd card modules and utils"
+	depends on ARM_ARCH_PXA || ARM_ARCH_SA1100
+
+config SDCARD_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on SDCARD

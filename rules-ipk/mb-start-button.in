@@ -1,0 +1,9 @@
+config MB-START-BUTTON
+	bool
+	prompt "mb-start-button"
+	depends on XFREE430
+
+config MB-START-BUTTON_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on MB-START-BUTTON

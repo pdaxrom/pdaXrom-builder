@@ -1,0 +1,9 @@
+config XMMS-TREMOR
+	bool
+	prompt "xmms-tremor"
+	depends on XMMS && TREMOR
+
+config XMMS-TREMOR_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XMMS-TREMOR

@@ -1,0 +1,8 @@
+config PHP
+	bool
+	prompt "php"
+
+config PHP_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PHP

@@ -1,0 +1,4 @@
+config XCHAIN_CDRTOOLS
+	bool
+	prompt "cdrtools"
+	default n

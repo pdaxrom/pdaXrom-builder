@@ -1,0 +1,11 @@
+--- ROX-Session/ROX-Session/AppRun~	2004-10-12 18:48:22.000000000 +0000
++++ ROX-Session/ROX-Session/AppRun	2004-10-12 18:48:27.000000000 +0000
+@@ -17,7 +17,7 @@
+ if [ "x$PLATFORM" = x ]; then
+ 	ARCH=`uname -m`
+ 	case "$ARCH" in
+-		i?86) ARCH=ix86 ;;
++		i?86) ARCH=i386 ;;
+ 	esac
+ 
+ 	PLATFORM=`uname -s`-"$ARCH" export PLATFORM

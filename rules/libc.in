@@ -1,0 +1,53 @@
+menu	"C Library           "
+
+choice
+        prompt "Which C library do you want to use?"
+        default GLIBC
+	
+	config GLIBC
+		bool
+ 		prompt "GLIBC"
+ 		depends on !ARCH_NOMMU
+
+	config NEWLIB
+		bool
+		prompt "Newlib"
+    
+#	config UCLIBC
+#		bool
+# 		prompt "uClibc"
+endchoice
+
+comment "C Library options"
+
+choice
+	prompt "C-Lib Version"
+		default GLIBC_2_2_5
+
+	config GLIBC_2_3_3
+		bool
+		prompt "2.3.3"
+		depends on GLIBC
+
+	config GLIBC_2_3_2
+		bool
+		prompt "2.3.2"
+		depends on GLIBC
+
+	config GLIBC_2_2_5
+		bool
+		prompt "2.2.5"
+		depends on GLIBC
+
+	config NEWLIB_1_12_0
+		bool
+		prompt "1.12.0"
+		depends on NEWLIB
+
+endchoice
+
+source "rules/glibc.in"
+
+source "rules/newlib.in"
+
+endmenu

@@ -1,0 +1,13 @@
+diff -Nur pango-1.2.4/pango/pangoft2.h pango-1.2.4.new/pango/pangoft2.h
+--- pango-1.2.4/pango/pangoft2.h	2002-07-03 22:30:36.000000000 +0000
++++ pango-1.2.4.new/pango/pangoft2.h	2004-08-24 04:36:22.000000000 +0000
+@@ -23,7 +23,8 @@
+ #ifndef __PANGOFT2_H__
+ #define __PANGOFT2_H__
+ 
+-#include <freetype/freetype.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ 
+ #include <fontconfig/fontconfig.h>
+ 

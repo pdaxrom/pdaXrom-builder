@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# This stuff was originally in the pm_helper script before the switch.
+#
+#
+SLEEVEFILE="/proc/bus/sleeve/device"
+
+export DEVICE_NAME=`/bin/grep driver $SLEEVEFILE | /bin/sed -e 's/.*=//'`
+case $DEVICE_NAME in
+"Compaq Mercury Backpaq")
+    cat /etc/fpga.bin > /dev/backpaq/fpga
+    echo 'BackPAQ fpga loaded'
+    ;;
+"Compaq CompactFlash Sleeve")
+    echo 'CompactFlash resuming'
+    ;;
+"Compaq PC Card Sleeve")
+    echo 'PC card sleeve resuming'
+    ;;
+"Compaq Dual PC Card Sleeve")
+    echo 'Dual PC card sleeve resuming'
+    ;;
+*)
+    echo $1 event not handled for $DEVICE_NAME
+    ;;
+esac
+
+

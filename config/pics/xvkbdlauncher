@@ -1,0 +1,51 @@
+#!/bin/sh
+# $1 = height, $2 = width, $3 = rotation
+xpos=0
+set `xrandr | awk '/^\*/ { print $2,$4 } /^Current rotation/ { print $4 }'`
+
+if [ -f $HOME/.matchbox/mb-panel-orientation ]; then
+    size=`cat ~/.matchbox/mb-panel-orientation | sed 's/^.*--size "\?\([0-9]*\)"\? .*$/\1/'`
+    if [ "x$size" == "x" ]; then
+	size="36"
+    fi
+    panelpos=`cat ~/.matchbox/mb-panel-orientation | sed 's/^.*--orientation "\?\([a-z]*\)"\? .*$/\1/'`
+    if [ "x$panelpos" == "x" ]; then
+	panelpos="south"
+    fi 
+else
+    size="36"
+    panelpos="south"
+fi
+
+if [ $3 == "normal" ] || [ $3 == "inverted" ]; then
+    screenwidth=$1
+    screenheight=$2
+else
+    screenheight=$1
+    screenwidth=$2
+fi
+
+if [ $panelpos == "west" ] || [ $panelpos == "east" ]; then
+    screenwidth=$(($screenwidth - $size))
+    if [ $panelpos == "west" ]; then
+	xpos=$size
+    fi
+fi
+
+# keyboardheight=$(($screenheight / 4))
+keyboardheight=120
+
+if [ $panelpos != "south" ]; then
+    ypos=$(($screenheight - $keyboardheight))
+else
+    ypos=$(($screenheight - $keyboardheight - $size))
+fi
+
+geometry=${screenwidth}x${keyboardheight}+${xpos}+${ypos}
+
+if pidof xvkbd >/dev/null; then
+    xresizewindow xvkbd $geometry 
+else
+    # xkbd wont resize below start parameter
+    xvkbd -modal -no-keypad -geometry $geometry -dict /usr/share/dict/xvkbd.dic &
+fi

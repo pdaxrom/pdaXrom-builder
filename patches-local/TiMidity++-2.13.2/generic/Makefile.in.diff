@@ -1,0 +1,14 @@
+--- src/timidity/Makefile.in~	2004-10-30 00:23:57.000000000 +0000
++++ src/timidity/Makefile.in	2004-10-30 00:25:54.000000000 +0000
+@@ -865,9 +865,9 @@
+ 
+ clean-noinstPROGRAMS:
+ 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+-@BORLANDC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@calcnewt$(EXEEXT): $(calcnewt_OBJECTS) $(calcnewt_DEPENDENCIES) 
++@BORLANDC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@calcnewt$(EXEEXT):
+ @BORLANDC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	@rm -f calcnewt$(EXEEXT)
+-@BORLANDC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	$(LINK) $(calcnewt_LDFLAGS) $(calcnewt_OBJECTS) $(calcnewt_LDADD) $(LIBS)
++@BORLANDC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	$(HOST_CC) $(calcnewt_SOURCES) -o $@ -lm
+ @BORLANDC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@timidity$(EXEEXT): $(timidity_OBJECTS) $(timidity_DEPENDENCIES) 
+ @BORLANDC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	@rm -f timidity$(EXEEXT)
+ @BORLANDC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	$(LINK) $(timidity_LDFLAGS) $(timidity_OBJECTS) $(timidity_LDADD) $(LIBS)

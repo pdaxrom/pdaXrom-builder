@@ -1,0 +1,8 @@
+config OPENOBEX-APPS
+	bool
+	prompt "openobex-apps"
+
+config OPENOBEX-APPS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on OPENOBEX-APPS

@@ -1,0 +1,8 @@
+config RSYNC
+	bool
+	prompt "rsync"
+
+config RSYNC_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on RSYNC

@@ -1,0 +1,17 @@
+--- Clock/src/Makefile.in~	2004-04-12 13:41:38.000000000 +0000
++++ Clock/src/Makefile.in	2004-05-31 17:47:26.000000000 +0000
+@@ -6,11 +6,11 @@
+ LIBS = 
+ .SUFFIXES:
+ .SUFFIXES: .c .o
+-ROX_CLIB = "@ROX_RUN@" ROX-CLib
++#ROX_CLIB = "@ROX_RUN@" ROX-CLib
+ 
+ CC = @CC@
+-CFLAGS = @CFLAGS@ `${PKG_CONFIG} --cflags gtk+-2.0 libxml-2.0` -I. `${ROX_CLIB} --cflags`
+-LDFLAGS = @LDFLAGS@ `${PKG_CONFIG} --libs gtk+-2.0 libxml-2.0` ${LIBS} `${ROX_CLIB} --libs`
++CFLAGS = @CFLAGS@ `${PKG_CONFIG} --cflags gtk+-2.0 libxml-2.0 ROX-CLib` -I.
++LDFLAGS = @LDFLAGS@ `${PKG_CONFIG} --libs gtk+-2.0 libxml-2.0 ROX-CLib` ${LIBS}
+ EXEC = ${PLATFORM_DIR}/${PROG}
+ 
+ ############ Things to change for different programs

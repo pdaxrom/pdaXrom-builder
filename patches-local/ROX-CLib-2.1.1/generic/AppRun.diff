@@ -1,0 +1,11 @@
+--- app/AppRun~	2004-10-12 18:38:07.000000000 +0000
++++ app/AppRun	2004-10-12 18:38:17.000000000 +0000
+@@ -9,7 +9,7 @@
+ 
+   ARCH=`uname -m`
+   case $ARCH in
+-	i?86) ARCH=ix86 ;;
++	i?86) ARCH=i386 ;;
+   esac
+ 
+   PLATFORM=`uname -s`-$ARCH ; export PLATFORM

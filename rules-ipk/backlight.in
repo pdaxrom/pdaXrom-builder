@@ -1,0 +1,9 @@
+config BACKLIGHT
+	bool
+	prompt "backlight"
+	depends on LIBXML2 && GTK22
+
+config BACKLIGHT_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on BACKLIGHT

@@ -1,0 +1,8 @@
+config MESALIB
+	bool
+	prompt "Mesa 3D"
+
+config MESALIB_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on MESALIB

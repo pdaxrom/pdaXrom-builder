@@ -1,0 +1,13 @@
+diff -Nur pango-1.2.4/pango/pango-ot.h pango-1.2.4.new/pango/pango-ot.h
+--- pango-1.2.4/pango/pango-ot.h	2002-06-04 00:20:47.000000000 +0000
++++ pango-1.2.4.new/pango/pango-ot.h	2004-08-24 04:36:30.000000000 +0000
+@@ -22,7 +22,8 @@
+ #ifndef __PANGO_OT_H__
+ #define __PANGO_OT_H__
+ 
+-#include <freetype/freetype.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ #include <pango/pango-glyph.h>
+ 
+ G_BEGIN_DECLS

@@ -1,0 +1,274 @@
+diff -Nur ffmpeg-cvs-2004-11-10~/configure ffmpeg-cvs-2004-11-10/configure
+--- ffmpeg-cvs-2004-11-10~/configure	2004-11-09 00:27:16.000000000 +0000
++++ ffmpeg-cvs-2004-11-10/configure	2004-11-26 16:17:39.000000000 +0000
+@@ -34,6 +34,8 @@
+ echo "  --enable-pthreads        use pthreads [default=no]"
+ echo "  --enable-dc1394          enable IIDC-1394 grabbing using libdc1394 and libraw1394 [default=no]"
+ echo "  --enable-gpl             allow use of gpl code, the resulting libav* and ffmpeg will be under gpl [default=no]"
++echo "  --enable-ipp             enable Intel IPP optimization [default=no]"
++echo "  --ipp-dir=DIR            Intel IPP dir"
+ echo ""
+ echo "Advanced options (experts only):"
+ echo "  --source-path=PATH       path of source code [$source_path]"
+@@ -196,6 +198,8 @@
+ pthreads="no"
+ gpl="no"
+ memalignhack="no"
++ipp=no
++IPP_DIR=""
+ 
+ # OS specific
+ targetos=`uname -s`
+@@ -456,6 +460,10 @@
+   ;;
+   --enable-gpl) gpl="yes"
+   ;;
++  --enable-ipp) ipp="yes"
++  ;;
++  --ipp-dir=*) IPP_DIR="${opt#--ipp-dir=}"
++  ;;
+   --enable-memalign-hack) memalignhack="yes"
+   ;;
+   --disable-strip) dostrip="no"
+@@ -1008,7 +1016,7 @@
+ 	CFLAGS="$CFLAGS -O5"
+ 	LDFLAGS="$LDFLAGS -O5"
+     else
+-	CFLAGS="-O3 $CFLAGS"
++	CFLAGS="-Os -fomit-frame-pointer $CFLAGS"
+     fi
+ fi
+ 
+@@ -1053,6 +1061,7 @@
+ echo "debug symbols    $debug"
+ echo "strip symbols    $dostrip"
+ echo "optimize         $optimize"
++echo "ipp              $ipp"
+ echo "shared pp        $shared_pp"
+ echo "Video hooking    $vhook"
+ echo "SDL support      $sdl"
+@@ -1130,6 +1139,9 @@
+ elif test "$cpu" = "armv4l" ; then
+   echo "TARGET_ARCH_ARMV4L=yes" >> config.mak
+   echo "#define ARCH_ARMV4L 1" >> $TMPH
++elif test "$cpu" = "armv5tel" ; then
++  echo "TARGET_ARCH_ARMV4L=yes" >> config.mak
++  echo "#define ARCH_ARMV4L 1" >> $TMPH
+ elif test "$cpu" = "alpha" ; then
+   echo "TARGET_ARCH_ALPHA=yes" >> config.mak
+   echo "#define ARCH_ALPHA 1" >> $TMPH
+@@ -1434,6 +1446,13 @@
+   echo "CONFIG_GPL=yes" >> config.mak
+ fi
+ 
++if test "$ipp" = "yes" ; then
++  echo "#define HAVE_IPP 1" >> $TMPH
++  echo "HAVE_IPP=yes" >> config.mak
++  echo "IPP_INC=\"-I$IPP_DIR/include\"" >> config.mak
++  echo "IPP_LIB=-Wl,--no-warn-mismatch  $IPP_DIR/lib/video_r.a" >> config.mak
++fi
++
+ echo "#define restrict $_restrict" >> $TMPH
+ 
+ if test "$optimize" = "small"; then
+diff -Nur ffmpeg-cvs-2004-11-10~/libavcodec/Makefile ffmpeg-cvs-2004-11-10/libavcodec/Makefile
+--- ffmpeg-cvs-2004-11-10~/libavcodec/Makefile	2004-11-09 23:31:46.000000000 +0000
++++ ffmpeg-cvs-2004-11-10/libavcodec/Makefile	2004-11-26 16:17:50.000000000 +0000
+@@ -150,6 +150,12 @@
+ CFLAGS += $(MLIB_INC)
+ endif
+ 
++# Intel IPP specific stuff
++ifeq ($(HAVE_IPP),yes)
++CFLAGS += $(IPP_INC)
++EXTRALIBS += $(IPP_LIB)
++endif
++
+ # alpha specific stuff
+ ifeq ($(TARGET_ARCH_ALPHA),yes)
+ OBJS += alpha/dsputil_alpha.o alpha/mpegvideo_alpha.o \
+diff -Nur ffmpeg-cvs-2004-11-10~/libavcodec/armv4l/dsputil_arm.c ffmpeg-cvs-2004-11-10/libavcodec/armv4l/dsputil_arm.c
+--- ffmpeg-cvs-2004-11-10~/libavcodec/armv4l/dsputil_arm.c	2003-07-07 11:19:18.000000000 +0000
++++ ffmpeg-cvs-2004-11-10/libavcodec/armv4l/dsputil_arm.c	2004-11-26 16:14:16.000000000 +0000
+@@ -18,10 +18,107 @@
+  */
+ 
+ #include "../dsputil.h"
++#ifdef HAVE_IPP
++#include "ipp.h"
++#endif
+ 
+ extern void j_rev_dct_ARM(DCTELEM *data);
+ extern void simple_idct_ARM(DCTELEM *data);
+ 
++static void add_pixels_clamped_ARM(short *block, unsigned char *dest, int line_size)
++{
++    asm volatile (
++		  "mov r10, #8 \n\t"
++
++		  "1: \n\t"
++
++		  /* load dest */
++		  "ldr r4, [%1] \n\t"
++		  /* block[0] and block[1]*/
++		  "ldrsh r5, [%0] \n\t"
++		  "ldrsh r7, [%0, #2] \n\t"
++		  "and r6, r4, #0xFF \n\t"
++		  "and r8, r4, #0xFF00 \n\t"
++		  "add r6, r5, r6 \n\t"
++		  "add r8, r7, r8, lsr #8 \n\t"
++		  "mvn r5, r5 \n\t"
++		  "mvn r7, r7 \n\t"
++		  "tst r6, #0x100 \n\t"
++		  "movne r6, r5, lsr #24 \n\t"
++		  "tst r8, #0x100 \n\t"
++		  "movne r8, r7, lsr #24 \n\t"
++		  "mov r9, r6 \n\t"
++		  "ldrsh r5, [%0, #4] \n\t" /* moved form [A] */
++		  "orr r9, r9, r8, lsl #8 \n\t"
++		  /* block[2] and block[3] */
++		  /* [A] */
++		  "ldrsh r7, [%0, #6] \n\t"
++		  "and r6, r4, #0xFF0000 \n\t"
++		  "and r8, r4, #0xFF000000 \n\t"
++		  "add r6, r5, r6, lsr #16 \n\t"
++		  "add r8, r7, r8, lsr #24 \n\t"
++		  "mvn r5, r5 \n\t"
++		  "mvn r7, r7 \n\t"
++		  "tst r6, #0x100 \n\t"
++		  "movne r6, r5, lsr #24 \n\t"
++		  "tst r8, #0x100 \n\t"
++		  "movne r8, r7, lsr #24 \n\t"
++		  "orr r9, r9, r6, lsl #16 \n\t"
++		  "ldr r4, [%1, #4] \n\t"	/* moved form [B] */
++		  "orr r9, r9, r8, lsl #24 \n\t"
++		  /* store dest */
++		  "ldrsh r5, [%0, #8] \n\t" /* moved form [C] */
++		  "str r9, [%1] \n\t"
++
++		  /* load dest */
++		  /* [B] */
++		  /* block[4] and block[5] */
++		  /* [C] */
++		  "ldrsh r7, [%0, #10] \n\t"
++		  "and r6, r4, #0xFF \n\t"
++		  "and r8, r4, #0xFF00 \n\t"
++		  "add r6, r5, r6 \n\t"
++		  "add r8, r7, r8, lsr #8 \n\t"
++		  "mvn r5, r5 \n\t"
++		  "mvn r7, r7 \n\t"
++		  "tst r6, #0x100 \n\t"
++		  "movne r6, r5, lsr #24 \n\t"
++		  "tst r8, #0x100 \n\t"
++		  "movne r8, r7, lsr #24 \n\t"
++		  "mov r9, r6 \n\t"
++		  "ldrsh r5, [%0, #12] \n\t" /* moved from [D] */
++		  "orr r9, r9, r8, lsl #8 \n\t"
++		  /* block[6] and block[7] */
++		  /* [D] */
++		  "ldrsh r7, [%0, #14] \n\t"
++		  "and r6, r4, #0xFF0000 \n\t"
++		  "and r8, r4, #0xFF000000 \n\t"
++		  "add r6, r5, r6, lsr #16 \n\t"
++		  "add r8, r7, r8, lsr #24 \n\t"
++		  "mvn r5, r5 \n\t"
++		  "mvn r7, r7 \n\t"
++		  "tst r6, #0x100 \n\t"
++		  "movne r6, r5, lsr #24 \n\t"
++		  "tst r8, #0x100 \n\t"
++		  "movne r8, r7, lsr #24 \n\t"
++		  "orr r9, r9, r6, lsl #16 \n\t"
++		  "add %0, %0, #16 \n\t" /* moved from [E] */
++		  "orr r9, r9, r8, lsl #24 \n\t"
++		  "subs r10, r10, #1 \n\t" /* moved from [F] */
++		  /* store dest */
++		  "str r9, [%1, #4] \n\t"
++
++		  /* [E] */
++		  /* [F] */
++		  "add %1, %1, %2 \n\t"
++		  "bne 1b \n\t"
++		  :
++		  : "r"(block),
++		    "r"(dest),
++		    "r"(line_size)
++		  : "r4", "r5", "r6", "r7", "r8", "r9", "r10", "cc", "memory" );
++}
++
+ /* XXX: local hack */
+ static void (*ff_put_pixels_clamped)(const DCTELEM *block, uint8_t *pixels, int line_size);
+ static void (*ff_add_pixels_clamped)(const DCTELEM *block, uint8_t *pixels, int line_size);
+@@ -38,6 +135,7 @@
+     j_rev_dct_ARM (block);
+     ff_add_pixels_clamped(block, dest, line_size);
+ }
++
+ static void simple_idct_ARM_put(uint8_t *dest, int line_size, DCTELEM *block)
+ {
+     simple_idct_ARM (block);
+@@ -49,6 +147,27 @@
+     ff_add_pixels_clamped(block, dest, line_size);
+ }
+ 
++
++static void simple_idct_ipp(DCTELEM *block)
++{
++#ifdef HAVE_IPP
++    ippiDCTInv_8x8_16s_I(block);
++#endif
++}
++static void simple_idct_ipp_put(uint8_t *dest, int line_size, DCTELEM *block)
++{
++#ifdef HAVE_IPP
++    ippiDCTInv_8x8_16s8u(block, dest, line_size);
++#endif
++}
++static void simple_idct_ipp_add(uint8_t *dest, int line_size, DCTELEM *block)
++{
++#ifdef HAVE_IPP
++    ippiDCTInv_8x8_16s_I(block);
++    add_pixels_clamped_ARM(block, dest, line_size);
++#endif
++}
++
+ void dsputil_init_armv4l(DSPContext* c, AVCodecContext *avctx)
+ {
+     const int idct_algo= avctx->idct_algo;
+@@ -56,7 +175,11 @@
+     ff_put_pixels_clamped = c->put_pixels_clamped;
+     ff_add_pixels_clamped = c->add_pixels_clamped;
+ 
++#ifdef HAVE_IPP
++    if(idct_algo==FF_IDCT_ARM){
++#else
+     if(idct_algo==FF_IDCT_AUTO || idct_algo==FF_IDCT_ARM){
++#endif
+         c->idct_put= j_rev_dct_ARM_put;
+         c->idct_add= j_rev_dct_ARM_add;
+ 	c->idct    = j_rev_dct_ARM;
+@@ -66,5 +189,14 @@
+ 	c->idct_add= simple_idct_ARM_add;
+ 	c->idct    = simple_idct_ARM;
+ 	c->idct_permutation_type= FF_NO_IDCT_PERM;
++#ifdef HAVE_IPP
++    } else if (idct_algo==FF_IDCT_AUTO || idct_algo==FF_IDCT_IPP){
++#else
++    } else if (idct_algo==FF_IDCT_IPP){
++#endif
++	c->idct_put= simple_idct_ipp_put;
++	c->idct_add= simple_idct_ipp_add;
++	c->idct    = simple_idct_ipp;
++	c->idct_permutation_type= FF_NO_IDCT_PERM;
+     }
+ }
+diff -Nur ffmpeg-cvs-2004-11-10~/libavcodec/avcodec.h ffmpeg-cvs-2004-11-10/libavcodec/avcodec.h
+--- ffmpeg-cvs-2004-11-10~/libavcodec/avcodec.h	2004-11-09 23:31:46.000000000 +0000
++++ ffmpeg-cvs-2004-11-10/libavcodec/avcodec.h	2004-11-26 15:22:14.000000000 +0000
+@@ -1122,6 +1122,7 @@
+ #define FF_IDCT_SH4          9
+ #define FF_IDCT_SIMPLEARM    10
+ #define FF_IDCT_H264         11
++#define FF_IDCT_IPP          12
+ 
+     /**
+      * slice count.

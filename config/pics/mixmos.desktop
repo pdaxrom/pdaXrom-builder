@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=OSS Mixer
+Comment=OSS Mixer
+Exec=mixmos
+Terminal=0
+Type=Application
+Icon=/usr/share/mixmos/pixmaps/icon.png
+Categories=AudioVideo
+StartupNotify=True
+SingleInstance=False

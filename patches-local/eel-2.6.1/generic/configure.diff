@@ -1,0 +1,11 @@
+--- eel/configure~	2004-05-26 14:53:43.000000000 +0000
++++ eel/configure	2004-05-26 14:55:57.000000000 +0000
+@@ -20555,7 +20555,7 @@
+ See \`config.log' for more details." >&5
+ echo "$as_me: error: cannot run test program while cross compiling
+ See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }
++   }
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+ /* confdefs.h.  */

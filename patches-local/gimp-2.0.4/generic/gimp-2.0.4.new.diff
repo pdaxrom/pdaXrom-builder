@@ -1,0 +1,823 @@
+diff -Nur gimp-2.0.4/app/base/Makefile.in gimp-2.0.4.new/app/base/Makefile.in
+--- gimp-2.0.4/app/base/Makefile.in	2004-08-05 18:49:13.000000000 +0000
++++ gimp-2.0.4.new/app/base/Makefile.in	2004-08-25 03:52:15.000000000 +0000
+@@ -419,8 +419,7 @@
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+-	$(GLIB_CFLAGS)		\
+-	-I$(includedir)
++	$(GLIB_CFLAGS)
+ 
+ 
+ TESTS = test-cpu-accel
+diff -Nur gimp-2.0.4/app/composite/Makefile.in gimp-2.0.4.new/app/composite/Makefile.in
+--- gimp-2.0.4/app/composite/Makefile.in	2004-08-05 19:56:08.000000000 +0000
++++ gimp-2.0.4.new/app/composite/Makefile.in	2004-08-25 03:52:53.000000000 +0000
+@@ -367,9 +367,7 @@
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+-	$(GLIB_CFLAGS)		\
+-	-I$(includedir)
+-
++	$(GLIB_CFLAGS)
+ 
+ noinst_LIBRARIES = libappcomposite.a
+ 
+diff -Nur gimp-2.0.4/app/config/Makefile.in gimp-2.0.4.new/app/config/Makefile.in
+--- gimp-2.0.4/app/config/Makefile.in	2004-08-05 18:49:13.000000000 +0000
++++ gimp-2.0.4.new/app/config/Makefile.in	2004-08-25 03:53:12.000000000 +0000
+@@ -408,9 +408,7 @@
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+ 	$(GLIB_CFLAGS)		\
+-	$(GDK_PIXBUF_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GDK_PIXBUF_CFLAGS)
+ 
+ EXTRA_PROGRAMS = test-config
+ 
+diff -Nur gimp-2.0.4/app/core/Makefile.in gimp-2.0.4.new/app/core/Makefile.in
+--- gimp-2.0.4/app/core/Makefile.in	2004-08-05 18:49:14.000000000 +0000
++++ gimp-2.0.4.new/app/core/Makefile.in	2004-08-25 03:53:19.000000000 +0000
+@@ -361,9 +361,7 @@
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+ 	$(GDK_PIXBUF_CFLAGS)	\
+-	$(LIBART_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(LIBART_CFLAGS)
+ 
+ noinst_LIBRARIES = libappcore.a
+ 
+diff -Nur gimp-2.0.4/app/display/Makefile.in gimp-2.0.4.new/app/display/Makefile.in
+--- gimp-2.0.4/app/display/Makefile.in	2004-08-05 18:49:14.000000000 +0000
++++ gimp-2.0.4.new/app/display/Makefile.in	2004-08-25 03:53:26.000000000 +0000
+@@ -359,9 +359,7 @@
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+-	$(GTK_CFLAGS)		\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ noinst_LIBRARIES = libappdisplay.a
+ 
+diff -Nur gimp-2.0.4/app/file/Makefile.in gimp-2.0.4.new/app/file/Makefile.in
+--- gimp-2.0.4/app/file/Makefile.in	2004-08-05 18:49:14.000000000 +0000
++++ gimp-2.0.4.new/app/file/Makefile.in	2004-08-25 03:53:31.000000000 +0000
+@@ -370,9 +370,7 @@
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+-	$(GDK_PIXBUF_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GDK_PIXBUF_CFLAGS)
+ 
+ EXTRA_DIST = makefile.msc
+ subdir = app/file
+diff -Nur gimp-2.0.4/app/gui/Makefile.in gimp-2.0.4.new/app/gui/Makefile.in
+--- gimp-2.0.4/app/gui/Makefile.in	2004-08-05 18:49:14.000000000 +0000
++++ gimp-2.0.4.new/app/gui/Makefile.in	2004-08-25 03:53:37.000000000 +0000
+@@ -550,9 +550,7 @@
+ 	-I$(top_srcdir)		\
+ 	-I$(top_builddir)/app	\
+ 	-I$(top_srcdir)/app	\
+-	$(GTK_CFLAGS)		\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ subdir = app/gui
+ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+diff -Nur gimp-2.0.4/app/Makefile.in gimp-2.0.4.new/app/Makefile.in
+--- gimp-2.0.4/app/Makefile.in	2004-08-05 18:49:13.000000000 +0000
++++ gimp-2.0.4.new/app/Makefile.in	2004-08-25 03:54:40.000000000 +0000
+@@ -417,9 +417,7 @@
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+ 	$(GTK_CFLAGS)	\
+-	$(PANGOFT2_CFLAGS) \
+-	-I$(includedir)
+-
++	$(PANGOFT2_CFLAGS)
+ 
+ gimp_2_0_LDFLAGS = \
+ 	$(mwindows)				\
+diff -Nur gimp-2.0.4/app/paint/Makefile.in gimp-2.0.4.new/app/paint/Makefile.in
+--- gimp-2.0.4/app/paint/Makefile.in	2004-08-05 18:49:15.000000000 +0000
++++ gimp-2.0.4.new/app/paint/Makefile.in	2004-08-25 03:53:43.000000000 +0000
+@@ -361,9 +361,7 @@
+ 	-I$(top_srcdir)		\
+ 	-I$(top_builddir)/app	\
+ 	-I$(top_srcdir)/app	\
+-	$(GDK_PIXBUF_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GDK_PIXBUF_CFLAGS)
+ 
+ noinst_LIBRARIES = libapppaint.a
+ 
+diff -Nur gimp-2.0.4/app/paint-funcs/Makefile.in gimp-2.0.4.new/app/paint-funcs/Makefile.in
+--- gimp-2.0.4/app/paint-funcs/Makefile.in	2004-08-05 18:49:14.000000000 +0000
++++ gimp-2.0.4.new/app/paint-funcs/Makefile.in	2004-08-25 03:53:49.000000000 +0000
+@@ -362,9 +362,7 @@
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+-	$(GLIB_CFLAGS)		\
+-	-I$(includedir)
+-
++	$(GLIB_CFLAGS)
+ 
+ AM_CPPFLAGS = \
+ 	-DG_LOG_DOMAIN=\"Gimp-Paint-Funcs\"	\
+diff -Nur gimp-2.0.4/app/pdb/Makefile.in gimp-2.0.4.new/app/pdb/Makefile.in
+--- gimp-2.0.4/app/pdb/Makefile.in	2004-08-05 18:49:15.000000000 +0000
++++ gimp-2.0.4.new/app/pdb/Makefile.in	2004-08-25 03:53:55.000000000 +0000
+@@ -407,9 +407,7 @@
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+-	$(GTK_CFLAGS)		\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ EXTRA_DIST = makefile.msc
+ subdir = app/pdb
+diff -Nur gimp-2.0.4/app/plug-in/Makefile.in gimp-2.0.4.new/app/plug-in/Makefile.in
+--- gimp-2.0.4/app/plug-in/Makefile.in	2004-08-05 18:49:15.000000000 +0000
++++ gimp-2.0.4.new/app/plug-in/Makefile.in	2004-08-25 03:54:01.000000000 +0000
+@@ -359,9 +359,7 @@
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+-	$(GDK_PIXBUF_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GDK_PIXBUF_CFLAGS)
+ 
+ noinst_LIBRARIES = libappplug-in.a
+ 
+diff -Nur gimp-2.0.4/app/text/Makefile.in gimp-2.0.4.new/app/text/Makefile.in
+--- gimp-2.0.4/app/text/Makefile.in	2004-08-05 18:49:15.000000000 +0000
++++ gimp-2.0.4.new/app/text/Makefile.in	2004-08-25 03:54:08.000000000 +0000
+@@ -360,9 +360,7 @@
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+ 	$(GDK_PIXBUF_CFLAGS)	\
+-	$(PANGOFT2_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(PANGOFT2_CFLAGS)
+ 
+ noinst_LIBRARIES = libapptext.a
+ 
+diff -Nur gimp-2.0.4/app/tools/Makefile.in gimp-2.0.4.new/app/tools/Makefile.in
+--- gimp-2.0.4/app/tools/Makefile.in	2004-08-05 18:49:16.000000000 +0000
++++ gimp-2.0.4.new/app/tools/Makefile.in	2004-08-25 03:54:15.000000000 +0000
+@@ -507,9 +507,7 @@
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+-	$(GTK_CFLAGS)		\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ EXTRA_DIST = makefile.msc
+ 
+diff -Nur gimp-2.0.4/app/vectors/Makefile.in gimp-2.0.4.new/app/vectors/Makefile.in
+--- gimp-2.0.4/app/vectors/Makefile.in	2004-08-05 18:49:16.000000000 +0000
++++ gimp-2.0.4.new/app/vectors/Makefile.in	2004-08-25 03:54:22.000000000 +0000
+@@ -360,9 +360,7 @@
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+ 	$(GDK_PIXBUF_CFLAGS)	\
+-	$(LIBART_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(LIBART_CFLAGS)
+ 
+ noinst_LIBRARIES = libappvectors.a
+ 
+diff -Nur gimp-2.0.4/app/widgets/Makefile.in gimp-2.0.4.new/app/widgets/Makefile.in
+--- gimp-2.0.4/app/widgets/Makefile.in	2004-08-05 18:49:16.000000000 +0000
++++ gimp-2.0.4.new/app/widgets/Makefile.in	2004-08-25 03:54:28.000000000 +0000
+@@ -362,9 +362,7 @@
+ 	-I$(top_builddir)/app	\
+ 	-I$(top_srcdir)/app	\
+ 	$(GTK_CFLAGS)		\
+-	$(PANGOFT2_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(PANGOFT2_CFLAGS)
+ 
+ noinst_LIBRARIES = libappwidgets.a
+ 
+diff -Nur gimp-2.0.4/app/xcf/Makefile.in gimp-2.0.4.new/app/xcf/Makefile.in
+--- gimp-2.0.4/app/xcf/Makefile.in	2004-08-05 18:49:16.000000000 +0000
++++ gimp-2.0.4.new/app/xcf/Makefile.in	2004-08-25 03:54:34.000000000 +0000
+@@ -377,9 +377,7 @@
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/app	\
+-	$(GDK_PIXBUF_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GDK_PIXBUF_CFLAGS)
+ 
+ EXTRA_DIST = makefile.msc
+ subdir = app/xcf
+diff -Nur gimp-2.0.4/configure gimp-2.0.4.new/configure
+--- gimp-2.0.4/configure	2004-08-05 18:49:36.000000000 +0000
++++ gimp-2.0.4.new/configure	2004-08-25 04:34:26.000000000 +0000
+@@ -2026,7 +2026,7 @@
+ GLIB_REQUIRED_VERSION=2.2.0
+ GTK_REQUIRED_VERSION=2.2.2
+ GDK_PIXBUF_REQUIRED_VERSION=2.2.2
+-PANGOFT2_REQUIRED_VERSION=1.2.2
++PANGOFT2_REQUIRED_VERSION=1.2.0
+ FONTCONFIG_REQUIRED_VERSION=2.2.0
+ GTKDOC_REQUIRED_VERSION=1.0
+ GTKHTML2_REQUIRED_VERSION=2.0.0
+@@ -26047,20 +26047,20 @@
+         echo "$as_me:$LINENO: checking for pangoft2 >= 1.2.2" >&5
+ echo $ECHO_N "checking for pangoft2 >= 1.2.2... $ECHO_C" >&6
+ 
+-        if $PKG_CONFIG --exists "pangoft2 >= 1.2.2" ; then
++        if $PKG_CONFIG --exists "pangoft2 >= 1.2.0" ; then
+             echo "$as_me:$LINENO: result: yes" >&5
+ echo "${ECHO_T}yes" >&6
+             succeeded=yes
+ 
+             echo "$as_me:$LINENO: checking PANGOFT2_CFLAGS" >&5
+ echo $ECHO_N "checking PANGOFT2_CFLAGS... $ECHO_C" >&6
+-            PANGOFT2_CFLAGS=`$PKG_CONFIG --cflags "pangoft2 >= 1.2.2"`
++            PANGOFT2_CFLAGS=`$PKG_CONFIG --cflags "pangoft2 >= 1.2.0"`
+             echo "$as_me:$LINENO: result: $PANGOFT2_CFLAGS" >&5
+ echo "${ECHO_T}$PANGOFT2_CFLAGS" >&6
+ 
+             echo "$as_me:$LINENO: checking PANGOFT2_LIBS" >&5
+ echo $ECHO_N "checking PANGOFT2_LIBS... $ECHO_C" >&6
+-            PANGOFT2_LIBS=`$PKG_CONFIG --libs "pangoft2 >= 1.2.2"`
++            PANGOFT2_LIBS=`$PKG_CONFIG --libs "pangoft2 >= 1.2.0"`
+             echo "$as_me:$LINENO: result: $PANGOFT2_LIBS" >&5
+ echo "${ECHO_T}$PANGOFT2_LIBS" >&6
+         else
+@@ -26068,7 +26068,7 @@
+             PANGOFT2_LIBS=""
+             ## If we have a custom action on failure, don't print errors, but
+             ## do set a variable so people can do so.
+-            PANGOFT2_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "pangoft2 >= 1.2.2"`
++            PANGOFT2_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "pangoft2 >= 1.2.0"`
+ 
+         fi
+ 
+diff -Nur gimp-2.0.4/libgimp/Makefile.in gimp-2.0.4.new/libgimp/Makefile.in
+--- gimp-2.0.4/libgimp/Makefile.in	2004-08-05 18:49:20.000000000 +0000
++++ gimp-2.0.4.new/libgimp/Makefile.in	2004-08-25 03:55:03.000000000 +0000
+@@ -374,9 +374,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ EXTRA_DIST = \
+ 	COPYING		\
+diff -Nur gimp-2.0.4/libgimpbase/Makefile.in gimp-2.0.4.new/libgimpbase/Makefile.in
+--- gimp-2.0.4/libgimpbase/Makefile.in	2004-08-05 18:49:20.000000000 +0000
++++ gimp-2.0.4.new/libgimpbase/Makefile.in	2004-08-25 03:55:08.000000000 +0000
+@@ -372,9 +372,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GLIB_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GLIB_CFLAGS)
+ 
+ EXTRA_DIST = \
+ 	makefile.msc	\
+diff -Nur gimp-2.0.4/libgimpcolor/Makefile.in gimp-2.0.4.new/libgimpcolor/Makefile.in
+--- gimp-2.0.4/libgimpcolor/Makefile.in	2004-08-05 18:49:20.000000000 +0000
++++ gimp-2.0.4.new/libgimpcolor/Makefile.in	2004-08-25 03:55:14.000000000 +0000
+@@ -370,9 +370,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GLIB_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GLIB_CFLAGS)
+ 
+ EXTRA_DIST = \
+ 	makefile.msc		\
+diff -Nur gimp-2.0.4/libgimpmath/Makefile.in gimp-2.0.4.new/libgimpmath/Makefile.in
+--- gimp-2.0.4/libgimpmath/Makefile.in	2004-08-05 18:49:21.000000000 +0000
++++ gimp-2.0.4.new/libgimpmath/Makefile.in	2004-08-25 03:55:20.000000000 +0000
+@@ -370,9 +370,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GLIB_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GLIB_CFLAGS)
+ 
+ EXTRA_DIST = \
+ 	makefile.msc		\
+diff -Nur gimp-2.0.4/libgimpmodule/Makefile.in gimp-2.0.4.new/libgimpmodule/Makefile.in
+--- gimp-2.0.4/libgimpmodule/Makefile.in	2004-08-05 18:49:21.000000000 +0000
++++ gimp-2.0.4.new/libgimpmodule/Makefile.in	2004-08-25 03:55:31.000000000 +0000
+@@ -375,9 +375,7 @@
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+ 	$(GLIB_CFLAGS) \
+-	$(GMODULE_CFLAGS) \
+-	-I$(includedir)
+-
++	$(GMODULE_CFLAGS)
+ 
+ EXTRA_DIST = \
+ 	makefile.msc	\
+diff -Nur gimp-2.0.4/libgimpthumb/Makefile.in gimp-2.0.4.new/libgimpthumb/Makefile.in
+--- gimp-2.0.4/libgimpthumb/Makefile.in	2004-08-05 18:49:21.000000000 +0000
++++ gimp-2.0.4.new/libgimpthumb/Makefile.in	2004-08-25 03:55:36.000000000 +0000
+@@ -368,9 +368,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+-	$(GDK_PIXBUF_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GDK_PIXBUF_CFLAGS)
+ 
+ EXTRA_DIST = \
+ 	makefile.msc	\
+diff -Nur gimp-2.0.4/libgimpwidgets/Makefile.in gimp-2.0.4.new/libgimpwidgets/Makefile.in
+--- gimp-2.0.4/libgimpwidgets/Makefile.in	2004-08-05 18:49:21.000000000 +0000
++++ gimp-2.0.4.new/libgimpwidgets/Makefile.in	2004-08-25 03:55:41.000000000 +0000
+@@ -371,9 +371,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ lib_LTLIBRARIES = libgimpwidgets-2.0.la
+ 
+diff -Nur gimp-2.0.4/modules/Makefile.in gimp-2.0.4.new/modules/Makefile.in
+--- gimp-2.0.4/modules/Makefile.in	2004-08-05 18:49:22.000000000 +0000
++++ gimp-2.0.4.new/modules/Makefile.in	2004-08-25 03:55:50.000000000 +0000
+@@ -359,9 +359,7 @@
+ 
+ INCLUDES = \
+         -I$(top_srcdir)	\
+-        $(GTK_CFLAGS)	\
+-        -I$(includedir)
+-
++        $(GTK_CFLAGS)
+ 
+ EXTRA_DIST = \
+ 	makefile.msc
+diff -Nur gimp-2.0.4/plug-ins/bmp/Makefile.in gimp-2.0.4.new/plug-ins/bmp/Makefile.in
+--- gimp-2.0.4/plug-ins/bmp/Makefile.in	2004-08-05 18:49:23.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/bmp/Makefile.in	2004-08-25 03:56:14.000000000 +0000
+@@ -372,9 +372,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/common/Makefile.in gimp-2.0.4.new/plug-ins/common/Makefile.in
+--- gimp-2.0.4/plug-ins/common/Makefile.in	2004-08-05 18:49:25.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/common/Makefile.in	2004-08-25 03:56:22.000000000 +0000
+@@ -372,9 +372,7 @@
+ 	$(GTK_CFLAGS)					\
+ 	$(EXIF_CFLAGS)					\
+ 	$(SVG_CFLAGS)					\
+-	$(WMF_CFLAGS)					\
+-	-I$(includedir)
+-
++	$(WMF_CFLAGS)
+ 
+ libexec_PROGRAMS = \
+ 	AlienMap \
+diff -Nur gimp-2.0.4/plug-ins/dbbrowser/Makefile.in gimp-2.0.4.new/plug-ins/dbbrowser/Makefile.in
+--- gimp-2.0.4/plug-ins/dbbrowser/Makefile.in	2004-08-05 18:49:25.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/dbbrowser/Makefile.in	2004-08-25 03:56:28.000000000 +0000
+@@ -373,9 +373,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+-	$(GTK_CFLAGS)		\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/faxg3/Makefile.in gimp-2.0.4.new/plug-ins/faxg3/Makefile.in
+--- gimp-2.0.4/plug-ins/faxg3/Makefile.in	2004-08-05 18:49:25.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/faxg3/Makefile.in	2004-08-25 03:56:33.000000000 +0000
+@@ -372,9 +372,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GLIB_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GLIB_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimp)	\
+diff -Nur gimp-2.0.4/plug-ins/fits/Makefile.in gimp-2.0.4.new/plug-ins/fits/Makefile.in
+--- gimp-2.0.4/plug-ins/fits/Makefile.in	2004-08-05 18:49:25.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/fits/Makefile.in	2004-08-25 03:56:42.000000000 +0000
+@@ -371,9 +371,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/flame/Makefile.in gimp-2.0.4.new/plug-ins/flame/Makefile.in
+--- gimp-2.0.4/plug-ins/flame/Makefile.in	2004-08-05 18:49:26.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/flame/Makefile.in	2004-08-25 03:56:47.000000000 +0000
+@@ -376,9 +376,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ EXTRA_DIST = README
+ 
+diff -Nur gimp-2.0.4/plug-ins/fp/Makefile.in gimp-2.0.4.new/plug-ins/fp/Makefile.in
+--- gimp-2.0.4/plug-ins/fp/Makefile.in	2004-08-05 18:49:26.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/fp/Makefile.in	2004-08-25 03:56:52.000000000 +0000
+@@ -373,9 +373,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/FractalExplorer/Makefile.in gimp-2.0.4.new/plug-ins/FractalExplorer/Makefile.in
+--- gimp-2.0.4/plug-ins/FractalExplorer/Makefile.in	2004-08-05 18:49:22.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/FractalExplorer/Makefile.in	2004-08-25 03:55:57.000000000 +0000
+@@ -376,9 +376,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/gfig/Makefile.in gimp-2.0.4.new/plug-ins/gfig/Makefile.in
+--- gimp-2.0.4/plug-ins/gfig/Makefile.in	2004-08-05 18:49:26.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/gfig/Makefile.in	2004-08-25 03:56:59.000000000 +0000
+@@ -399,9 +399,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/gflare/Makefile.in gimp-2.0.4.new/plug-ins/gflare/Makefile.in
+--- gimp-2.0.4/plug-ins/gflare/Makefile.in	2004-08-05 18:49:27.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/gflare/Makefile.in	2004-08-25 03:57:06.000000000 +0000
+@@ -369,9 +369,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/gfli/Makefile.in gimp-2.0.4.new/plug-ins/gfli/Makefile.in
+--- gimp-2.0.4/plug-ins/gfli/Makefile.in	2004-08-05 18:49:27.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/gfli/Makefile.in	2004-08-25 03:57:11.000000000 +0000
+@@ -371,9 +371,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/gimpressionist/Makefile.in gimp-2.0.4.new/plug-ins/gimpressionist/Makefile.in
+--- gimp-2.0.4/plug-ins/gimpressionist/Makefile.in	2004-08-05 18:49:27.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/gimpressionist/Makefile.in	2004-08-25 03:57:19.000000000 +0000
+@@ -369,9 +369,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ libexec_PROGRAMS = gimpressionist
+ 
+diff -Nur gimp-2.0.4/plug-ins/help/Makefile.in gimp-2.0.4.new/plug-ins/help/Makefile.in
+--- gimp-2.0.4/plug-ins/help/Makefile.in	2004-08-05 18:49:28.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/help/Makefile.in	2004-08-25 03:57:26.000000000 +0000
+@@ -371,9 +371,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+-	$(GLIB_CFLAGS)		\
+-	-I$(includedir)
+-
++	$(GLIB_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimp)		\
+diff -Nur gimp-2.0.4/plug-ins/helpbrowser/Makefile.in gimp-2.0.4.new/plug-ins/helpbrowser/Makefile.in
+--- gimp-2.0.4/plug-ins/helpbrowser/Makefile.in	2004-08-05 18:49:28.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/helpbrowser/Makefile.in	2004-08-25 03:57:32.000000000 +0000
+@@ -371,9 +371,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)		\
+-	$(GTKHTML2_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTKHTML2_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/ifscompose/Makefile.in gimp-2.0.4.new/plug-ins/ifscompose/Makefile.in
+--- gimp-2.0.4/plug-ins/ifscompose/Makefile.in	2004-08-05 18:49:29.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/ifscompose/Makefile.in	2004-08-25 03:57:37.000000000 +0000
+@@ -374,9 +374,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/imagemap/Makefile.in gimp-2.0.4.new/plug-ins/imagemap/Makefile.in
+--- gimp-2.0.4/plug-ins/imagemap/Makefile.in	2004-08-05 18:49:29.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/imagemap/Makefile.in	2004-08-25 03:57:42.000000000 +0000
+@@ -492,9 +492,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/libgimpoldpreview/Makefile.in gimp-2.0.4.new/plug-ins/libgimpoldpreview/Makefile.in
+--- gimp-2.0.4/plug-ins/libgimpoldpreview/Makefile.in	2004-08-05 18:49:29.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/libgimpoldpreview/Makefile.in	2004-08-25 03:57:50.000000000 +0000
+@@ -362,8 +362,7 @@
+ 	-I$(srcdir)/..		\
+ 	-I$(top_srcdir)		\
+ 	-I$(top_srcdir)/libgimp \
+-	$(GTK_CFLAGS)		\
+-	-I$(includedir)
++	$(GTK_CFLAGS)
+ 
+ subdir = plug-ins/libgimpoldpreview
+ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+diff -Nur gimp-2.0.4/plug-ins/Lighting/Makefile.in gimp-2.0.4.new/plug-ins/Lighting/Makefile.in
+--- gimp-2.0.4/plug-ins/Lighting/Makefile.in	2004-08-05 18:49:22.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/Lighting/Makefile.in	2004-08-25 03:56:03.000000000 +0000
+@@ -391,9 +391,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/MapObject/Makefile.in gimp-2.0.4.new/plug-ins/MapObject/Makefile.in
+--- gimp-2.0.4/plug-ins/MapObject/Makefile.in	2004-08-05 18:49:23.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/MapObject/Makefile.in	2004-08-25 03:56:09.000000000 +0000
+@@ -393,9 +393,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/maze/Makefile.in gimp-2.0.4.new/plug-ins/maze/Makefile.in
+--- gimp-2.0.4/plug-ins/maze/Makefile.in	2004-08-05 18:49:29.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/maze/Makefile.in	2004-08-25 03:57:56.000000000 +0000
+@@ -373,9 +373,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/pagecurl/Makefile.in gimp-2.0.4.new/plug-ins/pagecurl/Makefile.in
+--- gimp-2.0.4/plug-ins/pagecurl/Makefile.in	2004-08-05 18:49:29.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/pagecurl/Makefile.in	2004-08-25 03:58:01.000000000 +0000
+@@ -378,9 +378,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/print/Makefile.in gimp-2.0.4.new/plug-ins/print/Makefile.in
+--- gimp-2.0.4/plug-ins/print/Makefile.in	2004-08-05 18:49:30.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/print/Makefile.in	2004-08-25 03:58:11.000000000 +0000
+@@ -371,7 +371,6 @@
+ 	-I$(top_srcdir)		\
+ 	$(GTK_CFLAGS)		\
+ 	$(GIMPPRINT_CFLAGS)	\
+-	-I$(includedir)
+ 
+ 
+ LDADD = \
+diff -Nur gimp-2.0.4/plug-ins/rcm/Makefile.in gimp-2.0.4.new/plug-ins/rcm/Makefile.in
+--- gimp-2.0.4/plug-ins/rcm/Makefile.in	2004-08-05 18:49:31.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/rcm/Makefile.in	2004-08-25 03:58:30.000000000 +0000
+@@ -385,9 +385,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/script-fu/Makefile.in gimp-2.0.4.new/plug-ins/script-fu/Makefile.in
+--- gimp-2.0.4/plug-ins/script-fu/Makefile.in	2004-08-05 18:49:31.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/script-fu/Makefile.in	2004-08-25 03:58:37.000000000 +0000
+@@ -385,8 +385,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
++	$(GTK_CFLAGS)
+ 
+ @HAVE_GLIBC_REGEX_FALSE@REGEXREPL = $(top_builddir)/regexrepl/libregex.a
+ 
+diff -Nur gimp-2.0.4/plug-ins/sel2path/Makefile.in gimp-2.0.4.new/plug-ins/sel2path/Makefile.in
+--- gimp-2.0.4/plug-ins/sel2path/Makefile.in	2004-08-05 18:49:32.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/sel2path/Makefile.in	2004-08-25 03:58:43.000000000 +0000
+@@ -393,9 +393,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/sgi/Makefile.in gimp-2.0.4.new/plug-ins/sgi/Makefile.in
+--- gimp-2.0.4/plug-ins/sgi/Makefile.in	2004-08-05 18:49:32.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/sgi/Makefile.in	2004-08-25 03:58:48.000000000 +0000
+@@ -371,9 +371,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/plug-ins/twain/Makefile.in gimp-2.0.4.new/plug-ins/twain/Makefile.in
+--- gimp-2.0.4/plug-ins/twain/Makefile.in	2004-08-05 18:49:32.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/twain/Makefile.in	2004-08-25 03:58:53.000000000 +0000
+@@ -379,9 +379,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GLIB_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GLIB_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimp)	\
+diff -Nur gimp-2.0.4/plug-ins/winsnap/Makefile.in gimp-2.0.4.new/plug-ins/winsnap/Makefile.in
+--- gimp-2.0.4/plug-ins/winsnap/Makefile.in	2004-08-05 18:49:32.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/winsnap/Makefile.in	2004-08-25 03:58:58.000000000 +0000
+@@ -376,9 +376,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)			\
+-	$(GTK_CFLAGS)			\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	winsnap-win32res.o	\
+diff -Nur gimp-2.0.4/plug-ins/xjt/Makefile.in gimp-2.0.4.new/plug-ins/xjt/Makefile.in
+--- gimp-2.0.4/plug-ins/xjt/Makefile.in	2004-08-05 18:49:33.000000000 +0000
++++ gimp-2.0.4.new/plug-ins/xjt/Makefile.in	2004-08-25 03:59:03.000000000 +0000
+@@ -372,9 +372,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ LDADD = \
+ 	$(libgimpui)		\
+diff -Nur gimp-2.0.4/regexrepl/Makefile.in gimp-2.0.4.new/regexrepl/Makefile.in
+--- gimp-2.0.4/regexrepl/Makefile.in	2004-08-05 18:49:33.000000000 +0000
++++ gimp-2.0.4.new/regexrepl/Makefile.in	2004-08-25 03:59:20.000000000 +0000
+@@ -355,9 +355,7 @@
+ @HAVE_GLIBC_REGEX_TRUE@libregex_a_SOURCES = 
+ 
+ INCLUDES = \
+-	-I$(top_srcdir)	\
+-	-I$(includedir)
+-
++	-I$(top_srcdir)
+ 
+ AM_CPPFLAGS = \
+ 	-DREGEX_MALLOC
+diff -Nur gimp-2.0.4/tools/Makefile.in gimp-2.0.4.new/tools/Makefile.in
+--- gimp-2.0.4/tools/Makefile.in	2004-08-05 18:49:34.000000000 +0000
++++ gimp-2.0.4.new/tools/Makefile.in	2004-08-25 03:59:33.000000000 +0000
+@@ -378,9 +378,7 @@
+ 
+ INCLUDES = \
+ 	-I$(top_srcdir)	\
+-	$(GTK_CFLAGS)	\
+-	-I$(includedir)
+-
++	$(GTK_CFLAGS)
+ 
+ EXTRA_DIST = \
+ 	gimp-mkenums	\

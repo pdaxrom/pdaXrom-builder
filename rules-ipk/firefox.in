@@ -1,0 +1,8 @@
+config FIREFOX
+	bool
+	prompt "firefox"
+
+config FIREFOX_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on FIREFOX

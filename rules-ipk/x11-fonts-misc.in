@@ -1,0 +1,9 @@
+config X11-FONTS-MISC
+	bool
+	prompt "X11 misc fonts"
+	depends on XFREE430
+
+config X11-FONTS-MISC_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on X11-FONTS-MISC

@@ -1,0 +1,23 @@
+diff -Nur perl-5.8.5/Cross/config perl-5.8.5-new/Cross/config
+--- perl-5.8.5/Cross/config	2003-04-15 20:31:56.000000000 +0000
++++ perl-5.8.5-new/Cross/config	2004-09-28 07:23:54.000000000 +0000
+@@ -6,7 +6,7 @@
+ ##############################################################################
+ 
+ ### Target Arch
+-ARCH = arm
++ARCH = arm
+ #ARCH = i386-pc
+ #ARCH = sh4
+ #ARCH = mips
+@@ -14,8 +14,8 @@
+ #ARCH = ppc
+ 
+ ## Specific arm
+-CONFIG_TARGET_ARM_SA11X0 = 1
+-#CONFIG_TARGET_ARM_XSCALE = 1
++CONFIG_TARGET_ARM_SA11X0 = 1
++#CONFIG_TARGET_ARM_XSCALE = 1
+ 
+ ### Target OS
+ OS = linux

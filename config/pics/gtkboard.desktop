@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=gtkboard
+Comment=31 games in a single program
+Exec=gtkboard
+Icon=gtkboard.png
+Terminal=false
+Type=Application
+Categories=Games
+StartupNotify=True

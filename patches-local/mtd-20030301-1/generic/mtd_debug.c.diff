@@ -1,0 +1,63 @@
+--- mtd/util/mtd_debug.c~	2002-01-10 14:16:58.000000000 +0000
++++ mtd/util/mtd_debug.c	2004-09-21 16:36:42.000000000 +0000
+@@ -124,10 +124,10 @@
+    if ((buf = (u_int8_t *) malloc (size)) == NULL)
+ 	 {
+ #define BUF_SIZE	(64 * 1024 * sizeof (u_int8_t))
+-		fprintf (stderr, __FUNCTION__ ": malloc(%#x)\n", size);
++		fprintf (stderr, "flash_to file : malloc(%#x)\n", size);
+ 		if (size != BUF_SIZE) {
+ 			size = BUF_SIZE;
+-			fprintf (stderr, __FUNCTION__ ": trying buffer size %#x\n", size);
++			fprintf (stderr, "flash_to file : trying buffer size %#x\n", size);
+ 			goto retry;
+ 		}
+ 		perror ("malloc()");
+@@ -139,14 +139,14 @@
+    err = read (fd,buf,size);
+    if (err < 0)
+ 	 {
+-		fprintf (stderr, __FUNCTION__ ": read, size %#x, n %#x\n", size, n);
++		fprintf (stderr, "flash_to file : read, size %#x, n %#x\n", size, n);
+ 		perror ("read()");
+ 		goto err2;
+ 	 }
+    err = write (outfd,buf,size);
+    if (err < 0)
+ 	 {
+-		fprintf (stderr, __FUNCTION__ ": write, size %#x, n %#x\n", size, n);
++		fprintf (stderr, "flash_to file : write, size %#x, n %#x\n", size, n);
+ 		perror ("write()");
+ 		goto err2;
+ 	 }
+@@ -194,10 +194,10 @@
+ retry:
+    if ((buf = (u_int8_t *) malloc (size)) == NULL)
+ 	 {
+-		fprintf (stderr, __FUNCTION__ ": malloc(%#x) failed\n", size);
++		fprintf (stderr, "file_to_flash : malloc(%#x) failed\n", size);
+ 		if (size != BUF_SIZE) {
+ 			size = BUF_SIZE;
+-			fprintf (stderr, __FUNCTION__ ": trying buffer size %#x\n", size);
++			fprintf (stderr, "file_to_flash : trying buffer size %#x\n", size);
+ 			goto retry;
+ 		}
+ 		perror ("malloc()");
+@@ -209,7 +209,7 @@
+ 	   size = n;
+    if (fread (buf,size,1,fp) != 1 || ferror (fp))
+ 	 {
+-		fprintf (stderr, __FUNCTION__ ": fread, size %#x, n %#x\n", size, n);
++		fprintf (stderr, "file_to_flash : fread, size %#x, n %#x\n", size, n);
+ 		perror ("fread()");
+ 		free (buf);
+ 		fclose (fp);
+@@ -218,7 +218,7 @@
+    err = write (fd,buf,size);
+    if (err < 0)
+ 	 {
+-		fprintf (stderr, __FUNCTION__ ": write, size %#x, n %#x\n", size, n);
++		fprintf (stderr, "file_to_flash : write, size %#x, n %#x\n", size, n);
+ 		perror ("write()");
+ 		free (buf);
+ 		fclose (fp);

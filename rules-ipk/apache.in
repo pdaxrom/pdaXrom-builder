@@ -1,0 +1,8 @@
+config APACHE
+	bool
+	prompt "Apache Webserver"
+
+config APACHE_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on APACHE

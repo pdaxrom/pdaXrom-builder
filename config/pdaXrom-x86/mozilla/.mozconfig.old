@@ -1,0 +1,18 @@
+# This file specifies the build flags for Thunderbird.  You can use it by adding:
+#  . $topsrcdir/mail/config/mozconfig
+# to the top of your mozconfig file.
+
+export CROSS_COMPILE=1
+
+ac_add_options --enable-default-toolkit=gtk2
+ac_add_options --disable-freetype2
+ac_add_options --enable-xft
+
+ac_add_options --with-system-zlib
+ac_add_options --with-system-jpeg
+ac_add_options --with-system-png
+#ac_add_options --disable-libIDLtest
+ac_add_options --disable-tests
+ac_add_options --disable-logging
+ac_add_options --disable-gtktest
+ac_add_options --enable-strip

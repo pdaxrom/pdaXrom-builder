@@ -1,0 +1,8 @@
+config GQVIEW
+	bool
+	prompt "gqview"
+
+config GQVIEW_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GQVIEW

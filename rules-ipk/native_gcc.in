@@ -1,0 +1,8 @@
+config NATIVE_GCC
+	bool
+	prompt "gcc"
+
+config NATIVE_GCC_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on NATIVE_GCC

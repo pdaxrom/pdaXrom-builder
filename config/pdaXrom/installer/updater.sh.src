@@ -1,0 +1,459 @@
+#!/bin/sh
+
+
+DATAPATH=$1
+TMPPATH=/tmp/update
+TMPDATA=$TMPPATH/tmpdata.bin
+TMPHEAD=$TMPPATH/tmphead.bin
+
+WFLG_KERNEL=0
+WFLG_INITRD=0
+WFLG_MVERSION=0
+
+RO_MTD_LINE=`cat /proc/mtd | grep "root" | tail -n 1`
+if [ "$RO_MTD_LINE" = "" ]; then
+    RO_MTD_LINE=`cat /proc/mtd | grep "\<NAND\>.*\<2\>" | tail -n 1`
+fi
+RO_MTD_NO=`echo $RO_MTD_LINE | cut -d: -f1 | cut -dd -f2`
+RO_MTD_SIZE_HEX=`echo $RO_MTD_LINE | cut -d" " -f2`
+RO_MTD=/dev/mtd$RO_MTD_NO
+RO_MTDBLK=/dev/mtdblock$RO_MTD_NO
+RO_MTD_SIZE=`dc 0x$RO_MTD_SIZE_HEX 1024 /`
+
+RW_MTD_LINE=`cat /proc/mtd | grep "home" | tail -n 1`
+if [ "$RW_MTD_LINE" = "" ]; then
+    RW_MTD_LINE=`cat /proc/mtd | grep "\<NAND\>.*\<2\>" | tail -n 1`
+fi
+RW_MTD_NO=`echo $RW_MTD_LINE | cut -d: -f1 | cut -dd -f2`
+RW_MTD_SIZE_HEX=`echo $RW_MTD_LINE | cut -d" " -f2`
+RW_MTD=/dev/mtd$RW_MTD_NO
+RW_MTDBLK=/dev/mtdblock$RW_MTD_NO
+RW_MTD_SIZE=`dc 0x$RW_MTD_SIZE_HEX 1024 /`
+
+LOGOCAL_MTD=/dev/mtd1
+
+VERBLOCK=0x48000
+MVRBLOCK=0x70000
+
+DIALOG=/tmp1/tools/bin/dialog
+
+
+
+Cleanup(){
+	rm -f $VTMPNAME > /dev/null 2>&1
+	rm -f $MTMPNAME > /dev/null 2>&1
+	rm $CTRLPATH/* > /dev/null 2>&1
+	rm $DATAPATH/* > /dev/null 2>&1
+	exit $1
+}
+
+writeflash()
+{
+	rm -f $TMPPATH/error
+	PCT=0
+	while [ $DATAPOS -lt $DATASIZE ]
+	do
+	    bcut -a $DATAPOS -s $ONESIZE -o $TMPDATA $TARGETFILE
+	    TMPSIZE=`wc -c $TMPDATA`
+	    TMPSIZE=`echo $TMPSIZE | cut -d' ' -f1`
+	    DATAPOS=`expr $DATAPOS + $TMPSIZE`
+
+	    if [ $ISLOGICAL = 0 ]
+	    then
+		next_addr=`/sbin/nandcp -a $ADDR $TMPDATA $TARGET_MTD  2>/dev/null | fgrep "mtd address" | cut -d- -f2 | cut -d\( -f1`
+		if [ "$next_addr" = "" ]; then
+		    rm $TMPDATA > /dev/null 2>&1
+		    touch $TMPPATH/error
+		    break
+		fi
+		ADDR=$next_addr
+	    else
+		/sbin/nandlogical $LOGOCAL_MTD WRITE $ADDR $DATASIZE $TMPDATA > /dev/null 2>&1
+		ADDR=`expr $ADDR + $TMPSIZE`
+	    fi
+
+	    rm $TMPDATA > /dev/null 2>&1
+
+	    PCT=`expr $PCT + $PROGSTEP`
+	    echo "XXX"
+	    echo $PCT
+	    echo "\\n$DATANAME flashing..."
+	    echo "XXX"
+	done
+}
+
+homeformat() {
+	$DIALOG --sleep 1 \
+		--title "Cacko Linux Installer" \
+    		--infobox "\\nUser flash erasing ..." 10 52
+	/tmp1/tools/bin/eraseall -j $RW_MTD 2> /dev/null > /dev/null
+	$DIALOG --sleep 1 \
+		--title "Cacko Linux Installer" \
+    		--infobox "\\nUser flash erasing ... done" 10 52
+	mkdir -p /tmp1/root
+	mkdir -p /tmp1/root/home
+	$DIALOG --sleep 1 \
+		--title "Cacko Linux Installer" \
+    		--infobox "\\nMount root partition ..." 10 52
+	mount -t jffs2 -o rw,noatime $RO_MTDBLK /tmp1/root
+	$DIALOG --sleep 1 \
+		--title "Cacko Linux Installer" \
+    		--infobox "\\nMount user partition ..." 10 52
+	mount -t jffs2 -o rw,noatime $RW_MTDBLK /tmp1/root/home
+	$DIALOG --sleep 1 \
+		--title "Cacko Linux Installer" \
+    		--infobox "\\nInstalling system files ..." 10 52
+	cd /tmp1/root
+	tar xf /tmp1/root/root/.home_default.tar
+	cd /tmp1/root/home/system
+	tar xf /tmp1/root/root/.var_default.tar
+	$DIALOG --sleep 1 \
+		--title "Cacko Linux Installer" \
+    		--infobox "\\nUser partition was formatted...\\nReboot..." 10 52
+	cd /
+	umount /tmp1/root/home
+	umount /tmp1/root
+}
+
+homebackup() {
+    cd $DATAPATH
+    tempfile=`tempfile 2>/dev/null` || tempfile=/tmp/test$$
+    trap "rm -f $tempfile" 0 1 2 5 15
+
+    $DIALOG --title "Cacko Linux Installer" --clear \
+	    --inputbox "\\nEnter backup name:" 6 51 2> $tempfile
+
+    if [ "$?" != "0" ]; then
+	return
+    fi
+
+    dstname=`cat $tempfile`
+
+    mkdir -p /tmp/home
+    mount -t jffs2 -o rw,noatime $RW_MTDBLK /tmp/home
+    cd /tmp/home
+    tar c . | gzip -9 -c >$DATAPATH/$dstname-backup.tgz
+    cd /
+    umount /tmp/home
+}
+
+homerestore() {
+    cd $DATAPATH
+    DIRL=`ls -1 *-backup.tgz`
+    FILELIST=""
+    for file in $DIRL
+    do
+        DATASIZE=`wc -c $file`
+        DATASIZE=`echo $DATASIZE | cut -d' ' -f1`
+        FILELIST="$FILELIST `echo $file | sed -e '/-backup.tgz/s///'` $DATASIZE"
+    done
+
+    tempfile=`tempfile 2>/dev/null` || tempfile=/tmp/test$$
+    trap "rm -f $tempfile" 0 1 2 5 15
+    $DIALOG --clear --title "Cacko Linux Installer" \
+	    --menu "\\nChoose backup file:" 15 40 7 \
+    	    $FILELIST 2> $tempfile
+
+    if [ "$?" != "0" ]; then
+	return
+    fi
+
+    srcname=`cat $tempfile`
+
+    /tmp1/tools/bin/eraseall -j $RW_MTD 2> /dev/null > /dev/null
+
+    mkdir -p /tmp/home
+    mount -t jffs2 -o rw,noatime $RW_MTDBLK /tmp/home
+    cd /tmp/home
+    gzip -dc $DATAPATH/$srcname-backup.tgz | tar xf -
+    cd /
+    umount /tmp/home
+}
+
+flashresize() {
+    cd /tmp
+    
+    tempfile=`tempfile 2>/dev/null` || tempfile=/tmp/test$$
+    trap "rm -f $tempfile" 0 1 2 5 15
+
+    DROMS="25";
+
+    case $MODEL in
+	SL-C700)
+		DROMS=25;
+		;;
+	SL-C750)
+		DROMS=25;
+		;;
+	SL-C760)
+		DROMS=50;
+		;;
+	SL-C860)
+		DROMS=50;
+		;;
+    esac
+
+    $DIALOG --title "Cacko Linux Installer" --clear \
+	    --inputbox "\\nEnter new root partition size \\nin MB ($DROMS default for your Z):" 12 51 2> $tempfile
+
+    if [ "$?" != "0" ]; then
+	return
+    fi
+
+    romsize=`cat $tempfile`
+
+#    if [ $romsize -eq 0]; then
+#	$DIALOG --title "Cacko Linux Installer" --clear \
+#    		--msgbox "Size must be more that 0\\nPress the [ENTER] for main menu." 10 52
+#	return
+#    fi
+
+    /tmp1/tools/bin/fsro_resize $romsize
+
+    $DIALOG --title "Cacko Linux Installer" --clear \
+    	    --msgbox "\\nRepartition finished.\\nYou will need reflash your ROM after rebooting.\\nPress the [ENTER] for reboot." 10 52
+    exit 0
+}
+
+mainmenu() {
+while true
+do
+    tempfile=`tempfile 2>/dev/null` || tempfile=/tmp/test$$
+    trap "rm -f $tempfile" 0 1 2 5 15
+    $DIALOG --clear --title "Cacko Linux Installer" \
+	    --menu "\nChoose what do you like:" 15 40 7 \
+    		"1" "Install new ROM" \
+		"2" "Backup User partition" \
+		"3" "Restore User partition" \
+		"4" "Format User partition" \
+    		"5" "NAND Flash resize" \
+    		"6" "Run console shell" \
+    		"7" "Reboot" 2> $tempfile
+
+    retval=$?
+
+    choice=`cat $tempfile`
+
+    case $retval in
+      0)
+	case $choice in
+	    1)
+		break
+		;;
+	    2)
+		homebackup
+		;;
+	    3)
+		homerestore
+		;;
+	    4)
+		homeformat
+		;;
+	    5)
+		flashresize
+		;;
+	    6)
+		clear
+		echo "Type 'exit' for close console."
+		/bin/sh
+		;;
+	    7)
+		exit 0
+		;;
+	esac
+	;;
+      1)
+	exit 0
+	;;
+      255)
+	exit 0
+	;;
+    esac
+done
+}
+
+
+badmodel() {
+	$DIALOG --title "Cacko Linux Installer" --clear \
+    		--msgbox "\\nSeriously problem!!! \\nYour Zaurus not SL-C700/750/760/860 model.\
+			  \\nCannot install linux on $MODEL, press the [ENTER] key for reboot." 10 41
+	exit 1
+}
+
+trap 'Cleanup 1' 1 15
+trap '' 2 3
+
+echo "Installer starting ..."
+
+mkdir -p /tmp1
+mount -t tmpfs -o size=10m none /tmp1
+TOOLSNAME="$DATAPATH/tools.tar"
+if [ ! -f $TOOLSNAME ]; then
+    TOOLSNAME="$DATAPATH/TOOLS.TAR"
+    if [ ! -f $TOOLSNAME ]; then
+	echo "Cannot detect tools package on $DATAPATH"
+	sleep 1
+	exit 1
+    fi
+fi
+
+cd /tmp1
+tar xf $TOOLSNAME
+
+/sbin/writerominfo
+MODEL=`cat /proc/deviceinfo/product`
+echo 'MODEL:'$MODEL
+case "$MODEL" in
+    SL-C700) 
+	;;
+    SL-C750) 
+	;;
+    SL-C760) 
+	;;
+    SL-C860) 
+	;;
+    *)
+	badmodel
+	;;
+esac
+
+$DIALOG --sleep 1 \
+	--title "Cacko Linux Installer" \
+        --infobox "\\nSharp Zaurus $MODEL detected..." 10 52
+
+while true
+do
+
+mainmenu
+
+mkdir -p $TMPPATH > /dev/null 2>&1
+
+cd $DATAPATH/
+
+for TARGETFILE in /tmp1/tools/kernel-$MODEL/zImage.bin initrd.bin INITRD.BIN
+do
+	if [ -e $TARGETFILE ]
+	then
+		rm -f $TMPPATH/*.bin > /dev/null 2>&1
+		DATASIZE=`wc -c $TARGETFILE`
+		DATASIZE=`echo $DATASIZE | cut -d' ' -f1`
+
+		TARGETTYPE=Invalid
+		case "$TARGETFILE" in
+		/tmp1/tools/kernel-$MODEL/zImage.bin) TARGETTYPE=Kernel;;
+		initrd.bin) TARGETTYPE=RoFs;;
+		INITRD.BIN) TARGETTYPE=RoFs;;
+		*)
+			continue
+			;;
+		esac
+
+		case "$TARGETTYPE" in
+		Kernel)
+			if [ $WFLG_KERNEL != 0 ]
+			then
+				continue
+			fi
+			WFLG_KERNEL=1
+			DATANAME="kernel"
+			ISLOGICAL=1
+			MODULEID=5
+			MODULESIZE=0x13C000
+			ADDR=`dc 0xE0000`
+			ISFORMATTED=1
+			DATAPOS=0
+			ONESIZE=524288
+			HDTOP=`expr $DATASIZE - 16`
+			bcut -a $HDTOP -s 16 -o $TMPHEAD $TARGETFILE
+			;;
+		RoFs)
+			if [ $WFLG_INITRD != 0 ]
+			then
+				continue
+			fi
+			WFLG_INITRD=1
+			DATANAME="RO file system"
+			ISLOGICAL=0
+			MODULEID=6
+			MODULESIZE=0x1900000
+			ADDR=0
+			ISFORMATTED=0
+			TARGET_MTD=$RO_MTD
+			DATAPOS=16
+			ONESIZE=1048576
+			bcut -s 16 -o $TMPHEAD $TARGETFILE
+			;;
+		*)
+			continue
+			;;
+		esac
+
+		if [ $ISFORMATTED = 0 ]
+		then
+			$DIALOG --sleep 1 \
+				--title "Cacko Linux Installer" \
+    				--infobox "\\n$DATANAME: flash erasing ..." 10 52
+			/tmp1/tools/bin/eraseall -j $TARGET_MTD 2> /dev/null > /dev/null
+			$DIALOG --sleep 1 \
+				--title "Cacko Linux Installer" \
+    				--infobox "\\n$DATANAME: flash erasing ... done" 10 52
+			ISFORMATTED=1
+		fi
+
+		PROGSTEP=`expr $DATASIZE / $ONESIZE + 1`
+		PROGSTEP=`expr 100 / $PROGSTEP`
+		if [ $PROGSTEP = 0 ]
+		then
+			PROGSTEP=1
+		fi
+
+		#00 means header information
+		VTMPNAME=$TMPPATH'/vtmp'`date '+%s'`'.tmp'
+		MTMPNAME=$TMPPATH'/mtmp'`date '+%s'`'.tmp'
+		/sbin/nandlogical $LOGOCAL_MTD READ $VERBLOCK 0x4000 $VTMPNAME > /dev/null 2>&1
+		/sbin/nandlogical $LOGOCAL_MTD READ $MVRBLOCK 0x4000 $MTMPNAME > /dev/null 2>&1
+
+		#echo 'found header'
+		/sbin/verchg -v $VTMPNAME $TMPHEAD $MODULEID $MODULESIZE > /dev/null 2>&1
+		/sbin/verchg -m $MTMPNAME $TMPHEAD $MODULEID $MODULESIZE > /dev/null 2>&1
+
+		writeflash | $DIALOG --title "Cacko Linux Installer" --gauge "\\nPreparing $DATANAME flash image..." 20 70 0
+		rm -f $TMPPATH/*.bin > /dev/null 2>&1
+
+		if [ ! -f $TMPPATH/error ]
+		then
+			/sbin/nandlogical $LOGOCAL_MTD WRITE $VERBLOCK 0x4000 $VTMPNAME > /dev/null 2>&1
+			/sbin/nandlogical $LOGOCAL_MTD WRITE $MVRBLOCK 0x4000 $MTMPNAME > /dev/null 2>&1
+
+			rm -f $VTMPNAME > /dev/null 2>&1
+			rm -f $MTMPNAME > /dev/null 2>&1
+			$DIALOG --sleep 1 \
+				--title "Cacko Linux Installer" \
+    				--infobox "\\n$DATANAME: flashing OK" 10 52
+		else
+			$DIALOG --title "Cacko Linux Installer" --clear \
+    				--msgbox "\\nSeriously problem!!! \
+    				\\n$DATANAME: error while flashing.\\nPress the [ENTER] key for reboot." 10 52
+			exit 3
+		fi
+	fi
+done
+
+$DIALOG --title "Cacko Linux Installer" --clear \
+        --yesno "\\nCongratulation!!!
+		 \\n\\nCacko Linux ROM installed on your Zaurus $MODEL! \
+		 Probably, you want format internal user flash now?" 15 61
+
+case $? in
+  0)
+    homeformat
+    ;;
+  1)
+    ;;
+  255)
+    ;;
+esac
+
+done
+
+exit 0

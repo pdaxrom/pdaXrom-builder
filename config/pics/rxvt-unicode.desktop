@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=rxvt
+Comment=rxvt-unicode
+Exec=rxvt
+Terminal=0
+Type=Application
+Icon=rxvt-unicode.png
+Categories=Applications
+StartupNotify=False
+SingleInstance=False

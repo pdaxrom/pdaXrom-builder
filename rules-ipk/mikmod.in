@@ -1,0 +1,8 @@
+config MIKMOD
+	bool
+	prompt "mikmod"
+
+config MIKMOD_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MIKMOD

@@ -1,0 +1,57 @@
+--- tslib/tests/fbutils.c~	2004-08-28 09:45:27.000000000 +0000
++++ tslib/tests/fbutils.c	2004-08-28 09:57:12.000000000 +0000
+@@ -221,27 +221,30 @@
+ 
+ void put_char(int x, int y, int c, int color)
+ {
+-	int i,j,bits,loc;
++	int i,j,q,bits,loc;
++
++	x = x/2;
+ 
+ 	for(i=0;i<font_vga_8x8.height;i++) {
++	    for(q=0;q<2;q++) {
+ 		bits = font_vga_8x8.data[font_vga_8x8.height*c + i];
+ 		for(j=0;j<8;j++) {
+-			loc = (x + j + var.xoffset)*(var.bits_per_pixel/8)
+-				+ (y + i + var.yoffset)*fix.line_length;
++			loc = (x + j + var.xoffset)*(var.bits_per_pixel/8)*2
++				+ (y + i * 2 + q + var.yoffset)*fix.line_length;
+ 			if(loc>=0 && loc<fix.smem_len && ((bits >> (7-j)) & 1)) {
+ 				switch(var.bits_per_pixel) {
+ 					case 8:
+ 					default:
+ 						if(color==0)
+-							fbuffer[loc] = 0;
++							*((unsigned short *)(fbuffer + loc)) = 0;
+ 						else
+-							fbuffer[loc] = 1;
++							*((unsigned short *)(fbuffer + loc)) = 0xffff;
+ 						break;
+ 					case 16:
+ 						if(color==0)
+-							*((unsigned short *)(fbuffer + loc)) = 0;
++							*((unsigned int *)(fbuffer + loc)) = 0;
+ 						else
+-							*((unsigned short *)(fbuffer + loc)) = 0xffff;
++							*((unsigned int *)(fbuffer + loc)) = 0xffffffff;
+ 						break;
+ 					case 24:
+ 					case 32:
+@@ -253,6 +256,7 @@
+ 				}
+ 			}	
+ 		}
++	    }
+ 	}
+ }
+ 		
+@@ -262,7 +266,7 @@
+ {
+ 	int i;
+ 	for(i=0;i<strlen(s);i++) {
+-		put_char( (x + font_vga_8x8.width* (i - strlen(s)/2)), y, s[i], color);
++		put_char( (x + font_vga_8x8.width* (i - strlen(s)/2)*2), y, s[i], color);
+ 	}
+ }
+ 

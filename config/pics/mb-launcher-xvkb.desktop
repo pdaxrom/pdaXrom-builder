@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=X Virtual Keyboard
+Comment=Virtual keyboard for X window system
+Exec=mb-applet-launcher -o -1 --desktop /usr/share/applications/xvkbd.desktop
+Type=PanelApp
+Icon=xvkbd.png
+Categories=Panel;Utility;MB

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Minicom
+Comment=Minicom
+Exec=xminicom
+Terminal=0
+Type=Application
+Icon=terminal.png
+Categories=Applications
+StartupNotify=False
+SingleInstance=False

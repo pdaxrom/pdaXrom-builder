@@ -1,0 +1,13 @@
+--- linux/arch/sh/Makefile~	2004-11-16 11:54:05.000000000 +0000
++++ linux/arch/sh/Makefile	2004-11-16 11:54:16.000000000 +0000
+@@ -45,8 +45,8 @@
+ AFLAGS		+= -m3
+ endif
+ ifdef CONFIG_CPU_SH4
+-CFLAGS+=-m4 -m4-nofpu
+-AFLAGS+=-m4 -m4-nofpu
++CFLAGS+=-m4
++AFLAGS+=-m4
+ endif
+ 
+ #

@@ -1,0 +1,17 @@
+[Desktop Entry]
+Name=GQview
+GenericName=Image Viewer
+GenericName[et]=Piltide vaatur
+GenericName[tr]=Resim göstericisi
+GenericName[fr]=Explorateur d'images
+GenericName[hu]=Képnéző
+Comment=View and manage images
+Comment[hu]=Képek megjelenítése és rendszerezése
+Exec=gqview
+Icon=gqview.png
+Type=Application
+Terminal=false
+StartupNotify=True
+StartupWMClass=gqview
+Encoding=UTF-8
+Categories=Application;Graphics;

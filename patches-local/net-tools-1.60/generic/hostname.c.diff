@@ -1,0 +1,26 @@
+--- net-tools/hostname.c~	2004-09-21 16:41:00.000000000 +0000
++++ net-tools/hostname.c	2004-09-21 16:41:47.000000000 +0000
+@@ -97,7 +97,6 @@
+ 	case EINVAL:
+ 	    fprintf(stderr, _("%s: name too long\n"), program_name);
+ 	    break;
+-	default:
+ 	}
+ 	exit(1);
+     };
+@@ -116,7 +115,6 @@
+ 	case EINVAL:
+ 	    fprintf(stderr, _("%s: name too long\n"), program_name);
+ 	    break;
+-	default:
+ 	}
+ 	exit(1);
+     };
+@@ -173,7 +171,6 @@
+ 	    *p = '\0';
+ 	printf("%s\n", hp->h_name);
+ 	break;
+-    default:
+     }
+ }
+ 

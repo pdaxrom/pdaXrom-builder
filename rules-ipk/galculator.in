@@ -1,0 +1,8 @@
+config GALCULATOR
+	bool
+	prompt "galculator"
+
+config GALCULATOR_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GALCULATOR

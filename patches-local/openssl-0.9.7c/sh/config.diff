@@ -1,0 +1,10 @@
+--- openssl/config~	2004-11-16 12:36:05.000000000 +0000
++++ openssl/config	2004-11-16 12:36:31.000000000 +0000
+@@ -584,6 +584,7 @@
+ 	options="$options -mschedule=$CPUSCHEDULE -march=$CPUARCH"
+ 	OUT="linux-parisc" ;;
+   arm*-*-linux2) OUT="linux-elf-arm" ;;
++  sh*-*-linux2) OUT="linux-elf-sh" ;;
+   s390-*-linux2) OUT="linux-s390" ;;
+   s390x-*-linux?) OUT="linux-s390x" ;;
+   x86_64-*-linux?) OUT="linux-x86_64" ;;

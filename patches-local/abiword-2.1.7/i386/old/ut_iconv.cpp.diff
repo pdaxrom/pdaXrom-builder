@@ -1,0 +1,11 @@
+--- abiword/abi/src/af/util/xp/ut_iconv.cpp~	2004-10-19 05:26:00.000000000 +0000
++++ abiword/abi/src/af/util/xp/ut_iconv.cpp	2004-10-19 05:27:15.000000000 +0000
+@@ -72,7 +72,7 @@
+ 
+ #define ICONV_CONST const
+ #else
+-#define ICONV_CONST
++#define ICONV_CONST const
+ #endif
+ 
+ /*

@@ -1,0 +1,8 @@
+config OPENSSH
+	bool
+	prompt "OpenSSH"
+
+config OPENSSH_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on OPENSSH

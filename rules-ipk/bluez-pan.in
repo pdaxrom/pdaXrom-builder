@@ -1,0 +1,9 @@
+config BLUEZ-PAN
+	bool
+	prompt "bluez-pan"
+	depends on BLUEZ-UTILS
+
+config BLUEZ-PAN_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on BLUEZ-PAN

@@ -1,0 +1,11 @@
+--- prboom-2.2.3/src/p_maputl.h~	2004-09-22 12:36:12.000000000 +0000
++++ prboom-2.2.3/src/p_maputl.h	2004-09-22 12:36:22.000000000 +0000
+@@ -65,7 +65,7 @@
+ typedef boolean (*traverser_t)(intercept_t *in);
+ 
+ #ifdef __GNUC__
+-#define CONSTFUNC const
++#define CONSTFUNC
+ #else
+ #define CONSTFUNC
+ #endif

@@ -1,0 +1,165 @@
+diff -Nur matchbox-common-0.8/data/vfolders-desktop/Games.directory matchbox-common-0.8-patched/data/vfolders-desktop/Games.directory
+--- matchbox-common-0.8/data/vfolders-desktop/Games.directory	2004-02-03 14:45:54.000000000 +0000
++++ matchbox-common-0.8-patched/data/vfolders-desktop/Games.directory	2004-02-23 22:58:12.000000000 +0000
+@@ -119,4 +119,4 @@
+ Comment[zh_TW]=遊戲選單
+ Icon=mbfolder.png
+ Type=Directory
+-Match=Graphics
+\ � ����� ����� ��� ����� ������
++Match=Games
+diff -Nur matchbox-common-0.8/data/vfolders-desktop/Makefile.am matchbox-common-0.8-patched/data/vfolders-desktop/Makefile.am
+--- matchbox-common-0.8/data/vfolders-desktop/Makefile.am	2004-02-03 17:54:07.000000000 +0000
++++ matchbox-common-0.8-patched/data/vfolders-desktop/Makefile.am	2004-02-23 23:09:16.000000000 +0000
+@@ -1,7 +1,7 @@
+ desktop_files = \
+  Accessories.directory   Graphics.directory    Root.directory      \
+  Applications.directory  Internet.directory    Root.order          \
+- Development.directory   Multimedia.directory  Settings.directory  \
++ Development.directory   Multimedia.directory    \
+  Games.directory         Office.directory      System.directory    
+ 
+ EXTRA_DIST = $(desktop_files)
+diff -Nur matchbox-common-0.8/data/vfolders-desktop/Makefile.in matchbox-common-0.8-patched/data/vfolders-desktop/Makefile.in
+--- matchbox-common-0.8/data/vfolders-desktop/Makefile.in	2004-02-10 18:21:09.000000000 +0000
++++ matchbox-common-0.8-patched/data/vfolders-desktop/Makefile.in	2004-02-23 23:09:05.000000000 +0000
+@@ -99,7 +99,7 @@
+ desktop_files = \
+  Accessories.directory   Graphics.directory    Root.directory      \
+  Applications.directory  Internet.directory    Root.order          \
+- Development.directory   Multimedia.directory  Settings.directory  \
++ Development.directory   Multimedia.directory   \
+  Games.directory         Office.directory      System.directory    
+ 
+ 
+diff -Nur matchbox-common-0.8/data/vfolders-desktop/Settings.directory matchbox-common-0.8-patched/data/vfolders-desktop/Settings.directory
+--- matchbox-common-0.8/data/vfolders-desktop/Settings.directory	2004-02-03 14:45:54.000000000 +0000
++++ matchbox-common-0.8-patched/data/vfolders-desktop/Settings.directory	1970-01-01 00:00:00.000000000 +0000
+@@ -1,116 +0,0 @@
+-[Desktop Entry]
+-Name=Desktop Preferences
+-Name[am]=የሠሌዳ ምርጫዎች
+-Name[ar]=تفضيلات سطح المكتب
+-Name[az]=Masaüstü Səçənəkləri
+-Name[be]=Наладка асяродзьдзя
+-Name[bg]=Настройки на средата
+-Name[bn]=ডেস্কটপের পছন্দ
+-Name[ca]=Preferències de l'escriptori
+-Name[cs]=Nastavení prostředí
+-Name[da]=Indstillinger
+-Name[de]=Desktop-Einstellungen
+-Name[el]=Προτιμήσεις Επιφάνειας Εργασίας
+-Name[eo]=Tabula agordo
+-Name[es]=Preferencias del escritorio
+-Name[et]=Töölaua häälestus
+-Name[eu]=Mahaiko hobespenak
+-Name[fi]=Työpöydän asetukset
+-Name[fr]=Préférences du bureau
+-Name[ga]=Tosaíochtaí le haighaidh an Deasc
+-Name[gl]=Preferencias do escritorio
+-Name[he]=העדפות שולחן העבודה
+-Name[hi]=डेस्कटाप वरीयता
+-Name[hu]=Munkaasztal beállításai
+-Name[id]=Setting Desktop
+-Name[is]=Skjáborðsstillingar
+-Name[it]=Preferenze del desktop
+-Name[ja]=デスクトップ設定
+-Name[ko]=기본 설정
+-Name[lt]=Darbalaukio parinktys
+-Name[lv]=Darbvirsmas Preferences
+-Name[mk]=Подесувања за десктопот
+-Name[ml]=പണിപ്പുര തെരഞ്ഞെടുക്കല്‌
+-Name[mn]=Ажилын талбар тохируулга
+-Name[ms]=Keutamaan Desktop
+-Name[nl]=Bureaubladvoorkeuren
+-Name[nn]=Skrivebordinnstillingar
+-Name[no]=Brukervalg
+-Name[pl]=Ustawienia środowiska
+-Name[pt]=Preferências Ambiente Trabalho
+-Name[pt_BR]=Preferências
+-Name[ro]=Preferinţe desktop
+-Name[ru]=Настройки Рабочего стола
+-Name[sk]=Nastavenia plochy
+-Name[sl]=Nastavitve namizja
+-Name[sq]=Preferencat e Desktop
+-Name[sr]=Поставкe десктопа
+-Name[sr@Latn]=Postavke desktopa
+-Name[sv]=Skrivbordsinställningar
+-Name[ta]=¸½¢§Á¨º Å¢ÕôÀí¸û
+-Name[th]=ปรับแต่งพื้นโต้ะ
+-Name[tr]=Masaüstü Tercihleri
+-Name[uk]=Властивості стільниці
+-Name[vi]=Tùy thích cho Desktop
+-Name[wa]=Preferinces do scribanne
+-Name[zh_CN]=桌面首选项
+-Name[zh_TW]=桌面偏好設定
+-Comment=Preferences that affect the whole GNOME desktop
+-Comment[am]=ሁሉንም የሆሖመሕሄን ገበታ የሚያቃውሱ ምርጫዎች
+-Comment[ar]=التفضيلات التي تحكم سطح مكتب جينوم كله
+-Comment[az]=Bütün Gnome masaüstünə təsir göstərən qurğular.
+-Comment[be]=Перавагі, якія ўзьдзейнічаюць на ўсё асяродьдзе GNOME
+-Comment[bg]=Настройки, които влияят на цялата Гном среда
+-Comment[bn]=যেসব বিষয় সমগ্র জিনম ডেস্কটপের জন্য প্রযোজ্য
+-Comment[ca]=Preferències que afecten a tot l'escriptori del GNOME
+-Comment[cs]=Nastavení týkající se celého prostředí GNOME
+-Comment[da]=Indstillinger der har indflydelse på hele Gnome-skrivebordet
+-Comment[de]=Einstellungen, die den gesamten GNOME-Desktop betreffen
+-Comment[el]=Προτιμήσεις που επηρεάζουν όλη την επιφάνεια εργασίας του GNOME
+-Comment[eo]=Agordo kio efikas la tutan GNOME tabulan
+-Comment[es]=Preferencias que afectan a todo el escritorio de GNOME
+-Comment[et]=Häälestused, mis mõjutavad kogu Gnome töölauda
+-Comment[eu]=Hobespenak, GNOMEKO idazmahi osorakoak
+-Comment[fi]=Asetukset, jotka vaikuttavat koko Gnome-työpöytään
+-Comment[fr]=Préférences affectant l'intégralité du bureau GNOME
+-Comment[ga]=Tosaíochtaí a bhfuil bhaint leis an deasc GNOME go iomlán 
+-Comment[gl]=Preferencias que afectan a todo o escritorio GNOME
+-Comment[he]=העדפות שישפיעו על כל שולחן העבודה של GNOME
+-Comment[hi]=गनोम डेस्कटाप के विकल्प
+-Comment[hu]=Tulajdonságok, amelyek a GNOME-munkakörnyezetre vonatkoznak
+-Comment[id]=Setting yang berlaku di semua desktop GNOME
+-Comment[is]=Stillingar sem hafa áhrif á GNOME skjáborðið í heild sinni
+-Comment[it]=Impostazioni che modificano tutto il desktop GNOME
+-Comment[ja]=GNOME デスクトップ全体に適用させる設定を行います
+-Comment[ko]=전체 그놈 데스크탑에 대한 기본 설정
+-Comment[lt]=Parinktys, kurios įtakoja visą GNOME darbalaukį
+-Comment[lv]=Preferences, kas ietekmē visu GNOME darbvirsmu
+-Comment[mk]=Подесувања кои влијаат на целиот GNOME десктоп
+-Comment[ml]=ഗ്നോം പണിയിടമാകെ ബാധിക്കുന്ന മുന്ഗണനകള്
+-Comment[mn]=Нийт GNOME ажилын талбарт нөлөөлөх тохируулга
+-Comment[ms]=Keutamaan yang melibatkan seluruh desktop GNOME
+-Comment[nl]=Voorkeuren die het hele GNOME bureaublad beïnvloeden
+-Comment[nn]=Instillingar som endrar på heile GNOME-skrivebordet
+-Comment[no]=Brukervalg som påvirker hele GNOME skrivebordet
+-Comment[pl]=Ustawienia, które wpływają na całe środowisko GNOME
+-Comment[pt]=Preferências que afectam todo o ambiente de trabalho GNOME
+-Comment[pt_BR]=Preferências que afetam todo o desktop do GNOME
+-Comment[ro]=Preferinţe care afectează tot desktopul GNOME
+-Comment[ru]=Настойки, которые применяются ко всему рабочему столу среды GNOME
+-Comment[sk]=Nastavenia, ktoré ovplyvňujú celé prostredie GNOME
+-Comment[sl]=Nastavitve, ki vplivajo na celo namizje GNOME
+-Comment[sq]=Preferencat që ndikojnë desktop
+-Comment[sr]=Поставке које утичу на цели GNOME десктоп
+-Comment[sr@Latn]=Postavke koje utiču na celi GNOME desktop
+-Comment[sv]=Inställningar som påverkar hela GNOME-skrivbordet
+-Comment[ta]=ÓØ ¸§É¡õ ¸½¢§Á¨º¨ÂÔõ À¡¾¢ì¸ìÜÊÂ Å¢ÕôÀí¸û
+-Comment[th]=ปรับแต่งปัจจัยที่ส่งผลกระทบกับ GNOME โดยรวม
+-Comment[tr]=Tüm GNOME masaüstünü etkileyen tercihler
+-Comment[uk]=Властивості, що стосуються всієї стільниці GNOME
+-Comment[vi]=Các tùy thích tác động lên toàn bộ màn hình nền của GNOME
+-Comment[wa]=Preferinces ki candjèt li scribanne Gnome en etir
+-Comment[zh_CN]=影响整个 GNOME 桌面的首选项
+-Comment[zh_TW]=有關整個 GNOME 桌面的偏好設定
+-Icon=mbfolder.png
+-Type=Directory
+-Match=Settings
+\ � ����� ����� ��� ����� ������
+diff -Nur matchbox-common-0.8/data/vfolders-desktop/System.directory matchbox-common-0.8-patched/data/vfolders-desktop/System.directory
+--- matchbox-common-0.8/data/vfolders-desktop/System.directory	2004-02-03 14:45:54.000000000 +0000
++++ matchbox-common-0.8-patched/data/vfolders-desktop/System.directory	2004-02-23 23:03:10.000000000 +0000
+@@ -117,4 +117,4 @@
+ Comment[zh_TW]=系統選單
+ Icon=mbfolder.png
+ Type=Directory
+-Match=System
+\ � ����� ����� ��� ����� ������
++Match=System

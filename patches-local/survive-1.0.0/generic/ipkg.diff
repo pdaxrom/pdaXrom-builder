@@ -1,0 +1,131 @@
+--- survive/ipkg~	2004-01-04 15:25:46.000000000 +0000
++++ survive/ipkg	2004-06-12 20:12:45.000000000 +0000
+@@ -15,7 +15,7 @@
+ #
+ # modified by sharp 2001
+ #
+-# modified by cacko.biz 2003
++# modified by cacko.biz - pdaXrom.org 2003, 2004
+ #
+ 
+ set -e
+@@ -612,12 +612,14 @@
+ 		local tmp_pkg_file="$IPKG_TMP/"`ipkg_file_part $filename`
+ 		if ! ipkg_download `ipkg_src_byname $src`/$filename $tmp_pkg_file; then
+ 			echo "ipkg_get_install: Perhaps you need to run \`ipkg update'?"
++			ipkg_status_remove_sd $sd $pkg
+ 			return 1
+ 		fi
+ 
+ 		if ! ipkg_install_file_dest $dest $tmp_pkg_file; then
+ 			echo "ipkg_get_install: ERROR: Failed to install $tmp_pkg_file"
+ 			echo "ipkg_get_install: I'll leave it there for you to try a manual installation"
++			ipkg_status_remove_sd $sd $pkg
+ 			exit 1
+ 		fi
+ 
+@@ -692,7 +694,7 @@
+ 	fi
+ 
+ 
+-	echo -n "Unpacking $pkg..."
++##	echo -n "Unpacking $pkg..."
+ 	set +o noglob
+ 	for file in $IPKG_TMP/$pkg/control/*; do
+ 		local base_file=`ipkg_file_part $file`
+@@ -701,15 +703,17 @@
+ 	set -o noglob
+ 	rm -r $IPKG_TMP/$pkg/control
+ 
+-##	if ! tar -xzOf $filename ./data.tar.gz | tar -xzf - -C $IPKG_TMP/$pkg/data; then
+-#	if ! zcat -dc $filename | tar -xOf - ./data.tar.gz | zcat -dc - | tar -xf - -C $IPKG_TMP/$pkg/data; then
+-	if ! zcat -dc $filename | tar --no-same-owner --no-same-permissions -xOf - ./data.tar.gz | zcat -dc - | tar --no-same-owner --no-same-permissions -xf - -C $IPKG_TMP/$pkg/data; then
+-		echo "ipkg_install_file: ERROR unpacking data.tar.gz from $filename"
+-		return 1
+-	fi
+-	echo "Done."
++#----------
++###	if ! tar -xzOf $filename ./data.tar.gz | tar -xzf - -C $IPKG_TMP/$pkg/data; then
++###	if ! zcat -dc $filename | tar -xOf - ./data.tar.gz | zcat -dc - | tar -xf - -C $IPKG_TMP/$pkg/data; then
++##	if ! zcat -dc $filename | tar --no-same-owner --no-same-permissions -xOf - ./data.tar.gz | zcat -dc - | tar --no-same-owner --no-same-permissions -xf - -C $IPKG_TMP/$pkg/data; then
++##		echo "ipkg_install_file: ERROR unpacking data.tar.gz from $filename"
++##		return 1
++##	fi
++##	echo "Done."
++#----------
+ 
+-	echo -n "Configuring $pkg..."
++	echo -n "Installing $pkg..."
+ 	export PKG_ROOT=$dest
+ 
+ 	# for package made in windows
+@@ -729,59 +733,20 @@
+ 
+ 	local old_conffiles=`ipkg_status_sd $sd $pkg Conffiles | ipkg_extract_value`
+ 	local new_conffiles=
+-	if [ -f "$info_dir/$pkg.conffiles" ]; then
+-		for conffile in `cat $info_dir/$pkg.conffiles`; do
+-			if [ -f "$dest/$conffile" ] && ! echo " $old_conffiles " | grep -q " $conffile "`md5sum $dest/$conffile | sed 's/ .*//'`; then
+-				local use_maintainers_conffile=
+-				if [ -z "$FORCE_DEFAULTS" ]; then
+-					while true; do
+-						echo -n "Configuration file \`$conffile'
+- ==> File on system created by you or by a script.
+- ==> File also in package provided by package maintainer.
+-   What would you like to do about it ?  Your options are:
+-    Y or I  : install the package maintainer's version
+-    N or O  : keep your currently-installed version
+-      D     : show the differences between the versions (if diff is installed)
+- The default action is to keep your current version.
+-*** `ipkg_file_part $conffile` (Y/I/N/O/D) [default=N] ? "
+-						read response
+-						case "$response" in
+-						[YyIi] | [Yy][Ee][Ss])
+-							use_maintainers_conffile=t
+-							break
+-						;;
+-						[Dd])
+-							echo "
+-diff -u $dest/$conffile $IPKG_TMP/$pkg/data/$conffile"
+-							diff -u $dest/$conffile $IPKG_TMP/$pkg/data/$conffile || true
+-							echo "[Press ENTER to continue]"
+-							read junk
+-						;;
+-						*)
+-							break
+-						;;
+-						esac
+-					done
+-				fi
+-				if [ -n "$use_maintainers_conffile" ]; then
+-					local md5sum=`md5sum $IPKG_TMP/$pkg/data/$conffile | sed 's/ .*//'`
+-					new_conffiles="$new_conffiles $conffile $md5sum"
+-				else
+-					new_conffiles="$new_conffiles $conffile <custom>"
+-					rm $IPKG_TMP/$pkg/data/$conffile
+-				fi
+-			else
+-				md5sum=`md5sum $IPKG_TMP/$pkg/data/$conffile | sed 's/ .*//'`
+-				new_conffiles="$new_conffiles $conffile $md5sum"
+-			fi
+-		done
+-	fi
+ 
+ 	local owd=`pwd`
+-	(cd $IPKG_TMP/$pkg/data/; tar cf - . | (cd $owd; cd $dest; tar --no-same-owner --no-same-permissions -xf -))
++#-------
++##	(cd $IPKG_TMP/$pkg/data/; tar cf - . | (cd $owd; cd $dest; tar --no-same-owner --no-same-permissions -xf -))
++#	echo "Done."
++#	echo -n "Unpacking $pkg..."
++	if ! zcat -dc $filename | tar --no-same-owner --no-same-permissions -xOf - ./data.tar.gz | zcat -dc - | tar --no-same-owner --no-same-permissions -xf - -C $dest; then
++		echo "ipkg_install_file: ERROR unpacking data.tar.gz from $filename"
++		return 1
++	fi
++#-------
+ 	local copy_ok=$? # A3_BUG#2267 2002/06/24 t.oku@sharp
+ 	rm -rf $IPKG_TMP/$pkg/data
+-	rmdir $IPKG_TMP/$pkg
++	rm -rf $IPKG_TMP/$pkg
+ ##	tar -xzOf $filename ./data.tar.gz | tar tzf - | sed -e 's/^\.//' > $info_dir/$pkg.list
+ 	if ! zcat -dc $filename | tar -xOf - ./data.tar.gz | zcat -dc - | tar tf - | sed -e 's/^\.//' > $info_dir/$pkg.list; then
+ 	    echo "install failed. Aborting installation of $pkg"

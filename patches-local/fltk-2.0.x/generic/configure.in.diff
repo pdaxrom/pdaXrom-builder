@@ -1,0 +1,18 @@
+--- fltk-2.0.x/configure.in~	2004-06-17 00:19:02.000000000 +0000
++++ fltk-2.0.x/configure.in	2004-06-17 00:19:23.000000000 +0000
+@@ -634,12 +634,12 @@
+         AC_ARG_ENABLE(xft, [  --enable-xft            turn on Xft support (default=yes)])
+ 
+ 	if test x$enable_xft != xno; then
+-	    ac_cpp="$ac_cpp -I/usr/include/freetype2"
++	    ac_cpp="$ac_cpp"
+ 	    AC_CHECK_HEADER(X11/Xft/Xft.h,
+ 	            AC_DEFINE(USE_XFT)
+ 		    LIBS="-lXft $LIBS"
+-		    CFLAGS="$CFLAGS -I/usr/include/freetype2"
+-		    CXXFLAGS="$CXXFLAGS -I/usr/include/freetype2",,)
++		    CFLAGS="$CFLAGS"
++		    CXXFLAGS="$CXXFLAGS",,)
+ 	fi
+ 
+ 	dnl Check for the Xdbe extension unless disabled...

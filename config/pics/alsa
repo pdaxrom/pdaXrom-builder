@@ -1,0 +1,78 @@
+#!/bin/sh
+#
+# alsa		Start/Stop Alsa sound
+#
+
+NAME="alsa"
+DESC="ALSA"
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+test -f /usr/sbin/alsactl || exit 0
+
+#
+# set default mixer volumes
+#
+mixer() {
+  amixer set "$1" "$2" unmute >/dev/null 2>&1
+  amixer set "$1" unmute >/dev/null 2>&1
+}
+
+set_mixers() {
+    mixer Master 75%
+    mixer PCM 90%
+    mixer Synth 90%
+    mixer CD 90%
+    # mute mic
+    amixer set Mic 0% mute >/dev/null 2>&1
+    # ESS 1969 chipset has 2 PCM channels
+    mixer PCM,1 90%
+    # Trident/YMFPCI/emu10k1
+    mixer Wave 100%
+    mixer Music 100%
+    mixer AC97 100%
+    # CS4237B chipset:
+    mixer 'Master Digital' 75%
+    # Envy24 chips with analog outs
+    mixer DAC 90%
+    mixer DAC,0 90%
+    mixer DAC,1 90%
+    # some notebooks use headphone instead of master
+    mixer Headphone 75%
+    mixer Playback 100%
+    # turn off digital switches
+    amixer set "SB Live Analog/Digital Output Jack" off >/dev/null 2>&1
+    amixer set "Audigy Analog/Digital Output Jack" off >/dev/null 2>&1
+}
+
+start() {
+    if [ -f /etc/asound.state ]; then
+	/usr/sbin/alsactl restore
+    else
+	set_mixers
+    fi
+}
+
+stop() {
+    /usr/sbin/alsactl store
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+        ;;
+  stop)
+	stop
+        ;;
+  restart|reload)
+	stop
+	start
+	;;
+  *)
+        echo $"Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit 0

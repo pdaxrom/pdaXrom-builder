@@ -1,0 +1,25 @@
+--- xmms/libxmms/xmmsctrl.c~	2004-11-16 23:35:38.000000000 +0000
++++ xmms/libxmms/xmmsctrl.c	2004-11-16 23:36:48.000000000 +0000
+@@ -382,6 +382,22 @@
+ 	remote_cmd(session, CMD_PLAY_PAUSE);
+ }
+ 
++void xmms_remote_main_volume_up(gint session)
++{
++  gint vol = xmms_remote_get_main_volume(session);
++  vol += 5;
++  xmms_remote_set_main_volume(session, vol);
++}
++
++void xmms_remote_main_volume_down(gint session )
++{
++  gint vol = xmms_remote_get_main_volume(session);
++  vol -= 5;
++  if ( vol < 0 ) { vol = 0 ; }
++
++  xmms_remote_set_main_volume(session, vol);
++}
++
+ gboolean xmms_remote_is_playing(gint session)
+ {
+ 	return remote_get_gboolean(session, CMD_IS_PLAYING);

@@ -1,0 +1,57 @@
+diff -Nur rdesktop-1.3.1-old/Makefile rdesktop-1.3.1/Makefile
+--- rdesktop-1.3.1-old/Makefile	2004-01-22 03:26:01.000000000 +0000
++++ rdesktop-1.3.1/Makefile	2004-10-28 19:33:10.000000000 +0000
+@@ -50,7 +50,7 @@
+ installbin: rdesktop
+ 	mkdir -p $(DESTDIR)/$(bindir)
+ 	$(INSTALL) rdesktop $(DESTDIR)/$(bindir)
+-	strip $(DESTDIR)/$(bindir)/rdesktop
++	$(STRIP) $(DESTDIR)/$(bindir)/rdesktop
+ 	chmod 755 $(DESTDIR)/$(bindir)/rdesktop
+ 
+ installman: doc/rdesktop.1
+diff -Nur rdesktop-1.3.1-old/configure rdesktop-1.3.1/configure
+--- rdesktop-1.3.1-old/configure	2003-12-11 14:59:54.000000000 +0000
++++ rdesktop-1.3.1/configure	2004-10-28 19:29:54.000000000 +0000
+@@ -16,6 +16,7 @@
+ cflags='-DKEYMAP_PATH=\"$(KEYMAP_PATH)\"'
+ ldflags=''
+ rpath=
++extraincdir=/usr/include
+ 
+ for arg in $*; do
+ optarg=`echo $arg | sed 's/[-a-z]*=//'`
+@@ -35,6 +36,9 @@
+   --sharedir=*)
+     echo "datadir     = $optarg" >>Makeconf
+     ;;
++  --with-incdir*)
++    extraincdir=$optarg
++    ;;
+   --with-x*)
+     extraxdir=$optarg
+     ;;
+@@ -115,7 +119,7 @@
+ echo "CC          = $cc" >>Makeconf
+ 
+ if $cc -v 2>&1 |grep '^gcc' >/dev/null; then
+-    cflags="$cflags -Wall -O2"
++    cflags="$cflags -Wall -Os -fomit-frame-pointer"
+ else
+     cflags="$cflags -O"
+ fi
+@@ -259,12 +263,12 @@
+ 
+ # Check for OSS sound support
+ 
+-if [ -f /usr/include/sys/soundcard.h ]; then
++if [ -f $extraincdir/sys/soundcard.h ]; then
+     echo Sound support enabled: Open Sound System
+     echo
+     echo "SOUNDOBJ    = rdpsnd.o rdpsnd_oss.o" >>Makeconf
+     cflags="$cflags -DWITH_RDPSND"
+-elif [ -f /usr/include/sys/audioio.h ]; then
++elif [ -f $extraincdir/sys/audioio.h ]; then
+     echo Sound support enabled: Sun/BSD
+     echo
+     echo "SOUNDOBJ    = rdpsnd.o rdpsnd_sun.o" >>Makeconf

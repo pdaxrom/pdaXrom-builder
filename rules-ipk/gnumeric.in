@@ -1,0 +1,14 @@
+config GNUMERIC
+	bool
+	prompt "gnumeric"
+	depends on GTK22
+
+config GNUMERIC_BONOBO
+	bool
+	prompt "with bonobo"
+	depends on GNUMERIC
+
+config GNUMERIC_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on GNUMERIC

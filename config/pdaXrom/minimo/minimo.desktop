@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Minimo
+Comment=Web browser
+Exec=minimo
+Terminal=0
+Type=Application
+Icon=minimo.png
+Categories=Network
+StartupNotify=True
+SingleInstance=False

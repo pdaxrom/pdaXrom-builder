@@ -1,0 +1,8 @@
+config XMMS
+	bool
+	prompt "xmms"
+
+config XMMS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XMMS

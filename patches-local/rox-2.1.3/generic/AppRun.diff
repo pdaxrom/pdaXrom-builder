@@ -1,0 +1,11 @@
+--- rox/ROX-Filer/AppRun~	2004-10-12 18:41:08.000000000 +0000
++++ rox/ROX-Filer/AppRun	2004-10-12 18:41:12.000000000 +0000
+@@ -8,7 +8,7 @@
+ if [ "x$PLATFORM" = x ]; then
+ 	ARCH=`uname -m`
+ 	case "$ARCH" in
+-		i?86) ARCH=ix86 ;;
++		i?86) ARCH=i386 ;;
+ 	esac
+ 
+ 	PLATFORM=`uname -s`-"$ARCH" export PLATFORM

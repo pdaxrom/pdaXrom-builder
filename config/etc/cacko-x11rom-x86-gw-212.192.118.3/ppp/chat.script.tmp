@@ -1,0 +1,10 @@
+TIMEOUT		3
+ABORT		'\nBUSY\r'
+ABORT		'\nNO ANSWER\r'
+ABORT		'\nRINGING\r\n\r\nRINGING\r'
+''		AT
+'OK-+++\c-OK'	ATH0
+@1
+TIMEOUT		@2
+OK		ATD@3@4
+CONNECT						

@@ -1,0 +1,8 @@
+config TUXPAINT
+	bool
+	prompt "tuxpaint"
+
+config TUXPAINT_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on TUXPAINT

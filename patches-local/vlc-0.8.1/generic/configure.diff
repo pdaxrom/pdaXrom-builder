@@ -1,0 +1,11 @@
+--- vlc/configure~	2004-11-26 01:24:40.000000000 +0000
++++ vlc/configure	2004-11-26 01:25:14.000000000 +0000
+@@ -27326,7 +27326,7 @@
+ 
+ 
+   for element in tremor; do
+-    eval "LDFLAGS_${element}="'"'"-lvorbisidec -logg "'$'"{LDFLAGS_${element}} "'"'
++    eval "LDFLAGS_${element}="'"'"-lvorbisidec "'$'"{LDFLAGS_${element}} "'"'
+     am_modules_with_ldflags="${am_modules_with_ldflags} ${element}"
+   done
+ 

@@ -1,0 +1,9 @@
+config MB-APPLET-POWER
+	bool
+	prompt "Compile mb-applet-power"
+	depends on XFREE430
+
+config MB-APPLET-POWER_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MB-APPLET-POWER

@@ -1,0 +1,8 @@
+config XVKBD
+	bool
+	prompt "Virtual keyboard for X window system"
+
+config XVKBD_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XVKBD

@@ -1,0 +1,176 @@
+# -*-makefile-*-
+# $Id: template,v 1.10 2004/01/24 15:50:34 mkl Exp $
+#
+# Copyright (C) 2004 by @AUTHOR@
+#          
+# See CREDITS for details about who has contributed to this project.
+#
+# For further information about the PTXdist project and license conditions
+# see the README file.
+#
+
+#
+# We provide this package
+#
+ifdef PTXCONF_@PACKET@
+PACKAGES += @packet@
+endif
+
+#
+# Paths and names
+#
+@PACKET@_VENDOR_VERSION	= 1
+@PACKET@_VERSION	= @MAJOR@.@MINOR@.@MICRO@
+@PACKET@		= @packet@-$(@PACKET@_VERSION)
+@PACKET@_SUFFIX		= @SUFFIX@
+@PACKET@_URL		= @URL@/$(@PACKET@).$(@PACKET@_SUFFIX)
+@PACKET@_SOURCE		= $(SRCDIR)/$(@PACKET@).$(@PACKET@_SUFFIX)
+@PACKET@_DIR		= $(BUILDDIR)/$(@PACKET@)
+@PACKET@_IPKG_TMP	= $(@PACKET@_DIR)/ipkg_tmp
+
+# ----------------------------------------------------------------------------
+# Get
+# ----------------------------------------------------------------------------
+
+@packet@_get: $(STATEDIR)/@packet@.get
+
+@packet@_get_deps = $(@PACKET@_SOURCE)
+
+$(STATEDIR)/@packet@.get: $(@packet@_get_deps)
+	@$(call targetinfo, $@)
+	@$(call get_patches, $(@PACKET@))
+	touch $@
+
+$(@PACKET@_SOURCE):
+	@$(call targetinfo, $@)
+	@$(call get, $(@PACKET@_URL))
+
+# ----------------------------------------------------------------------------
+# Extract
+# ----------------------------------------------------------------------------
+
+@packet@_extract: $(STATEDIR)/@packet@.extract
+
+@packet@_extract_deps = $(STATEDIR)/@packet@.get
+
+$(STATEDIR)/@packet@.extract: $(@packet@_extract_deps)
+	@$(call targetinfo, $@)
+	@$(call clean, $(@PACKET@_DIR))
+	@$(call extract, $(@PACKET@_SOURCE))
+	@$(call patchin, $(@PACKET@))
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Prepare
+# ----------------------------------------------------------------------------
+
+@packet@_prepare: $(STATEDIR)/@packet@.prepare
+
+#
+# dependencies
+#
+@packet@_prepare_deps = \
+	$(STATEDIR)/@packet@.extract \
+	$(STATEDIR)/virtual-xchain.install
+
+@PACKET@_PATH	=  PATH=$(CROSS_PATH)
+@PACKET@_ENV 	=  $(CROSS_ENV)
+#@PACKET@_ENV	+=
+@PACKET@_ENV	+= PKG_CONFIG_PATH=$(CROSS_LIB_DIR)/lib/pkgconfig
+#ifdef PTXCONF_XFREE430
+#@PACKET@_ENV	+= LDFLAGS=-Wl,-rpath-link,$(CROSS_LIB_DIR)/X11R6/lib
+#endif
+
+#
+# autoconf
+#
+@PACKET@_AUTOCONF = \
+	--build=$(GNU_HOST) \
+	--host=$(PTXCONF_GNU_TARGET) \
+	--prefix=/usr
+
+ifdef PTXCONF_XFREE430
+@PACKET@_AUTOCONF += --x-includes=$(CROSS_LIB_DIR)/include
+@PACKET@_AUTOCONF += --x-libraries=$(CROSS_LIB_DIR)/lib
+endif
+
+$(STATEDIR)/@packet@.prepare: $(@packet@_prepare_deps)
+	@$(call targetinfo, $@)
+	@$(call clean, $(@PACKET@_DIR)/config.cache)
+	cd $(@PACKET@_DIR) && \
+		$(@PACKET@_PATH) $(@PACKET@_ENV) \
+		./configure $(@PACKET@_AUTOCONF)
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Compile
+# ----------------------------------------------------------------------------
+
+@packet@_compile: $(STATEDIR)/@packet@.compile
+
+@packet@_compile_deps = $(STATEDIR)/@packet@.prepare
+
+$(STATEDIR)/@packet@.compile: $(@packet@_compile_deps)
+	@$(call targetinfo, $@)
+	$(@PACKET@_PATH) $(MAKE) -C $(@PACKET@_DIR)
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Install
+# ----------------------------------------------------------------------------
+
+@packet@_install: $(STATEDIR)/@packet@.install
+
+$(STATEDIR)/@packet@.install: $(STATEDIR)/@packet@.compile
+	@$(call targetinfo, $@)
+	$(@PACKET@_PATH) $(MAKE) -C $(@PACKET@_DIR) install
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Target-Install
+# ----------------------------------------------------------------------------
+
+@packet@_targetinstall: $(STATEDIR)/@packet@.targetinstall
+
+@packet@_targetinstall_deps = $(STATEDIR)/@packet@.compile
+
+$(STATEDIR)/@packet@.targetinstall: $(@packet@_targetinstall_deps)
+	@$(call targetinfo, $@)
+	$(@PACKET@_PATH) $(MAKE) -C $(@PACKET@_DIR) DESTDIR=$(@PACKET@_IPKG_TMP) install
+	mkdir -p $(@PACKET@_IPKG_TMP)/CONTROL
+	echo "Package: @LPACKET@" 							 >$(@PACKET@_IPKG_TMP)/CONTROL/control
+	echo "Priority: optional" 							>>$(@PACKET@_IPKG_TMP)/CONTROL/control
+	echo "Section: pdaXrom" 							>>$(@PACKET@_IPKG_TMP)/CONTROL/control
+	echo "Maintainer: @AUTHOR@" 							>>$(@PACKET@_IPKG_TMP)/CONTROL/control
+	echo "Architecture: $(SHORT_TARGET)" 						>>$(@PACKET@_IPKG_TMP)/CONTROL/control
+	echo "Version: $(@PACKET@_VERSION)-$(@PACKET@_VENDOR_VERSION)" 			>>$(@PACKET@_IPKG_TMP)/CONTROL/control
+	echo "Depends: " 								>>$(@PACKET@_IPKG_TMP)/CONTROL/control
+	echo "Description: generated with pdaXrom builder"				>>$(@PACKET@_IPKG_TMP)/CONTROL/control
+	cd $(FEEDDIR) && $(XMKIPKG) $(@PACKET@_IPKG_TMP)
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Image-Install
+# ----------------------------------------------------------------------------
+
+ifdef PTXCONF_@PACKET@_INSTALL
+ROMPACKAGES += $(STATEDIR)/@packet@.imageinstall
+endif
+
+@packet@_imageinstall_deps = $(STATEDIR)/@packet@.targetinstall \
+	$(STATEDIR)/virtual-image.install
+
+$(STATEDIR)/@packet@.imageinstall: $(@packet@_imageinstall_deps)
+	@$(call targetinfo, $@)
+	cd $(FEEDDIR) && $(XIPKG) install @LPACKET@
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Clean
+# ----------------------------------------------------------------------------
+
+@packet@_clean:
+	rm -rf $(STATEDIR)/@packet@.*
+	rm -rf $(@PACKET@_DIR)
+
+# vim: syntax=make

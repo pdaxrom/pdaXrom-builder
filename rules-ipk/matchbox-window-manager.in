@@ -1,0 +1,9 @@
+config MATCHBOX-WINDOW-MANAGER
+	bool
+	prompt "Compile matchbox wm"
+	depends on XFREE430
+
+config MATCHBOX-WINDOW-MANAGER_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MATCHBOX-WINDOW-MANAGER

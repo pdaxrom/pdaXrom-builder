@@ -1,0 +1,13 @@
+--- qt/src/kernel/qwidget_qws.cpp~	2004-12-23 00:03:42.000000000 +0000
++++ qt/src/kernel/qwidget_qws.cpp	2004-12-27 14:56:40.000000000 +0000
+@@ -641,8 +641,8 @@
+ {
+     if ( qt_mouseGrb == this ) {
+ 	qwsDisplay()->grabMouse(this,FALSE);
+-        topData()->qwsManager->active = 0;
+-        topData()->qwsManager->activeRegion = QWSDecoration::None;
++//        topData()->qwsManager->active = 0;
++//        topData()->qwsManager->activeRegion = QWSDecoration::None;
+ 	qt_mouseGrb = 0;
+     }
+ }

@@ -1,0 +1,26 @@
+# %ENV;
+
+QTDIR=/usr/lib/qt
+KDEDIR=/usr/lib/kde
+PATH=@PTXCONF_PREFIX@/bin:/opt/sdk/bin:/root/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/X11R6/bin:$QTDIR/bin:$KDEDIR/bin
+LD_LIBRARY_PATH=$QTDIR/lib:$KDEDIR/lib
+PS1="# "
+
+TSLIB_TSDEVICE=/dev/ts
+TSLIB_TSEVENTTYPE=COLLIE
+
+#if [ -f /usr/bin/ts_calibrate ]; then
+#    if [ ! -f /etc/pointercal ]; then
+#	/usr/bin/ts_calibrate >/dev/null 2>/dev/null
+#    fi
+#fi
+
+##if [ -f $HOME/Choices/lightnpower.cfg ]; then
+##    lightnpower.py --loadandquit
+##fi
+
+export NATIVE_SDK_FILES_PREFIX=@CROSS_LIB_DIR@
+export DISTCC_HOSTS="192.168.129.1 localhost"
+export PKG_CONFIG_PATH=@CROSS_LIB_DIR@/lib/pkgconfig:/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/X11R6/lib/pkgconfig
+export KDEDIR QTDIR PATH LD_LIBRARY_PATH PS1 TSLIB_TSDEVICE TSLIB_TSEVENTTYPE
+export COLORTERM=

@@ -1,0 +1,9 @@
+config CDRTOOLS
+	bool
+	prompt "cdrtools"
+	depends on ARCH_X86
+
+config CDRTOOLS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on CDRTOOLS

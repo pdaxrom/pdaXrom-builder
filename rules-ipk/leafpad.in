@@ -1,0 +1,8 @@
+config LEAFPAD
+	bool
+	prompt "leafpad"
+
+config LEAFPAD_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on LEAFPAD

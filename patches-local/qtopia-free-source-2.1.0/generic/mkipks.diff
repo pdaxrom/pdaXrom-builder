@@ -1,0 +1,21 @@
+--- qtopia/bin/mkipks~	2004-12-13 00:04:17.000000000 +0000
++++ qtopia/bin/mkipks	2004-12-24 16:16:49.000000000 +0000
+@@ -36,14 +36,14 @@
+     echo $VERSION_MAJ.$VERSION_MIN.$VERSION_PAT
+ }
+ 
+-QTE_VERSION=$(get_version $QTDIR/include/qglobal.h QT_VERSION_STR)
+-QPE_VERSION=$(get_version $QPEDIR/include/qtopia/version.h QPE_VERSION)
++test "$QTE_VERSION" = "" && QTE_VERSION=$(get_version $QTEDIR/include/qglobal.h QT_VERSION_STR)
++test "$QPE_VERSION" = "" && QPE_VERSION=$(get_version $QPEDIR/include/qtopia/version.h QPE_VERSION)
+ 
+ ARCH=arm
+ CPU_ARCH=arm
+-DEVICE_ARCH=SHARP
++DEVICE_ARCH=arm
+ STRIP=arm-linux-strip
+-STRIP_FILES="*ARM*not stripped"
++STRIP_FILES="*"
+ 
+ TDIR=/tmp/ipk$$
+ DATADIR=$TDIR/data

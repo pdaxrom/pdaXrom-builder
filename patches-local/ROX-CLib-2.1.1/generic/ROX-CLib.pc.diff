@@ -1,0 +1,14 @@
+diff -Nur src~/ROX-CLib.pc src/ROX-CLib.pc
+--- ROX-CLib/src~/ROX-CLib.pc	1970-01-01 00:00:00.000000000 +0000
++++ ROX-CLib/src/ROX-CLib.pc	2004-05-31 17:38:16.000000000 +0000
+@@ -0,0 +1,10 @@
++prefix=@PREFIX@
++exec_prefix=${prefix}
++libdir=${exec_prefix}/lib
++includedir=${prefix}/include
++
++Name: ROX-CLib
++Description: ROX C Library
++Version: 2.1.1
++Libs: -L${libdir} -lrox-clib
++Cflags: -I${includedir}/rox

@@ -1,0 +1,9 @@
+config PXA-OVERCLOCK
+	bool
+	prompt "PXA Overclock"
+	depends on XFREE430
+
+config PXA-OVERCLOCK_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PXA-OVERCLOCK

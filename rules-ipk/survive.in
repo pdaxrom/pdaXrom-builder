@@ -1,0 +1,48 @@
+config SURVIVE
+	bool
+	prompt "Embedix utils"
+
+config SURVIVE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on SURVIVE
+
+menu 	"Embedix utils       "
+	depends on SURVIVE
+
+config SURVIVE_SURVIVE
+	bool
+	prompt "survive"
+	depends on SURVIVE
+
+config SURVIVE_SLTIME
+	bool
+	prompt "sltime"
+	depends on SURVIVE
+
+config SURVIVE_SETFL
+	bool
+	prompt "setfl"
+	depends on SURVIVE
+
+config SURVIVE_IPKG
+	bool
+	prompt "ipkg"
+	depends on SURVIVE
+
+config SURVIVE_CHKHINGE
+	bool
+	prompt "chkhinge"
+	depends on SURVIVE && XFREE430
+
+config SURVIVE_WRITEROMINFO
+	bool
+	prompt "writerominfo"
+	depends on SURVIVE
+
+config SURVIVE_SETHWCLOCK
+	bool
+	prompt "sethwclock"
+	depends on SURVIVE
+
+endmenu

@@ -1,0 +1,9 @@
+config PPPSETTINGS
+	bool
+	prompt "PPP Settings"
+	depends on XFREE430
+
+config PPPSETTINGS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PPPSETTINGS

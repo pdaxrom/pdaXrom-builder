@@ -1,0 +1,12 @@
+diff -Nur freetype-2.1.9/include/freetype/config/ftoption.h freetype-2.1.9.new/include/freetype/config/ftoption.h
+--- freetype-2.1.9/include/freetype/config/ftoption.h	2004-04-25 20:15:09.000000000 +0000
++++ freetype-2.1.9.new/include/freetype/config/ftoption.h	2004-08-24 19:47:13.000000000 +0000
+@@ -436,7 +436,7 @@
+   /*   Do not #undef this macro here, since the build system might         */
+   /*   define it for certain configurations only.                          */
+   /*                                                                       */
+-/* #define  TT_CONFIG_OPTION_BYTECODE_INTERPRETER */
++#define  TT_CONFIG_OPTION_BYTECODE_INTERPRETER
+ 
+ 
+   /*************************************************************************/

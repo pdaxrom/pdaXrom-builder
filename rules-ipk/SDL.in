@@ -1,0 +1,32 @@
+menu	"SDL                 "
+
+config SDL
+	bool
+	prompt "sdl"
+
+config SDL_IMAGE
+	bool
+	prompt "sdl-image"
+	depends on SDL
+
+config SDL_MIXER
+	bool
+	prompt "sdl-mixer"
+	depends on SDL
+
+config SDL_NET
+	bool
+	prompt "sdl-net"
+	depends on SDL
+
+config SDL_PERL
+	bool
+	prompt "sdl-perl"
+	depends on SDL && PERL
+
+config SDL_TTF
+	bool
+	prompt "sdl-ttf"
+	depends on SDL
+
+endmenu

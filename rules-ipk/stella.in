@@ -1,0 +1,8 @@
+config STELLA
+	bool
+	prompt "Stella - Atari 2600"
+
+config STELLA_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on STELLA

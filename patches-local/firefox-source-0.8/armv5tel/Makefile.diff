@@ -1,0 +1,26 @@
+Двоичные файлы mozilla/security/coreconf/nsinstall/Linux2.4_x86_glibc_PTH_OPT.OBJ/nsinstall и mozilla-patched/security/coreconf/nsinstall/Linux2.4_x86_glibc_PTH_OPT.OBJ/nsinstall различаются
+Двоичные файлы mozilla/security/coreconf/nsinstall/Linux2.4_x86_glibc_PTH_OPT.OBJ/nsinstall.o и mozilla-patched/security/coreconf/nsinstall/Linux2.4_x86_glibc_PTH_OPT.OBJ/nsinstall.o различаются
+Двоичные файлы mozilla/security/coreconf/nsinstall/Linux2.4_x86_glibc_PTH_OPT.OBJ/pathsub.o и mozilla-patched/security/coreconf/nsinstall/Linux2.4_x86_glibc_PTH_OPT.OBJ/pathsub.o различаются
+diff -Nur mozilla/security/coreconf/nsinstall/Makefile mozilla-patched/security/coreconf/nsinstall/Makefile
+--- mozilla/security/coreconf/nsinstall/Makefile	2003-07-08 18:11:24.000000000 +0000
++++ mozilla-patched/security/coreconf/nsinstall/Makefile	2004-02-27 15:30:13.000000000 +0000
+@@ -54,13 +54,13 @@
+ TARGETS		= $(PROGRAM) $(PLSRCS:.pl=)
+ endif
+ 
+-ifdef NATIVE_CC
+-CC=$(NATIVE_CC)
+-endif
++#ifdef NATIVE_CC
++CC=gcc
++#endif
+ 
+-ifdef NATIVE_FLAGS
+-OS_CFLAGS=$(NATIVE_FLAGS)
+-endif
++#ifdef NATIVE_FLAGS
++OS_CFLAGS=
++#endif
+ 
+ include $(DEPTH)/coreconf/rules.mk
+ 

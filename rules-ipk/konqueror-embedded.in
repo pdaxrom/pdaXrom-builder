@@ -1,0 +1,8 @@
+config KONQUEROR-EMBEDDED
+	bool
+	prompt "Konqueror-embedded"
+
+config KONQUEROR-EMBEDDED_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on KONQUEROR-EMBEDDED

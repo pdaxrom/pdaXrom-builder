@@ -1,0 +1,40 @@
+--- MPlayer/etc/codecs.conf~	2004-08-29 07:04:53.000000000 +0000
++++ MPlayer/etc/codecs.conf	2004-08-29 07:04:28.000000000 +0000
+@@ -1560,6 +1560,18 @@
+   driver acm
+   dll "msadp32.acm"
+ 
++;MAD library
++audiocodec mad
++  info "libMAD MPEG layer 1-2-3"
++  status working
++  format 0x50
++  format 0x55
++  format 0x33706d2e  ; ".mp3" CBR/VBR MP3 (MOV files)
++  format 0x5500736d  ; "ms\0\x55" older mp3 fcc (MOV files)
++  driver libmad
++  dll "libmad"
++  flags seekable
++
+ audiocodec mp3
+   info "mp3lib MPEG layer-2, layer-3"
+   status working
+@@ -1619,18 +1631,6 @@
+   dll "mp2"
+   flags seekable
+ 
+-;MAD library
+-audiocodec mad
+-  info "libMAD MPEG layer 1-2-3"
+-  status working
+-  format 0x50
+-  format 0x55
+-  format 0x33706d2e  ; ".mp3" CBR/VBR MP3 (MOV files)
+-  format 0x5500736d  ; "ms\0\x55" older mp3 fcc (MOV files)
+-  driver libmad
+-  dll "libmad"
+-  flags seekable
+-
+ 
+ audiocodec mp3acm
+   info "MPEG layer-3"

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Frozen Bubble
+Exec=frozen-bubble.sh
+Icon=frozen-bubble.png
+Terminal=false
+Type=Application
+Categories=Games
+StartupNotify=false
+

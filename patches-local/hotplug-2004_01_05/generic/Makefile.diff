@@ -1,0 +1,11 @@
+--- hotplug/Makefile~	2004-12-30 19:32:41.000000000 +0000
++++ hotplug/Makefile	2004-12-30 19:33:11.000000000 +0000
+@@ -91,7 +91,7 @@
+ 	for F in etc/hotplug/{blacklist,usb.{user,hand,dist}map} ; do \
+ 	    ${INSTALL_DATA} $$F $(etcdir)/hotplug ; \
+ 	    done
+-	${INSTALL_SCRIPT} -D etc/rc.d/init.d/hotplug $(etcdir)/init.d/hotplug
++	${INSTALL_SCRIPT} -D etc/rc.d/init.d/hotplug $(etcdir)/rc.d/init.d/hotplug
+ 	$(INSTALL_DATA) -D hotplug.8  $(mandir)/man8/hotplug.8
+ 	$(INSTALL) -d $(prefix)/var/log/hotplug $(prefix)/var/run
+ 	$(INSTALL) -d -m 700 $(prefix)/var/run/usb

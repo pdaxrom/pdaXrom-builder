@@ -1,0 +1,12 @@
+#menu	"setserial           "
+
+config SETSERIAL
+	bool
+	prompt "setserial"
+
+config SETSERIAL_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on SETSERIAL
+
+#endmenu

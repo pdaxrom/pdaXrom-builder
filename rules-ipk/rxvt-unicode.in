@@ -1,0 +1,8 @@
+config RXVT-UNICODE
+	bool
+	prompt "rxvt-unicode"
+
+config RXVT-UNICODE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on RXVT-UNICODE

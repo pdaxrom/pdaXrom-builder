@@ -1,0 +1,4 @@
+config PYTHON23
+	bool
+	prompt "Python"
+	depends on GLIBC_DL || UCLIBC_DL

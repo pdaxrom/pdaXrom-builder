@@ -1,0 +1,8 @@
+config ESOUND
+	bool
+	prompt "esound"
+
+config ESOUND_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on ESOUND

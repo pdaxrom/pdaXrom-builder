@@ -1,0 +1,7 @@
+mb-applet-menu-launcher
+mb-applet-launcher -o -1 -l mbterm.png mb-applet-xterm-wrapper.sh
+	
+mb-applet-clock
+mb-applet-battery
+mb-applet-system-monitor
+	

@@ -1,0 +1,9 @@
+config MB-APPLET-BLANKER
+	bool
+	prompt "Compile mb-applet-blanker"
+	depends on MATCHBOX-PANEL
+
+config MB-APPLET-BLANKER_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MB-APPLET-BLANKER

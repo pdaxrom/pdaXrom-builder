@@ -1,0 +1,20 @@
+--- imlib/configure~	2004-12-25 17:24:14.000000000 +0000
++++ imlib/configure	2004-12-25 17:28:59.000000000 +0000
+@@ -19382,11 +19382,12 @@
+   LIBS="$LIBS `glib-config --libs gmodule`"
+   CFLAGS="$CFLAGS `glib-config --cflags gmodule`"
+   if test "$cross_compiling" = yes; then
+-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&5
+-echo "$as_me: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }
++#  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
++#See \`config.log' for more details." >&5
++#echo "$as_me: error: cannot run test program while cross compiling
++#See \`config.log' for more details." >&2;}
++#   { (exit 1); exit 1; }; }
++  dynworks=true
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+ /* confdefs.h.  */

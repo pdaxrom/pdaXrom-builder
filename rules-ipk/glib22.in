@@ -1,0 +1,8 @@
+config GLIB22
+	bool
+	prompt "Compile glib-2"
+
+config GLIB22_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on GLIB22

@@ -1,0 +1,8 @@
+config PKGCONFIG
+	bool
+	prompt "pkgconfig"
+
+config PKGCONFIG_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PKGCONFIG

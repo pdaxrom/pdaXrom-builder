@@ -1,0 +1,16 @@
+--- boa/contrib/rpm/boa.conf~	2004-10-20 18:41:47.000000000 +0000
++++ boa/contrib/rpm/boa.conf	2004-10-20 18:42:28.000000000 +0000
+@@ -160,6 +160,13 @@
+ 
+ # Uncomment the next line if you want .cgi files to execute from anywhere
+ #AddType application/x-httpd-cgi cgi
++AddType text/html html
++AddType text/html htm
++AddType image/jpeg jpeg
++AddType image/jpeg jpg
++AddType image/jpeg jpe
++AddType image/png png
++AddType application/pdf pdf
+ 
+ # Redirect, Alias, and ScriptAlias all have the same semantics -- they
+ # match the beginning of a request and take appropriate action.  Use

@@ -1,0 +1,49 @@
+--- gpe/base/libgpewidget/Makefile~	2005-01-27 18:02:07.000000000 +0000
++++ gpe/base/libgpewidget/Makefile	2005-02-07 02:22:16.000000000 +0000
+@@ -1,9 +1,9 @@
+-PREFIX = /usr/local
++PREFIX = /usr
+ PACKAGE = libgpewidget
+ DEBUG = yes
+ VERSION = 0.97
+ CVSBUILD = yes
+-CAIRO = yes
++CAIRO = no
+ 
+ IN_LIBGPEWIDGET = yes
+ 
+@@ -39,7 +39,7 @@
+ DEPS = $(patsubst %,%.d,$(MEMBERS))
+ SOURCES = $(patsubst %,%.c,$(MEMBERS))
+ 
+-all: libgpewidget.so $(PACKAGE).pc $(PACKAGE)-uninstalled.pc doc
++all: libgpewidget.so $(PACKAGE).pc $(PACKAGE)-uninstalled.pc
+ 
+ libgpewidget.so: $(SONAME)
+ 	ln -sf $^ $@
+@@ -56,7 +56,7 @@
+ 
+ install-program: $(SONAME)
+ 	mkdir -p $(DESTDIR)$(PREFIX)/lib/
+-	install -s $(SONAME) $(DESTDIR)$(PREFIX)/lib/
++	install    $(SONAME) $(DESTDIR)$(PREFIX)/lib/
+ 	install -d $(DESTDIR)$(PREFIX)/share/libgpewidget/
+ 	install -m 644 pixmaps/clock.png $(DESTDIR)$(PREFIX)/share/libgpewidget/clock.png
+ 	install -m 644 pixmaps/clock24.png $(DESTDIR)$(PREFIX)/share/libgpewidget/clock24.png
+--- gpe/base/libdisplaymigration/Makefile~	2005-02-07 02:27:15.000000000 +0000
++++ gpe/base/libdisplaymigration/Makefile	2005-02-07 02:27:39.000000000 +0000
+@@ -1,4 +1,4 @@
+-PREFIX = /usr/local
++PREFIX = /usr
+ PACKAGE = libdisplaymigration
+ DEBUG = yes
+ CVSBUILD = yes
+@@ -36,7 +36,7 @@
+ 
+ install-program: $(SONAME)
+ 	install -d $(DESTDIR)$(PREFIX)/lib
+-	install -s $(SONAME) $(DESTDIR)$(PREFIX)/lib/$(SONAME)
++	install $(SONAME) $(DESTDIR)$(PREFIX)/lib/$(SONAME)
+ 
+ install-devel:
+ 	for i in $(HEADERS); do install -m 644 -D $$i $(DESTDIR)$(PREFIX)/include/$$i; done

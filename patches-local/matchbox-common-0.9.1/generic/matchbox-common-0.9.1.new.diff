@@ -1,0 +1,417 @@
+diff -Nur matchbox-common-0.9.1/data/vfolders-desktop/Accessories.directory matchbox-common-0.9.1.new/data/vfolders-desktop/Accessories.directory
+--- matchbox-common-0.9.1/data/vfolders-desktop/Accessories.directory	2004-12-01 11:22:30.000000000 +0000
++++ matchbox-common-0.9.1.new/data/vfolders-desktop/Accessories.directory	1970-01-01 00:00:00.000000000 +0000
+@@ -1,114 +0,0 @@
+-[Desktop Entry]
+-Name=Accessories
+-Name[am]=አጋዥ ፕሮግራሞች
+-Name[ar]=ملحقات
+-Name[az]=Donatılar
+-Name[be]=Зручнасьці
+-Name[bg]=Аксесоари
+-Name[bn]=আনুষঙ্গিক
+-Name[bs]=Dodatci
+-Name[ca]=Accesoris
+-Name[cs]=Příslušenství
+-Name[da]=Tilbehør
+-Name[de]=Zubehör
+-Name[el]=Βοηθήματα
+-Name[eo]=Utilaĵoj
+-Name[es]=Accesorios
+-Name[et]=Tarvikud
+-Name[eu]=Gehigarriak
+-Name[fi]=Apuohjelmat
+-Name[fr]=Accessoires
+-Name[ga]=Oiriúintí
+-Name[gl]=Accesorios
+-Name[he]=עזרים
+-Name[hi]=सहायक प्रोग्राम
+-Name[hu]=Kellékek
+-Name[id]=Aksesoris
+-Name[is]=Aukahlutir
+-Name[it]=Accessori
+-Name[ja]=アクセサリ
+-Name[kn]=ಸಾಮಗ್ರಿಗಳು
+-Name[ko]=보조 프로그램
+-Name[lt]=Priemonės
+-Name[lv]=Aksesuāri
+-Name[mk]=Алатки
+-Name[ml]=സഹപ്രയോഗങ്ങള്
+-Name[mn]=Хэрэгсэл
+-Name[ms]=Aksesori
+-Name[nl]=Hulpmiddelen
+-Name[nn]=Hjelpemiddel
+-Name[no]=Tilbehør
+-Name[pl]=Akcesoria
+-Name[pt]=Acessórios
+-Name[pt_BR]=Acessórios
+-Name[ro]=Accesorii
+-Name[ru]=Стандартные
+-Name[sk]=Príslušenstvo
+-Name[sl]=Pripomočki
+-Name[sq]=Açesorët
+-Name[sr]=Алатке
+-Name[sr@Latn]=Alatke
+-Name[sv]=Tillbehör
+-Name[ta]=Ð¨½ ¯ÚôÒ¸û
+-Name[th]=เบ็ดเตล็ด
+-Name[tr]=Takılar
+-Name[uk]=Приладдя
+-Name[vi]=Chương trình Bổ sung
+-Name[wa]=Accesoires
+-Name[zh_CN]=附件
+-Name[zh_TW]=附屬應用程式
+-Comment=Accessories menu
+-Comment[am]=የአጋዥ ፕሮግራሞች ሜኑ
+-Comment[az]=Donatılar menyusu
+-Comment[be]=Мэню зручнасьцяў
+-Comment[bg]=Меню с аксесоари
+-Comment[bn]=আনুষঙ্গিক মেনূ
+-Comment[ca]=Menú d'accesoris
+-Comment[cs]=Menu příslušenství
+-Comment[da]=Tilbehørsmenu
+-Comment[de]=Zubehör-Menü
+-Comment[el]=Μενού βοηθημάτων
+-Comment[eo]=Utilaĵomenuo
+-Comment[es]=Menú de accesorios
+-Comment[et]=Tarvikute menüü
+-Comment[fi]=Apuohjelmavalikko
+-Comment[fr]=Menu Accessoires
+-Comment[ga]=roghchlár na Oiriúintí
+-Comment[he]=תפריט עזרים
+-Comment[hi]=सहायक प्रोग्राम
+-Comment[hu]=Kellékek menü
+-Comment[id]=Menu Aksesoris
+-Comment[is]=Aukahlutavalmynd
+-Comment[it]=Menù degli accessori
+-Comment[ja]=デスクトップ向けのアクセサリやツールです
+-Comment[kn]=ಸಾಮಗ್ರಿಗಳ ಪರಿವಿಡಿ
+-Comment[ko]=보조 프로그램 메뉴
+-Comment[lv]=Aksesuāru izvēlne
+-Comment[mk]=Мени со Алатки
+-Comment[ml]=സഹപ്രയോഗ പട്ടിക
+-Comment[mn]=Хэрэгсэл цэс
+-Comment[ms]=Menu Aksesori
+-Comment[nl]=Hulpmiddelen menu
+-Comment[no]=Meny for tilbehør
+-Comment[pl]=Menu Akcesoria
+-Comment[pt]=Menu acessórios
+-Comment[pt_BR]=Menu de Acessórios
+-Comment[ro]=Meniul Accesorii
+-Comment[ru]=Стандартные программы
+-Comment[sk]=Menu Príslušenstvo
+-Comment[sl]=Menu pripomočkov
+-Comment[sq]=Menuja e açesorëve
+-Comment[sr]=Мени са алаткама
+-Comment[sr@Latn]=Meni sa alatkama
+-Comment[sv]=Tillbehörsmeny
+-Comment[ta]=Ð¨½ ¯ÚôÒ¸û ÀðÊ
+-Comment[th]=เมนูเบ็ดเตล็ด
+-Comment[tr]=Takı menüsü
+-Comment[uk]=Меню приладдя
+-Comment[vi]=Menu bổ sung
+-Comment[wa]=Menu des accesoires
+-Comment[zh_CN]=附件菜单
+-Comment[zh_TW]=附屬應用程式選單
+-Icon=mbfolder.png
+-Type=Directory
+-Match=Utility
+\ No newline at end of file
+diff -Nur matchbox-common-0.9.1/data/vfolders-desktop/Development.directory matchbox-common-0.9.1.new/data/vfolders-desktop/Development.directory
+--- matchbox-common-0.9.1/data/vfolders-desktop/Development.directory	2004-12-01 11:22:30.000000000 +0000
++++ matchbox-common-0.9.1.new/data/vfolders-desktop/Development.directory	1970-01-01 00:00:00.000000000 +0000
+@@ -1,121 +0,0 @@
+-[Desktop Entry]
+-Name=Programming
+-Name[am]=የፕሮግራም ፈጠራ
+-Name[ar]=برمجة
+-Name[az]=Proqramlama
+-Name[be]=Распрацоўка
+-Name[bg]=Разработка
+-Name[bn]=প্রোগ্রামিং
+-Name[bs]=Programiranje
+-Name[ca]=Programació
+-Name[cs]=Vývoj
+-Name[da]=Programudvikling
+-Name[de]=Entwicklung
+-Name[el]=Ανάπτυξη εφαρμογών
+-Name[eo]=Programado
+-Name[es]=Desarrollo
+-Name[et]=Programmeermine
+-Name[eu]=Programatzeko
+-Name[fa]=برنامه‌نویسی
+-Name[fi]=Ohjelmointi
+-Name[fr]=Développement
+-Name[ga]=Forbairt
+-Name[gl]=Programación
+-Name[he]=פיתוח
+-Name[hi]=प्रोग्रामिंग
+-Name[hu]=Fejlesztés
+-Name[id]=Pemrograman
+-Name[is]=Forritun
+-Name[it]=Sviluppo
+-Name[ja]=開発ツール
+-Name[kn]=ಕ್ರಮವಿಧಿ ರಚನೆ
+-Name[ko]=개발
+-Name[lt]=Programavimas
+-Name[lv]=Progrmmēšana
+-Name[mk]=Програмирање
+-Name[ml]=നിര്‍ദ്ദേശ-സംഹിത
+-Name[mn]=Хөгжүүлэл
+-Name[ms]=Pengaturcaraan
+-Name[nl]=Ontwikkeling
+-Name[nn]=Utvikling
+-Name[no]=Utvikling
+-Name[pl]=Programowanie
+-Name[pt]=Programação
+-Name[pt_BR]=Desenvolvimento
+-Name[ro]=Dezvoltare
+-Name[ru]=Программирование
+-Name[sk]=Vývoj
+-Name[sl]=Razvoj
+-Name[sq]=Programim
+-Name[sr]=Програмирање
+-Name[sr@Latn]=Programiranje
+-Name[sv]=Programutveckling
+-Name[ta]=¿¢ÃÄ¡ì¸õ
+-Name[th]=เขียนโปรแกรม
+-Name[tr]=Programlama
+-Name[uk]=Розробка
+-Name[vi]=Lập trình
+-Name[wa]=Programaedje
+-Name[zh_CN]=编程
+-Name[zh_TW]=軟件開發
+-Comment=Tools for software development
+-Comment[am]=መሣሪያዎች ለሶፍትዌር መሻሻል
+-Comment[ar]=أدوات لتطوير البرامج
+-Comment[az]=Proqram yaradma vasitələri
+-Comment[be]=Прылады для распрацоўкі
+-Comment[bg]=Инструменти за разработка на софтуер
+-Comment[bn]=সফটওয়ার তৈরি করার উপকরণ
+-Comment[bs]=Alati za razvoj softvera
+-Comment[ca]=Eines per al desenvolupament de programari
+-Comment[cs]=Nástroje pro vývoj aplikací
+-Comment[da]=Værktøjer til programudvikling
+-Comment[de]=Werkzeuge zur Softwareentwicklung
+-Comment[el]=Εργαλεία ανάπτυξης εφαρμογών
+-Comment[eo]=Iloj por programado
+-Comment[es]=Herramientas para el desarrollo del software
+-Comment[et]=Tööriistad tarkvaraarenduseks
+-Comment[eu]=Software garapenerako tresnak
+-Comment[fa]=ابزارهای تولید نرم‌افزار
+-Comment[fi]=Työkaluja sovellusten tekemiseen
+-Comment[fr]=Outils de développement logiciel
+-Comment[ga]=Uirlisí le haighaid Fhorbairt
+-Comment[gl]=Ferramentas para o desenvolvemento de aplicacións
+-Comment[he]=כלים לפיתוח תוכנות
+-Comment[hi]=साफ्टवेयर विकास के लिए टूल्स
+-Comment[hu]=Programfejlesztő eszközök
+-Comment[id]=Program untuk membuat software
+-Comment[is]=Verkfæri fyrir hugbúnaðarþróun
+-Comment[it]=Strumenti per lo sviluppo software
+-Comment[ja]=ソフトウェア開発のためのツールです
+-Comment[ko]=소프트웨어 개발을 위한 도구
+-Comment[lt]=Įrankiai programinės įrangos kūrimui
+-Comment[lv]=Rīki programmatūras izstrādei
+-Comment[mk]=Алатки за развој на софтвер
+-Comment[ml]=മൃദുസാമഗ്രി നിര്മ്മിക്കുവാനുള്ള ഉപകരങ്ങള്
+-Comment[mn]=Программ хангамж хөгжүүлэгч хэрэгслүүд
+-Comment[ms]=Radas untuk pembangunan perisian
+-Comment[nl]=Programma's voor software-ontwikkeling
+-Comment[nn]=Verkty for programvareutvikling
+-Comment[no]=Verktøy for programvareutvikling
+-Comment[pl]=Narzędzia do tworzenia oprogramowania
+-Comment[pt]=Ferramentas para desenvolvimento de aplicações
+-Comment[pt_BR]=Programas para desenvolvimento de software
+-Comment[ro]=Unelte pentru dezvoltare software
+-Comment[ru]=Инструменты для разработки программ
+-Comment[sk]=Nástroje pre vývoj softvéru
+-Comment[sl]=Orodja za razvoj programske opreme
+-Comment[sq]=Vegla për zhvillim programesh
+-Comment[sr]=Алати за развој софтвера
+-Comment[sr@Latn]=Alati za razvoj softvera
+-Comment[sv]=Verktyg för programutveckling
+-Comment[ta]=¦Áý¦À¡Õû ¯ÕÅ¡ìÌÅ¾üÌ ¸ÕÅ¢¸û
+-Comment[th]=เครื่องมือสำหรับพัฒนาซอฟต์แวร์
+-Comment[tr]=Yazılım geliştirme
+-Comment[uk]=Інструмент для розробки програмного забезпечення
+-Comment[vi]=Công cụ phát triển phần mềm
+-Comment[wa]=Usteyes pol programaedje di programes
+-Comment[zh_CN]=软件开发工具
+-Comment[zh_TW]=用來開發軟件的工具程式
+-Icon=mbfolder.png
+-Type=Directory
+-Match=Development
+\ No newline at end of file
+diff -Nur matchbox-common-0.9.1/data/vfolders-desktop/Games.directory matchbox-common-0.9.1.new/data/vfolders-desktop/Games.directory
+--- matchbox-common-0.9.1/data/vfolders-desktop/Games.directory	2005-01-12 12:29:14.000000000 +0000
++++ matchbox-common-0.9.1.new/data/vfolders-desktop/Games.directory	2005-02-06 18:04:59.000000000 +0000
+@@ -119,4 +119,4 @@
+ Comment[zh_TW]=遊戲選單
+ Icon=mbfolder.png
+ Type=Directory
+-Match=Game
+\ No newline at end of file
++Match=Games
+diff -Nur matchbox-common-0.9.1/data/vfolders-desktop/Makefile.am matchbox-common-0.9.1.new/data/vfolders-desktop/Makefile.am
+--- matchbox-common-0.9.1/data/vfolders-desktop/Makefile.am	2004-12-01 11:22:31.000000000 +0000
++++ matchbox-common-0.9.1.new/data/vfolders-desktop/Makefile.am	2005-02-06 18:09:53.000000000 +0000
+@@ -1,7 +1,7 @@
+ desktop_files = \
+- Accessories.directory   Graphics.directory    Root.directory      \
++ Graphics.directory    Root.directory      \
+  Applications.directory  Internet.directory    Root.order          \
+- Development.directory   Multimedia.directory  Settings.directory  \
++ Multimedia.directory  \
+  Games.directory         Office.directory      System.directory    
+ 
+ EXTRA_DIST = $(desktop_files)
+diff -Nur matchbox-common-0.9.1/data/vfolders-desktop/Makefile.in matchbox-common-0.9.1.new/data/vfolders-desktop/Makefile.in
+--- matchbox-common-0.9.1/data/vfolders-desktop/Makefile.in	2005-01-12 13:34:43.000000000 +0000
++++ matchbox-common-0.9.1.new/data/vfolders-desktop/Makefile.in	2005-02-06 18:10:04.000000000 +0000
+@@ -112,9 +112,9 @@
+ sysconfdir = @sysconfdir@
+ target_alias = @target_alias@
+ desktop_files = \
+- Accessories.directory   Graphics.directory    Root.directory      \
++ Graphics.directory    Root.directory      \
+  Applications.directory  Internet.directory    Root.order          \
+- Development.directory   Multimedia.directory  Settings.directory  \
++ Multimedia.directory  \
+  Games.directory         Office.directory      System.directory    
+ 
+ EXTRA_DIST = $(desktop_files)
+diff -Nur matchbox-common-0.9.1/data/vfolders-desktop/Root.order matchbox-common-0.9.1.new/data/vfolders-desktop/Root.order
+--- matchbox-common-0.9.1/data/vfolders-desktop/Root.order	2004-12-01 11:22:31.000000000 +0000
++++ matchbox-common-0.9.1.new/data/vfolders-desktop/Root.order	2005-02-06 18:35:50.000000000 +0000
+@@ -3,9 +3,5 @@
+ Multimedia
+ Graphics
+ Games
+-Development
+ Applications
+-Accessories
+ System
+-Settings
+-
+diff -Nur matchbox-common-0.9.1/data/vfolders-desktop/Settings.directory matchbox-common-0.9.1.new/data/vfolders-desktop/Settings.directory
+--- matchbox-common-0.9.1/data/vfolders-desktop/Settings.directory	2004-12-01 11:22:30.000000000 +0000
++++ matchbox-common-0.9.1.new/data/vfolders-desktop/Settings.directory	1970-01-01 00:00:00.000000000 +0000
+@@ -1,116 +0,0 @@
+-[Desktop Entry]
+-Name=Desktop Preferences
+-Name[am]=የሠሌዳ ምርጫዎች
+-Name[ar]=تفضيلات سطح المكتب
+-Name[az]=Masaüstü Səçənəkləri
+-Name[be]=Наладка асяродзьдзя
+-Name[bg]=Настройки на средата
+-Name[bn]=ডেস্কটপের পছন্দ
+-Name[ca]=Preferències de l'escriptori
+-Name[cs]=Nastavení prostředí
+-Name[da]=Indstillinger
+-Name[de]=Desktop-Einstellungen
+-Name[el]=Προτιμήσεις Επιφάνειας Εργασίας
+-Name[eo]=Tabula agordo
+-Name[es]=Preferencias del escritorio
+-Name[et]=Töölaua häälestus
+-Name[eu]=Mahaiko hobespenak
+-Name[fi]=Työpöydän asetukset
+-Name[fr]=Préférences du bureau
+-Name[ga]=Tosaíochtaí le haighaidh an Deasc
+-Name[gl]=Preferencias do escritorio
+-Name[he]=העדפות שולחן העבודה
+-Name[hi]=डेस्कटाप वरीयता
+-Name[hu]=Munkaasztal beállításai
+-Name[id]=Setting Desktop
+-Name[is]=Skjáborðsstillingar
+-Name[it]=Preferenze del desktop
+-Name[ja]=デスクトップ設定
+-Name[ko]=기본 설정
+-Name[lt]=Darbalaukio parinktys
+-Name[lv]=Darbvirsmas Preferences
+-Name[mk]=Подесувања за десктопот
+-Name[ml]=പണിപ്പുര തെരഞ്ഞെടുക്കല്‌
+-Name[mn]=Ажилын талбар тохируулга
+-Name[ms]=Keutamaan Desktop
+-Name[nl]=Bureaubladvoorkeuren
+-Name[nn]=Skrivebordinnstillingar
+-Name[no]=Brukervalg
+-Name[pl]=Ustawienia środowiska
+-Name[pt]=Preferências Ambiente Trabalho
+-Name[pt_BR]=Preferências
+-Name[ro]=Preferinţe desktop
+-Name[ru]=Настройки Рабочего стола
+-Name[sk]=Nastavenia plochy
+-Name[sl]=Nastavitve namizja
+-Name[sq]=Preferencat e Desktop
+-Name[sr]=Поставкe десктопа
+-Name[sr@Latn]=Postavke desktopa
+-Name[sv]=Skrivbordsinställningar
+-Name[ta]=¸½¢§Á¨º Å¢ÕôÀí¸û
+-Name[th]=ปรับแต่งพื้นโต้ะ
+-Name[tr]=Masaüstü Tercihleri
+-Name[uk]=Властивості стільниці
+-Name[vi]=Tùy thích cho Desktop
+-Name[wa]=Preferinces do scribanne
+-Name[zh_CN]=桌面首选项
+-Name[zh_TW]=桌面偏好設定
+-Comment=Preferences that affect the whole GNOME desktop
+-Comment[am]=ሁሉንም የሆሖመሕሄን ገበታ የሚያቃውሱ ምርጫዎች
+-Comment[ar]=التفضيلات التي تحكم سطح مكتب جينوم كله
+-Comment[az]=Bütün Gnome masaüstünə təsir göstərən qurğular.
+-Comment[be]=Перавагі, якія ўзьдзейнічаюць на ўсё асяродьдзе GNOME
+-Comment[bg]=Настройки, които влияят на цялата Гном среда
+-Comment[bn]=যেসব বিষয় সমগ্র জিনম ডেস্কটপের জন্য প্রযোজ্য
+-Comment[ca]=Preferències que afecten a tot l'escriptori del GNOME
+-Comment[cs]=Nastavení týkající se celého prostředí GNOME
+-Comment[da]=Indstillinger der har indflydelse på hele Gnome-skrivebordet
+-Comment[de]=Einstellungen, die den gesamten GNOME-Desktop betreffen
+-Comment[el]=Προτιμήσεις που επηρεάζουν όλη την επιφάνεια εργασίας του GNOME
+-Comment[eo]=Agordo kio efikas la tutan GNOME tabulan
+-Comment[es]=Preferencias que afectan a todo el escritorio de GNOME
+-Comment[et]=Häälestused, mis mõjutavad kogu Gnome töölauda
+-Comment[eu]=Hobespenak, GNOMEKO idazmahi osorakoak
+-Comment[fi]=Asetukset, jotka vaikuttavat koko Gnome-työpöytään
+-Comment[fr]=Préférences affectant l'intégralité du bureau GNOME
+-Comment[ga]=Tosaíochtaí a bhfuil bhaint leis an deasc GNOME go iomlán 
+-Comment[gl]=Preferencias que afectan a todo o escritorio GNOME
+-Comment[he]=העדפות שישפיעו על כל שולחן העבודה של GNOME
+-Comment[hi]=गनोम डेस्कटाप के विकल्प
+-Comment[hu]=Tulajdonságok, amelyek a GNOME-munkakörnyezetre vonatkoznak
+-Comment[id]=Setting yang berlaku di semua desktop GNOME
+-Comment[is]=Stillingar sem hafa áhrif á GNOME skjáborðið í heild sinni
+-Comment[it]=Impostazioni che modificano tutto il desktop GNOME
+-Comment[ja]=GNOME デスクトップ全体に適用させる設定を行います
+-Comment[ko]=전체 그놈 데스크탑에 대한 기본 설정
+-Comment[lt]=Parinktys, kurios įtakoja visą GNOME darbalaukį
+-Comment[lv]=Preferences, kas ietekmē visu GNOME darbvirsmu
+-Comment[mk]=Подесувања кои влијаат на целиот GNOME десктоп
+-Comment[ml]=ഗ്നോം പണിയിടമാകെ ബാധിക്കുന്ന മുന്ഗണനകള്
+-Comment[mn]=Нийт GNOME ажилын талбарт нөлөөлөх тохируулга
+-Comment[ms]=Keutamaan yang melibatkan seluruh desktop GNOME
+-Comment[nl]=Voorkeuren die het hele GNOME bureaublad beïnvloeden
+-Comment[nn]=Instillingar som endrar på heile GNOME-skrivebordet
+-Comment[no]=Brukervalg som påvirker hele GNOME skrivebordet
+-Comment[pl]=Ustawienia, które wpływają na całe środowisko GNOME
+-Comment[pt]=Preferências que afectam todo o ambiente de trabalho GNOME
+-Comment[pt_BR]=Preferências que afetam todo o desktop do GNOME
+-Comment[ro]=Preferinţe care afectează tot desktopul GNOME
+-Comment[ru]=Настойки, которые применяются ко всему рабочему столу среды GNOME
+-Comment[sk]=Nastavenia, ktoré ovplyvňujú celé prostredie GNOME
+-Comment[sl]=Nastavitve, ki vplivajo na celo namizje GNOME
+-Comment[sq]=Preferencat që ndikojnë desktop
+-Comment[sr]=Поставке које утичу на цели GNOME десктоп
+-Comment[sr@Latn]=Postavke koje utiču na celi GNOME desktop
+-Comment[sv]=Inställningar som påverkar hela GNOME-skrivbordet
+-Comment[ta]=ÓØ ¸§É¡õ ¸½¢§Á¨º¨ÂÔõ À¡¾¢ì¸ìÜÊÂ Å¢ÕôÀí¸û
+-Comment[th]=ปรับแต่งปัจจัยที่ส่งผลกระทบกับ GNOME โดยรวม
+-Comment[tr]=Tüm GNOME masaüstünü etkileyen tercihler
+-Comment[uk]=Властивості, що стосуються всієї стільниці GNOME
+-Comment[vi]=Các tùy thích tác động lên toàn bộ màn hình nền của GNOME
+-Comment[wa]=Preferinces ki candjèt li scribanne Gnome en etir
+-Comment[zh_CN]=影响整个 GNOME 桌面的首选项
+-Comment[zh_TW]=有關整個 GNOME 桌面的偏好設定
+-Icon=mbfolder.png
+-Type=Directory
+-Match=Settings
+\ No newline at end of file

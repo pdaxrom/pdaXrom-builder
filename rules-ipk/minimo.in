@@ -1,0 +1,8 @@
+config MINIMO
+	bool
+	prompt "minimo"
+
+config MINIMO_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MINIMO

@@ -1,0 +1,18 @@
+--- fltk-2.0.x/src/Fl_x.cxx~	2004-06-17 00:36:27.000000000 +0000
++++ fltk-2.0.x/src/Fl_x.cxx	2004-06-17 00:36:43.000000000 +0000
+@@ -1653,6 +1653,7 @@
+   // if no text is drawn into this window. It is created when the
+   // xft text is drawn the first time.
+   load_identity();
++#if USE_CAIRO
+   // Cairo context created as well:
+   if (cc) {
+     if (cairo_status(cc)) {
+@@ -1664,6 +1665,7 @@
+     cairo_set_line_width(cc,1);
+   }
+   cairo_set_target_drawable (cc, xdisplay, window);
++#endif
+ }
+ 
+ /*! \fn void fltk::stop_drawing(XWindow window);

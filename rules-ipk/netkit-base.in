@@ -1,0 +1,23 @@
+config NETKIT-BASE
+        bool
+        prompt "netkit-base"
+
+config NETKIT-BASE_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on NETKIT-BASE
+
+menu    "netkit-base         "
+	depends on NETKIT-BASE
+
+config NETKIT-BASE-PING
+        bool
+        prompt "Compile ping"
+	depends on NETKIT-BASE && !BB_CONFIG_PING
+
+config NETKIT-BASE-INETD
+        bool
+        prompt "Compile inetd"
+	depends on NETKIT-BASE && !BB_CONFIG_INETD
+
+endmenu

@@ -1,0 +1,19 @@
+diff -Nur bzflag-2.0.0.20050117/src/platform/LinuxDisplay.h bzflag-2.0.0.20050117-new/src/platform/LinuxDisplay.h
+--- bzflag-2.0.0.20050117/src/platform/LinuxDisplay.h	2005-01-02 09:43:36.000000000 +0000
++++ bzflag-2.0.0.20050117-new/src/platform/LinuxDisplay.h	2005-01-24 14:45:00.000000000 +0000
+@@ -18,13 +18,14 @@
+ #define	BZF_LINUXDISPLAY_H
+ 
+ #include "XDisplay.h"
++/*
+ #if defined(XF86VIDMODE_EXT)
+ #define USE_XF86VIDMODE_EXT
+ #define private c_private
+ #include <X11/extensions/xf86vmode.h>
+ #undef private
+ #endif
+-
++*/
+ class LinuxDisplayMode : public XDisplayMode {
+   public:
+ #if defined(USE_XF86VIDMODE_EXT)

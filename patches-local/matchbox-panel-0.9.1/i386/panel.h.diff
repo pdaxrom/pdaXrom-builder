@@ -1,0 +1,12 @@
+diff -Nur matchbox-panel-0.9.1/src/panel.h matchbox-panel-0.9.1.new/src/panel.h
+--- matchbox-panel-0.9.1/src/panel.h	2005-01-21 15:45:52.000000000 +0000
++++ matchbox-panel-0.9.1.new/src/panel.h	2005-02-08 11:31:19.000000000 +0000
+@@ -110,7 +110,7 @@
+ 
+ 
+ #define DEFAULT_COLOR_SPEC "#e2e2de" /* Same as gnome ? */
+-#define MB_MSG_FONT        "Sans 14px"   
++#define MB_MSG_FONT        "Verdana-14"
+ 
+ #define MAX_DEFERED_WINS 32 	/* *very* Unlikely as much as 32 */
+ 

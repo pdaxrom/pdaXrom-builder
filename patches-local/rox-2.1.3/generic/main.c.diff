@@ -1,0 +1,11 @@
+--- rox-2.1.2/ROX-Filer/src/main.c~	2004-04-13 09:04:06.000000000 +0000
++++ rox-2.1.2/ROX-Filer/src/main.c	2004-06-03 02:33:06.000000000 +0000
+@@ -406,7 +406,7 @@
+ 
+ 	tooltips = gtk_tooltips_new();
+ 
+-	if (euid == 0 || show_user)
++	if (/*euid == 0 ||*/ show_user)
+ 		show_user_message = g_strdup_printf(_("Running as user '%s'"), 
+ 						    user_name(euid));
+ 	

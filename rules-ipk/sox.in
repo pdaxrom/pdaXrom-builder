@@ -1,0 +1,9 @@
+config SOX
+	bool
+	prompt "sox"
+	depends on !ARM_ARCH_PXA
+
+config SOX_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on SOX

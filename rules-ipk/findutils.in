@@ -1,0 +1,8 @@
+config FINDUTILS
+	bool
+	prompt "findutils"
+
+config FINDUTILS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on FINDUTILS

@@ -1,0 +1,11 @@
+--- scintilla/gtk/makefile~	2004-05-30 20:36:17.000000000 +0000
++++ scintilla/gtk/makefile	2004-05-30 20:36:30.000000000 +0000
+@@ -34,7 +34,7 @@
+ ifdef DEBUG
+ CXXFLAGS=-DDEBUG -g $(CXXBASEFLAGS) $(THREADFLAGS)
+ else
+-CXXFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS) $(THREADFLAGS)
++CXXFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS) $(THREADFLAGS) -fomit-frame-pointer
+ endif
+ 
+ # If explicit setting of GTK1 or GTK2 then use that else look for

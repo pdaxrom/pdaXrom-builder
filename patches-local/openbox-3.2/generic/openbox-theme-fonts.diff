@@ -1,0 +1,62 @@
+diff -Nur openbox~/themes/Artwiz/openbox-3/themerc openbox/themes/Artwiz/openbox-3/themerc
+--- openbox~/themes/Artwiz/openbox-3/themerc	2003-09-17 02:38:08.000000000 +0000
++++ openbox/themes/Artwiz/openbox-3/themerc	2004-11-25 15:05:00.000000000 +0000
+@@ -95,6 +95,6 @@
+ border.width:			1
+ window.handle.width:			4
+ 
+-window.active.label.text.font: Bitstream Vera Sans:pixelsize=10
+-menu.title.text.font: Bitstream Vera Sans:pixelsize=10
+-menu.items.font: Bitstream Vera Sans:pixelsize=10
++window.active.label.text.font: Verdana:pixelsize=10
++menu.title.text.font: Verdana:pixelsize=10
++menu.items.font: Verdana:pixelsize=10
+diff -Nur openbox~/themes/Blah41/openbox-3/themerc openbox/themes/Blah41/openbox-3/themerc
+--- openbox~/themes/Blah41/openbox-3/themerc	2003-10-11 07:05:12.000000000 +0000
++++ openbox/themes/Blah41/openbox-3/themerc	2004-11-25 15:05:36.000000000 +0000
+@@ -101,10 +101,10 @@
+ 
+ ! ***** fonts *****
+ 
+-window.active.label.text.font:Bitstream Vera Sans:bold:pixelsize=9:shadow=y
+-window.active.label.text.font:Bitstream Vera Sans:bold:pixelsize=9:shadow=y:shadowtint=12
+-menu.title.text.font: Bitstream Vera Sans:bold:pixelsize=9:shadow=y
+-menu.items.font: Bitstream Vera Sans:pixelsize=10
++window.active.label.text.font: Verdana:bold:pixelsize=9:shadow=y
++window.active.label.text.font: Verdana:bold:pixelsize=9:shadow=y:shadowtint=12
++menu.title.text.font: Verdana:bold:pixelsize=9:shadow=y
++menu.items.font: Verdana:pixelsize=10
+ 
+ window.label.text.justify:			center
+ menu.title.text.justify:		center
+diff -Nur openbox~/themes/Om4Ob/openbox-3/themerc openbox/themes/Om4Ob/openbox-3/themerc
+--- openbox~/themes/Om4Ob/openbox-3/themerc	2003-09-17 02:38:08.000000000 +0000
++++ openbox/themes/Om4Ob/openbox-3/themerc	2004-11-25 15:06:05.000000000 +0000
+@@ -1,9 +1,9 @@
+ style.author:	miklos
+ style.date:	Aug 1, 2003
+ 
+-window.active.label.text.font: arial:pixelsize=10:shadow=y:shadowtint=6:shadowoffset=1
+-menu.title.text.font: arial:pixelsize=10:shadow=y:shadowtint=6:shadowoffset=1
+-menu.items.font: arial:pixelsize=10:shadow=y:shadowtint=6:shadowoffset=1
++window.active.label.text.font: Verdana:pixelsize=10:shadow=y:shadowtint=6:shadowoffset=1
++menu.title.text.font: Verdana:pixelsize=10:shadow=y:shadowtint=6:shadowoffset=1
++menu.items.font: Verdana:pixelsize=10:shadow=y:shadowtint=6:shadowoffset=1
+ 
+ 
+ ! Menu settings...
+diff -Nur openbox~/themes/TheBear/openbox-3/themerc openbox/themes/TheBear/openbox-3/themerc
+--- openbox~/themes/TheBear/openbox-3/themerc	2003-09-28 09:54:07.000000000 +0000
++++ openbox/themes/TheBear/openbox-3/themerc	2004-11-25 15:06:31.000000000 +0000
+@@ -107,7 +107,7 @@
+ border.color: #222222
+ 
+ !! font me!
+-window.active.label.text.font:Bitstream Vera Sans:bold:pixelsize=9:shadow=y:shadowoffset=1:shadowtint=75
+-window.inactive.label.text.font:Bitstream Vera Sans:bold:pixelsize=9
+-menu.items.font: Bitstream Vera Sans:pixelsize=10
+-menu.title.text.font: Bitstream Vera Sans:bold:pixelsize=9:shadow=y:shadowoffset=1:shadowtint=75
++window.active.label.text.font: Verdana:bold:pixelsize=9:shadow=y:shadowoffset=1:shadowtint=75
++window.inactive.label.text.font: Verdana:bold:pixelsize=9
++menu.items.font: Verdana:pixelsize=10
++menu.title.text.font: Verdana:bold:pixelsize=9:shadow=y:shadowoffset=1:shadowtint=75

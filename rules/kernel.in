@@ -1,0 +1,230 @@
+menu	"Kernel              "
+	depends on OS_LINUX
+
+config KERNEL_CONFIG
+	string
+	prompt "Name of config in $PTXDIST/config/kernel to be used"
+	default "kernel-2.4.18-" if KERNEL_2_4_18
+	default "kernel-2.4.19-" if KERNEL_2_4_19
+	default "kernel-2.4.20-" if KERNEL_2_4_20
+	default "kernel-2.4.21-" if KERNEL_2_4_21
+	default "kernel-2.4.22-" if KERNEL_2_4_22
+	default "kernel-2.4.23-" if KERNEL_2_4_23
+	default "kernel-2.4.27-" if KERNEL_2_4_27
+	default "kernel-2.4.28-" if KERNEL_2_4_28
+
+choice 
+	prompt "Kernel Version"
+		default KERNEL_2_4_23
+	
+	config KERNEL_2_4_17
+		bool
+		prompt "2.4.17"
+
+	config KERNEL_2_4_18
+		bool
+		prompt "2.4.18"
+
+	config KERNEL_2_4_19
+		bool
+		prompt "2.4.19"
+ 
+	config KERNEL_2_4_20
+		bool
+		prompt "2.4.20"
+		depends on ARCH_ARM_NOMMU || ARCH_X86 || ARCH_PPC || ARCH_SPARC || ARCH_MIPS || ARCH_CRIS || ARCH_PARISC || ARCH_SH
+
+	config KERNEL_2_4_21
+		bool
+		prompt "2.4.21"
+
+	config KERNEL_2_4_22
+		bool
+		prompt "2.4.22"
+		depends on ARCH_ARM_NOMMU || ARCH_X86 || ARCH_PPC || ARCH_SPARC || ARCH_MIPS || ARCH_CRIS || ARCH_PARISC || ARCH_SH
+
+	config KERNEL_2_4_23
+		bool
+		prompt "2.4.23"
+		depends on ARCH_X86 || ARCH_PPC || ARCH_SPARC || ARCH_MIPS || ARCH_CRIS || ARCH_PARISC || ARCH_SH
+
+	config KERNEL_2_4_27
+		bool
+		prompt "2.4.27"
+		depends on ARCH_X86 || ARCH_PPC || ARCH_SPARC || ARCH_MIPS || ARCH_CRIS || ARCH_PARISC || ARCH_SH
+
+	config KERNEL_2_4_28
+		bool
+		prompt "2.4.28"
+		depends on ARCH_X86 || ARCH_PPC || ARCH_SPARC || ARCH_MIPS || ARCH_CRIS || ARCH_PARISC || ARCH_SH
+
+	config KERNEL_2_6_9
+		bool
+		prompt "2.6.9"
+		depends on ARCH_X86 || ARCH_ARM
+
+	config KERNEL_2_6_10
+		bool
+		prompt "2.6.10"
+		depends on ARCH_X86 || ARCH_ARM
+endchoice
+
+
+choice
+	prompt "Select flavour"
+
+	config KERNEL_SH_DC
+		bool "-sh-dc"
+		depends on ARCH_SH && OPT_SH4
+
+	config KERNEL_RMK
+		bool "-rmk"
+		depends on ARM_ARCH_LE && !ARM_ARCH_PXA && !ARCH_NOMMU
+
+	config KERNEL_RMK2_LINEO5
+		bool "-rmk2-lineo5"
+		depends on ARM_ARCH_LE && !ARCH_NOMMU && KERNEL_2_4_17
+
+	config KERNEL_RMK6_RS1
+		bool "-rmk6-rs1"
+		depends on ARM_ARCH_LE && !ARCH_NOMMU && KERNEL_2_4_19
+
+	config KERNEL_RMK_PXA
+		bool "-rmk-pxa"
+		depends on ARM_ARCH_LE && !ARCH_NOMMU
+
+	config KERNEL_RMK6_PXA1_HH36
+		bool "-rmk6-pxa1-hh36"
+		depends on ARM_ARCH_LE && !ARCH_NOMMU && KERNEL_2_4_19
+
+	config KERNEL_RMK_PXA_EMBEDIX_SL5500
+		bool "-rmk7-pxa3-embedix-sl5500"
+		depends on ARM_ARCH_LE && !ARCH_NOMMU && KERNEL_2_4_18
+
+	config KERNEL_RMK_PXA_EMBEDIX_SLC
+		bool "-rmk7-pxa3-embedix-slc860"
+		depends on ARM_ARCH_LE && !ARCH_NOMMU && KERNEL_2_4_18
+
+	config KERNEL_VANILLA
+		bool "vanilla"
+		depends on !ARCH_ARM && !ARCH_NOMMU
+endchoice
+
+
+
+choice
+	prompt "Select Patch version"
+	depends on !KERNEL_VANILLA
+
+#---------------------------------------------------------------------
+#------------------------------- RMK ---------------------------------
+#---------------------------------------------------------------------
+
+#--------------- 2.4.19
+
+	config KERNEL_2_4_19_rmk7
+		bool "2.4.19-rmk7"
+		depends on KERNEL_2_4_19
+		depends on KERNEL_RMK
+
+#--------------- 2.4.21
+
+	config KERNEL_2_4_21_rmk1
+		bool "2.4.21-rmk1"
+		depends on KERNEL_2_4_21
+		depends on KERNEL_RMK
+
+#--------------- 2.6.0
+
+	config KERNEL_2_6_0_rmk1
+		bool "2.6.0-rmk1"
+		depends on KERNEL_2_6_0
+		depends on KERNEL_RMK
+
+#---------------------------------------------------------------------
+#------------------------------- RMK-PXA -----------------------------
+#---------------------------------------------------------------------
+
+#--------------- 2.4.19-rmk7
+
+	config KERNEL_2_4_19_rmk7_pxa2
+		bool "2.4.19-rmk7-pxa2"
+		depends on KERNEL_2_4_19
+		depends on KERNEL_RMK_PXA
+
+	config KERNEL_2_4_21_rmk1_pxa1
+		bool "2.4.21-rmk1-pxa1"
+		depends on KERNEL_2_4_21
+		depends on KERNEL_RMK_PXA
+
+endchoice
+
+config DONT_COMPILE_KERNEL
+	bool
+	prompt "Don't compile kernel"
+	default n
+
+choice
+	prompt "C compiler for kernel"
+	default KERNEL_INTERNAL_GCC
+
+	config KERNEL_INTERNAL_GCC
+	bool
+	prompt "Don't use external compiler"
+
+	config KERNEL_EXTERNAL_GCC
+	bool
+	prompt "Use external compiler"
+	
+endchoice
+
+config KERNEL_EXTERNAL_GCC_PATH
+	string
+	prompt "Compiler path"
+	default "/usr/local/arm/2.95.3/bin"
+	depends on KERNEL_EXTERNAL_GCC
+
+choice
+	prompt "Kernel Image"
+	default KERNEL_IMAGE_BZ
+	depends on !DONT_COMPILE_KERNEL
+
+	config KERNEL_IMAGE_BZ
+		bool
+		prompt "bzImage"
+		depends on ARCH_X86
+		
+	config KERNEL_IMAGE_Z
+		bool
+		prompt "zImage"
+		depends on ARCH_X86 || ARCH_ARM || ARCH_SH
+
+	config KERNEL_IMAGE_U
+		bool
+		prompt "uImage"
+		depends on ARCH_ARM
+
+	config KERNEL_IMAGE_VMLINUX
+		bool
+		prompt "vmlinux"
+endchoice
+
+
+config KERNEL_INSTALL
+	bool
+	prompt "Install kernel into /boot on target"
+	default n
+	depends on !DONT_COMPILE_KERNEL
+
+config KERNEL_MODULES_INSTALL
+	bool
+	prompt "Install modules on target"
+	default n
+	depends on !DONT_COMPILE_KERNEL
+
+config KERNEL_IPKG_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on !DONT_COMPILE_KERNEL
+
+endmenu

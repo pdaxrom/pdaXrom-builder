@@ -1,0 +1,12 @@
+diff -aur glibc-2.3.2/csu/Makefile glibc-2.3.2-nounit/csu/Makefile
+--- glibc-2.3.2/csu/Makefile	2002-12-31 14:24:37.000000000 -0800
++++ glibc-2.3.2-nounit/csu/Makefile	2004-05-29 23:18:27.000000000 -0700
+@@ -99,7 +99,7 @@
+ $(objpfx)crt%.o: $(objpfx)crt%.S $(objpfx)defs.h
+ 	$(compile.S) -g0 $(ASFLAGS-.os) -o $@
+ 
+-CFLAGS-initfini.s = -g0 -fPIC -fno-inline-functions
++CFLAGS-initfini.s = -O1 -g0 -fPIC -fno-inline-functions
+ 
+ vpath initfini.c $(full_config_sysdirs)
+ 

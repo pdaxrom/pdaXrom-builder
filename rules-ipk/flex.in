@@ -1,0 +1,8 @@
+config FLEX
+	bool
+	prompt "flex"
+
+config FLEX_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on FLEX

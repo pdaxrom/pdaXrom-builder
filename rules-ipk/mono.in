@@ -1,0 +1,8 @@
+config MONO
+	bool
+	prompt "Mono Runtime"
+
+config MONO_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MONO

@@ -1,0 +1,8 @@
+config ROX
+	bool
+	prompt "rox"
+
+config ROX_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on ROX

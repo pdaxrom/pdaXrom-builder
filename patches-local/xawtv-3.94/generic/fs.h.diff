@@ -1,0 +1,9 @@
+--- xawtv/console/fs.h~	2005-01-07 12:12:18.000000000 +0000
++++ xawtv/console/fs.h	2005-01-07 12:12:24.000000000 +0000
+@@ -1,5 +1,5 @@
+ #ifndef X_DISPLAY_MISSING
+-# include <FSlib.h>
++# include <X11/fonts/FSlib.h>
+ 
+ struct fs_font {
+     Font               font;

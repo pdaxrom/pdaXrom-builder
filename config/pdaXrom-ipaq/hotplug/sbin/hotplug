@@ -1,0 +1,74 @@
+#!/bin/sh
+#
+# This version of /sbin/hotplug should works on most GNU/Linux systems
+# using Linux 2.2.18+ or 2.4.* kernels.  On 2.2.*, only USB has such
+# hotplugging support; on 2.4.*, so do PCI/Cardbus and network interfaces.
+#
+# The kernel HOTPLUG configuration option needs to be enabled, and KMOD
+# will normally be enabled so that kernels needn't statically link every
+# known driver.
+#
+#
+# HISTORY:
+#
+# 26-Feb-2001	Cleanup (Gioele Barabucci)
+# 14-Feb-2001	Better diagnostics: logging, agent list (contributors)
+# 04-Jan-2001	First "New" version, which only delegates to
+#		specialized hotplug agents.
+#
+# $Id: hotplug,v 1.4 2001/10/12 11:15:17 jamey Exp $
+#
+
+cd /etc/hotplug
+. hotplug.functions
+
+#DEBUG=yes export DEBUG
+
+if [ "$DEBUG" != "" ]; then
+    mesg "arguments ($*) env (`env`)"
+fi
+
+#
+# Only one required argument:  event type type being dispatched.
+# Examples:  usb, pci, isapnp, net, ieee1394, printer, disk,
+# parport, ... 
+#
+if [ $# -lt 1 -o "$1" = "help" -o "$1" = "--help" ]; then
+    if [ -t ]; then
+	echo "Usage: $0 AgentName [AgentArguments]"
+
+	AGENTS=""
+	for AGENT in /etc/hotplug/*.agent ; do
+	    TYPE=`basename $AGENT | sed s/.agent//`
+	    if [ -x $AGENT ]; then
+		AGENTS="$AGENTS $TYPE"
+	    else
+		AGENTS="$AGENTS ($TYPE)"
+	    fi
+	done
+	echo "AgentName values on this system: $AGENTS" 
+	echo "Most agents also require particular environment parameters."
+    else
+	mesg "illegal usage $*"
+    fi
+    exit 1
+fi
+
+AGENT=/etc/hotplug/$1.agent
+
+#
+# Delegate event handling:
+#   /sbin/hotplug FOO ..args.. ==> /etc/hotplug/FOO.agent ..args..
+#
+if [ -x $AGENT ]; then
+    shift
+    if [ "$DEBUG" != "" ]; then
+	mesg "invoke $AGENT ($@)"
+    fi
+    exec $AGENT "$@"
+    mesg "couldn't exec $AGENT"
+    exit 1
+fi
+
+mesg "no runnable $AGENT is installed"
+exit 1

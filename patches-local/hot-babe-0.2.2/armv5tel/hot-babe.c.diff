@@ -1,0 +1,71 @@
+--- hot-babe/hot-babe.c~	2005-01-18 13:06:03.000000000 +0000
++++ hot-babe/hot-babe.c	2005-01-18 13:11:58.000000000 +0000
+@@ -68,6 +68,8 @@
+ 
+ HotBabeData bm;
+ 
++char kistat[17];
++
+ #if 0
+ /* FIXME New BSD and Solaris code.. to check.
+  * doesn't work with Linux (getloadavg return 1.000) */
+@@ -86,6 +88,7 @@
+ /* returns current CPU load in percent, 0 to 256 */
+ static int system_cpu(void)
+ {
++  u_int64_t kiload, kiu, kis;
+   unsigned int  cpuload;
+   int           i;
+ #ifdef __linux__
+@@ -101,6 +104,14 @@
+ #endif
+ 
+ #ifdef __linux__
++  stat = fopen(kistat, "r");
++  fscanf(stat, "%*d %*s %*s %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %Ld %Ld", &kiu, &kis);
++  fclose(stat);
++
++  /* Find out the CPU load of the kapm-idled process */
++  /* user + sys = load */
++  kiload = kiu + kis;
++
+   stat = fopen("/proc/stat", "r");
+   fscanf(stat, "%*s %Ld %Ld %Ld %Ld", &ab, &ac, &ad, &ae);
+   fclose(stat);
+@@ -121,6 +132,11 @@
+    * total = total */
+   load = ab + ad;  /* cpu.user + cpu.sys; */
+   if(!bm.noNice) load += ac;
++
++#ifdef __linux__
++  load -= kiload;
++#endif
++
+   total = ab + ac + ad + ae;  /* cpu.total; */
+ 
+   i = bm.loadIndex;
+@@ -469,6 +485,24 @@
+   }
+   create_hotbabe_window();
+ 
++#ifdef __linux__
++  FILE *pidof_fp = NULL;
++  int kipid = -1;
++
++  if ((pidof_fp = popen("pidof kapm-idled", "r")) == NULL) {
++    printf("Error executing pidof\n");
++    exit(1);
++  }
++  fscanf(pidof_fp, "%d", &kipid);
++  pclose(pidof_fp);
++  if (kipid == -1) {
++    printf("Could not execute pidof or no pid found for kapm-idled\n");
++    exit(1);
++  }
++
++  sprintf(kistat, "/proc/%d/stat", kipid);
++#endif
++
+   bm.pixels = malloc( sizeof(guchar*) * bm.anim.samples );
+   for( i = 0 ; i < bm.anim.samples ; i++ )
+     bm.pixels[i] = gdk_pixbuf_get_pixels( bm.anim.pixbuf[i] );

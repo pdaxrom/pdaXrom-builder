@@ -1,0 +1,8 @@
+config LIBMAD
+	bool
+	prompt "libmad"
+
+config LIBMAD_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on LIBMAD

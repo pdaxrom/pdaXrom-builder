@@ -1,0 +1,34 @@
+config WEBFONTS-PART1
+	bool
+	prompt "MS ttf web fonts"
+	depends on XFREE430
+
+config WEBFONTS-PART1_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on WEBFONTS-PART1
+
+config WEBFONTS-PART1_INSTALL_ARIAL
+	bool
+	prompt "install Arial in ROM"
+	depends on WEBFONTS-PART1 && WEBFONTS-PART1_INSTALL
+
+config WEBFONTS-PART1_INSTALL_COURIER
+	bool
+	prompt "install Courier in ROM"
+	depends on WEBFONTS-PART1 && WEBFONTS-PART1_INSTALL
+
+config WEBFONTS-PART1_INSTALL_LUCON
+	bool
+	prompt "install Lucida Console in ROM"
+	depends on WEBFONTS-PART1 && WEBFONTS-PART1_INSTALL
+
+config WEBFONTS-PART1_INSTALL_TIMES
+	bool
+	prompt "install Times in ROM"
+	depends on WEBFONTS-PART1 && WEBFONTS-PART1_INSTALL
+
+config WEBFONTS-PART1_INSTALL_VERDANA
+	bool
+	prompt "install Verdana in ROM"
+	depends on WEBFONTS-PART1 && WEBFONTS-PART1_INSTALL

@@ -1,0 +1,68 @@
+config UTLNX
+	bool
+	prompt "Compile Util-Linux"
+
+config UTLNX_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on UTLNX
+
+menu "util-linux          "
+	depends on UTLNX
+
+config UTLNX_MKSWAP
+	bool
+        prompt "mkswap"
+	depends on UTLNX
+
+config UTLNX_SWAPON
+	bool
+	prompt "swapon swapoff"
+	depends on UTLNX && !BB_CONFIG_SWAPONOFF
+
+config UTLNX_MOUNT
+	bool
+	prompt "mount"
+	depends on UTLNX && !BB_CONFIG_MOUNT
+
+config UTLNX_UMOUNT
+	bool
+	prompt "umount"
+	depends on UTLNX && !BB_CONFIG_UMOUNT
+
+config UTLNX_HWCLOCK
+	bool
+	prompt "hwclock"
+	depends on UTLNX
+
+config UTLNX_IPCS
+	bool
+	prompt "ipcs"
+	depends on UTLNX
+
+config UTLNX_READPROFILE
+	bool
+	prompt "readprofile"
+	depends on UTLNX
+
+config UTLNX_MCOOKIE
+	bool
+	prompt "mcookie"
+	depends on UTLNX
+
+config UTLNX_CAL
+	bool
+	prompt "cal"
+	depends on UTLNX
+
+config UTLNX_FDISK
+	bool
+	prompt "fdisk"
+	depends on UTLNX
+
+config UTLNX_CFDISK
+	bool
+	prompt "cfdisk"
+	depends on UTLNX
+	
+endmenu

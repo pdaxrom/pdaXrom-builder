@@ -1,0 +1,11 @@
+--- xc/lib/X11/Imakefile~	2004-09-21 17:43:48.000000000 +0000
++++ xc/lib/X11/Imakefile	2004-09-21 17:46:05.000000000 +0000
+@@ -1063,7 +1063,7 @@
+ 
+ ks_tables.h: $(XINCLUDESRC)/keysymdef.h util/makekeys.c
+ 	RemoveFiles($@ HostProgramTargetName(makekeys) makekeys.Osuf)
+-	-HostLinkRule(HostProgramTargetName(makekeys),$(CFLAGS) $(LOCAL_LDFLAGS),util/makekeys.c,$(HOST_LDLIBS))
++	-HostLinkRule(HostProgramTargetName(makekeys),$(LOCAL_LDFLAGS),util/makekeys.c,$(HOST_LDLIBS))
+ 	RunProgram(MAKEKEYS,< $(XINCLUDESRC)/keysymdef.h > ks_tables_h)
+ 	$(MV) ks_tables_h $@
+ 	RemoveFiles(HostProgramTargetName(makekeys) makekeys.Osuf ks_tables_h)

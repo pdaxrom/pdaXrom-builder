@@ -1,0 +1,30 @@
+#!/bin/sh
+
+PATH="/usr/bin:/usr/sbin:$PATH"
+
+case $1 in 
+'start')
+		if [ ! -d /var/cache/samba ]; then
+		    mkdir -p /var/cache/samba
+		fi
+		if [ ! -d /var/run/samba ]; then
+		    mkdir -p /var/run/samba
+		fi
+		echo "Starting smbd..."
+		smbd -D
+		echo "Starting nmbd..."
+		nmbd -D
+		;;
+'stop')
+		echo "Stopping smbd and nmbd..."
+		PID=`cat /var/run/samba/smbd.pid`
+		kill $PID
+		PID=`cat /var/run/samba/nmbd.pid`
+		kill $PID
+		rm -f /var/run/samba/smbd.pid
+		rm -f /var/run/samba/nmbd.pid
+		;;
+*)
+		echo "usage: smb {start|stop}"
+		;;
+esac

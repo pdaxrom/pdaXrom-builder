@@ -1,0 +1,8 @@
+[Desktop Entry]
+Comment=KO/PI
+Exec=/usr/lib/qt/bin/kopi
+Icon=/usr/lib/qt/lib/kdepim/korganizer/korganizer.png
+Name=KO/Pi
+Type=Application
+Categories=Application;Office;WordProcessor;
+StartupNotify=True

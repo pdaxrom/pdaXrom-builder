@@ -1,0 +1,55 @@
+--- gpe/base/gpe-edit/Makefile~	2005-02-07 02:49:03.000000000 +0000
++++ gpe/base/gpe-edit/Makefile	2005-02-07 02:55:29.000000000 +0000
+@@ -1,4 +1,4 @@
+-PREFIX = /usr/local
++PREFIX = /usr
+ PACKAGE = gpe-edit
+ DEBUG = no
+ CVSBUILD = yes
+@@ -12,11 +12,33 @@
+ PACKAGE_CFLAGS += $(STANDARD_CFLAGS) $(GPECFLAGS)
+ PACKAGE_LDFLAGS += $(STANDARD_LDFLAGS) $(GPELIBS)
+ 
++CFLAGS = `pkg-config --cflags gtk+-2.0`
++
++CFLAGS += -D_GNU_SOURCE -Wall
++ifeq ($(DEBUG),yes)
++CFLAGS += -O2 -g
++LDFLAGS = -g #-lefence
++else
++CFLAGS += -Os -fomit-frame-pointer
++endif
++
++ifeq ($(CVSBUILD),yes)
++CFLAGS += -I../libgpewidget
++LDFLAGS += -L../libgpewidget
++BUILD = ../build
++else
++CFLAGS += -I/usr/include/gpe
++BUILD = build
++endif
++LDFLAGS += -lgpewidget
++
++LDFLAGS += `pkg-config --libs gtk+-2.0`
++
+ ifeq ($(CVSBUILD),yes)
+-PACKAGE_CFLAGS += -I../libdisplaymigration
+-PACKAGE_LDFLAGS += -L../libdisplaymigration
++CFLAGS += -I../libdisplaymigration
++LDFLAGS += -L../libdisplaymigration
+ endif
+-PACKAGE_LDFLAGS += -ldisplaymigration
++LDFLAGS += -ldisplaymigration
+ 
+ DEPS = $(patsubst %,%.d,$(MEMBERS))
+ OBJS = $(patsubst %,%.o,$(MEMBERS))
+@@ -35,7 +57,8 @@
+ 
+ install-program: all gpe-edit.desktop
+ 	install -d $(DESTDIR)$(PREFIX)/bin
+-	install -s gpe-edit $(DESTDIR)$(PREFIX)/bin/gpe-edit
++	install gpe-edit $(DESTDIR)$(PREFIX)/bin/gpe-edit
++	$(STRIP) $(DESTDIR)$(PREFIX)/bin/gpe-edit
+ 	install -D -m 644 gpe-edit.png $(DESTDIR)$(PREFIX)/share/pixmaps/gpe-edit.png
+ 	install -D -m 644 gpe-edit.mime $(DESTDIR)/etc/mime-handlers/gpe-edit.mime
+ 	install -d $(DESTDIR)$(PREFIX)/share/application-registry/

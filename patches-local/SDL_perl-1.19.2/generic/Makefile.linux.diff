@@ -1,0 +1,59 @@
+--- SDL_perl-1.19.2/Makefile.linux~	2002-10-15 03:30:18.000000000 +0000
++++ SDL_perl-1.19.2/Makefile.linux	2004-09-30 13:16:55.000000000 +0000
+@@ -16,7 +16,7 @@
+ 
+ $sdl_cflags = `sdl-config --cflags`;
+ chomp($sdl_cflags);
+-$sdl_libs = "-L/usr/X11R6/lib " . `sdl-config --libs`;
++$sdl_libs = `sdl-config --libs` . ' -Wl,-rpath-link,' . $ENV{X11LIB};
+ $sdl_libs =~ s/-Wl,-rpath,\S*lib//; # suppress the insanity
+ 
+ #
+@@ -24,16 +24,10 @@
+ #
+ 
+ @dirs=(
+-	'/usr/local/include/SDL', 
+-	'/usr/local/include',
+-	'/usr/local/include/smpeg',
+-	'/usr/include/SDL',
+-	'/usr/include',
+-	'/usr/include/smpeg',
+-	'/usr/local/include/GL',
+-	'/usr/local/include/gl',
+-	'/usr/include/GL', 
+-	'/usr/include/gl', 
++	'@INC_PATH@/include/SDL',
++	'@INC_PATH@/include/GL',
++	'@INC_PATH@/X11R6/include/GL',
++	'@INC_PATH@/include',
+ );
+ 
+ $inc_flags = "-ggdb " . $ENV{DEBUG};
+@@ -63,7 +57,8 @@
+ my ($e,$d);
+ for $e ( keys %ext ) {
+ 	for $d (@dirs) {
+-		$ext{$e}{exists} ||= -e "$d/$ext{$e}{test}" 
++		$ext{$e}{exists} ||= -e "$d/$ext{$e}{test}" ;
++		#print "ext($e)\n";
+ 	}
+ }
+ 
+@@ -94,11 +89,11 @@
+ #
+ 
+ if  ( $ext{GLU}{exists} ) {
+-	print "Detecting GLU Version\n";
+-	system ("gcc -o detect detect.c -lGLU -lGL $sdl_libs");
+-	my $version = `./detect` * 10;
+-	push @defs, "-DHAVE_GLU_VERSION=$version";
+-	system ("rm detect");
++#	print "Detecting GLU Version\n";
++#	system ($ENV{CC} . " -o detect detect.c -lGLU -lGL $sdl_libs");
++#	my $version = `./detect` * 10;
++	push @defs, "-DHAVE_GLU_VERSION=11";
++#	system ("rm detect");
+ }
+ 
+ 

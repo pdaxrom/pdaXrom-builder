@@ -1,0 +1,8 @@
+config MPLAYER
+	bool
+	prompt "mplayer"
+
+config MPLAYER_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on MPLAYER

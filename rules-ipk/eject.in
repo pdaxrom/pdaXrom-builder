@@ -1,0 +1,8 @@
+config EJECT
+	bool
+	prompt "eject"
+
+config EJECT_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on EJECT

@@ -1,0 +1,102 @@
+#!/bin/bash
+# $Id: menubox,v 1.4 2003/08/15 19:40:37 tom Exp $
+: ${DIALOG=dialog}
+
+tempfile=`tempfile 2>/dev/null` || tempfile=/tmp/test$$
+trap "rm -f $tempfile" 0 1 2 5 15
+
+
+PARTLIST=""
+
+COUNT=0
+for dev in `mount | grep '^/dev/[hd|sd]' 2>/dev/null | cut -d ' ' -f 1`; do
+    PARTLIST[$COUNT]=$dev
+    PARTLIST[$((COUNT + 1))]=`mount | grep $dev | cut -d ' ' -f 5`
+    COUNT=$((COUNT + 2))
+done
+
+exec 3>&1
+value=`$DIALOG \
+	--clear \
+	--title "Select Linux installation partition:" \
+	--menu \
+"Please select a partition from the following list to use for Linux settings and home directories." 13 70 5 \
+${PARTLIST[@]} \
+2>&1 1>&3`
+retval=$?
+exec 3>&-
+
+case $retval in
+  0)
+    #echo "$value chosen."
+    ;;
+  1)
+    #echo "Cancel pressed."
+    exit 0
+    ;;
+  2)
+    #echo "Help pressed ($value)"
+    exit 0
+    ;;
+  255)
+    if test -n "$value" ; then
+      echo "$value"
+    else
+      echo "ESC pressed."
+      exit 0
+    fi
+    ;;
+esac
+
+INFO=`df -h | grep $value |  egrep -o '[0-9]+\.[0-9][G|M]\ +[0-9]+\.[0-9][G|M]\ +[0-9]+\.[0-9][G|M]' | egrep -o '[0-9]+\.[0-9][G|M]$'`
+MNT=`mount | grep $value | cut -d ' ' -f 3`
+TYPE=`fdisk -l | grep $value | grep 'Linux'`
+
+echo $INFO $MNT
+
+if [ "$TYPE" ]; then
+    echo "Linux partition - OK, create pdaXrom directory $MNT/.pdaX86"
+    mkdir -p $MNT/.pdaX86
+    DSK=$MNT/.pdaX86
+else
+    $DIALOG --title "Linux image on non-Linux partition" --clear \
+        --inputbox "Non Linux partition selected, .pdax86.dsk image will create.\n\n
+Enter image size (40-2047 MB):" 16 51 2> $tempfile
+
+    retval=$?
+
+    case $retval in
+      0)
+        echo "Input string is `cat $tempfile`"
+	;;
+      1)
+        echo "Cancel pressed."
+	exit 0
+	;;
+      255)
+        if test -s $tempfile ; then
+          cat $tempfile
+        else
+          echo "ESC pressed."
+	  exit 0
+        fi
+        ;;
+    esac
+    SIZE=`cat $tempfile`
+    SIZE=`dc 0$SIZE`
+    if [ $SIZE -lt 40 -o $SIZE -gt 2047 ]; then
+	$DIALOG --title "ERROR!" --clear \
+        --msgbox "Image size must be greater 40 and less 2048 MB, \
+                  run setup again." 10 41
+	exit 0
+    fi
+    dd if=/dev/zero of=$MNT/.pdax86.dsk bs=1M count=$SIZE
+    mkfs.ext3 -F $MNT/.pdax86.dsk
+    #mkdir -p /tmp/xxxmnt
+    #mount -o loop $MNT/.pdax86.dsk /tmp/xxxmnt
+    #echo "Non Linux partition, create pdaXrom image $MNT/.pdaXrom.dsk ($SIZE)"
+    DSK=/tmp/xxxmnt
+fi
+
+$DIALOG --title "pdaX86" --clear \
+        --msgbox "Reboot system for apply changes." 10 41

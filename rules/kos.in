@@ -1,0 +1,67 @@
+menu "Kernel              "
+	depends on NEWLIB && KOS
+
+choice
+	prompt "Target platform"
+	depends on KOS
+
+	config KOS_DREAMCAST
+	bool
+	prompt "Sega Dreamcast"
+	depends on KOS && ARCH_SH
+
+	config KOS_GBA
+	bool
+	prompt "GameBoy Advanced"
+	depends on KOS && ARCH_ARM
+
+	config KOS_IA32
+	bool
+	prompt "IA-32"
+	depends on KOS && ARCH_X86
+
+	config KOS_PS2
+	bool
+	prompt "PS2"
+	depends on KOS && ARCH_PPC
+
+endchoice
+
+config KOS_CFLAGS
+	string
+	prompt "KOS CFLAGS"
+	default "-O2"
+	depends on KOS
+
+config KOS_CPPFLAGS
+	string
+	prompt "KOS CPPFLAGS"
+	default "-O2"
+	depends on KOS
+
+config KOS_AFLAGS
+	string
+	prompt "KOS AFLAGS"
+	default ""
+	depends on KOS
+
+config KOS_LDFLAGS
+	string
+	prompt "KOS LDFLAGS"
+	default ""
+	depends on KOS
+
+config KOS_ARM_TOOLS
+	string
+	prompt "ARM crosstools path and prefix"
+	default "/opt/arm/3.3.2-strongarm-vfp/bin/arm-linux-"
+	depends on KOS_DREAMCAST
+
+config KOS_ARCH
+	string
+	default "dreamcast"	if KOS_DREAMCAST
+	default "gba"		if KOS_GBA
+	default "ia32"		if KOS_IA32
+	default "ps2"		if KOS_PS2
+
+endmenu

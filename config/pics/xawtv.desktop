@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=TV
+Comment=TV application
+Exec=xawtv
+Icon=xawtv48x48.xpm
+Terminal=0
+Type=Application
+Categories=AudioVideo
+StartupNotify=False
+SingleInstance=False

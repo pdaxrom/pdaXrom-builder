@@ -1,0 +1,8 @@
+config AMULE
+	bool
+	prompt "aMule"
+
+config AMULE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on AMULE

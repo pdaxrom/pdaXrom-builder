@@ -1,0 +1,22 @@
+--- gnumeric-1.3.92/src/cut-n-paste-code/goffice/utils/go-file.c~	2004-11-06 10:53:44.000000000 +0000
++++ gnumeric-1.3.92/src/cut-n-paste-code/goffice/utils/go-file.c	2004-11-06 10:55:35.000000000 +0000
+@@ -169,11 +169,19 @@
+ 	dirname = raw_uri ? g_path_get_dirname (raw_uri) : NULL;
+ 	g_free (raw_uri);
+ #else
++	char *uri_basename = g_path_get_basename (uri);
++	char *fake_uri = g_strconcat ("file:///", uri_basename, NULL);
++	char *filename = go_filename_from_uri (fake_uri);
++
+ 	char *uri_dirname = g_path_get_dirname (filename);
+ 	char *dir = uri_dirname ? go_filename_from_uri (uri_dirname) : NULL;
+ 	dirname = dirname ? g_strconcat ("file://", dirname, NULL) : NULL;
+ 	g_free (dir);
+ 	g_free (uri_dirname);
++
++	g_free (uri_basename);
++	g_free (fake_uri);
++	g_free (filename);
+ #endif
+ 
+ 	if (brief && dirname &&

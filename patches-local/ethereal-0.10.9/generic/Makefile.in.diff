@@ -1,0 +1,11 @@
+--- ethereal/Makefile.in~	2005-01-31 15:31:46.000000000 +0000
++++ ethereal/Makefile.in	2005-01-31 15:32:37.000000000 +0000
+@@ -1944,7 +1944,7 @@
+ 	./rdps $(srcdir)/print.ps ps.c
+ 
+ rdps: rdps.c
+-	$(CC) $(CFLAGS) -o rdps $(srcdir)/rdps.c
++	$(HOST_CC) -o rdps $(srcdir)/rdps.c
+ 
+ @SETUID_INSTALL_TRUE@install-exec-hook:
+ @SETUID_INSTALL_TRUE@	-chmod +s $(DESTDIR)$(bindir)/ethereal

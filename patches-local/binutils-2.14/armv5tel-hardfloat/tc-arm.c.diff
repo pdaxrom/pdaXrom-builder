@@ -1,0 +1,65 @@
+--- binutils-2.14/gas/config/tc-arm.c~	2004-05-22 01:33:11.000000000 +0000
++++ binutils-2.14/gas/config/tc-arm.c	2004-05-22 01:45:36.000000000 +0000
+@@ -11823,25 +11823,25 @@
+   {"arm9tdmi",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
+   /* For V5 or later processors we default to using VFP; but the user
+      should really set the FPU type explicitly.  */
+-  {"arm9e-r0",		ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
+-  {"arm9e",		ARM_ARCH_V5TE,   FPU_ARCH_VFP_V2},
+-  {"arm926ej",		ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
+-  {"arm946e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
+-  {"arm946e",		ARM_ARCH_V5TE,   FPU_ARCH_VFP_V2},
+-  {"arm966e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
+-  {"arm966e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
+-  {"arm10t",		ARM_ARCH_V5T,	 FPU_ARCH_VFP_V1},
+-  {"arm10e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
+-  {"arm1020",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
+-  {"arm1020t",		ARM_ARCH_V5T,	 FPU_ARCH_VFP_V1},
+-  {"arm1020e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
++  {"arm9e-r0",		ARM_ARCH_V5TExP, FPU_ARCH_FPA},
++  {"arm9e",		ARM_ARCH_V5TE,   FPU_ARCH_FPA},
++  {"arm926ej",		ARM_ARCH_V5TEJ,	 FPU_ARCH_FPA},
++  {"arm946e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_FPA},
++  {"arm946e",		ARM_ARCH_V5TE,   FPU_ARCH_FPA},
++  {"arm966e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_FPA},
++  {"arm966e",		ARM_ARCH_V5TE,	 FPU_ARCH_FPA},
++  {"arm10t",		ARM_ARCH_V5T,	 FPU_ARCH_FPA},
++  {"arm10e",		ARM_ARCH_V5TE,	 FPU_ARCH_FPA},
++  {"arm1020",		ARM_ARCH_V5TE,	 FPU_ARCH_FPA},
++  {"arm1020t",		ARM_ARCH_V5T,	 FPU_ARCH_FPA},
++  {"arm1020e",		ARM_ARCH_V5TE,	 FPU_ARCH_FPA},
+   /* ??? XSCALE is really an architecture.  */
+-  {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
++  {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_FPA},
+   /* ??? iwmmxt is not a processor.  */
+-  {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP_V2},
+-  {"i80200",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
++  {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_FPA},
++  {"i80200",		ARM_ARCH_XSCALE, FPU_ARCH_FPA},
+   /* Maverick */
+-  {"ep9312",		ARM_ARCH_V4T | ARM_CEXT_MAVERICK, FPU_NONE},
++  {"ep9312",		ARM_ARCH_V4T | ARM_CEXT_MAVERICK, FPU_ARCH_FPA},
+   {NULL, 0, 0}
+ };
+ 
+@@ -11867,13 +11867,13 @@
+   {"armv4xm",		ARM_ARCH_V4xM,	 FPU_ARCH_FPA},
+   {"armv4t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
+   {"armv4txm",		ARM_ARCH_V4TxM,	 FPU_ARCH_FPA},
+-  {"armv5",		ARM_ARCH_V5,	 FPU_ARCH_VFP},
+-  {"armv5t",		ARM_ARCH_V5T,	 FPU_ARCH_VFP},
+-  {"armv5txm",		ARM_ARCH_V5TxM,	 FPU_ARCH_VFP},
+-  {"armv5te",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP},
+-  {"armv5texp",		ARM_ARCH_V5TExP, FPU_ARCH_VFP},
+-  {"armv5tej",		ARM_ARCH_V5TEJ,  FPU_ARCH_VFP},
+-  {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP},
++  {"armv5",		ARM_ARCH_V5,	 FPU_ARCH_FPA},
++  {"armv5t",		ARM_ARCH_V5T,	 FPU_ARCH_FPA},
++  {"armv5txm",		ARM_ARCH_V5TxM,	 FPU_ARCH_FPA},
++  {"armv5te",		ARM_ARCH_V5TE,	 FPU_ARCH_FPA},
++  {"armv5texp",		ARM_ARCH_V5TExP, FPU_ARCH_FPA},
++  {"armv5tej",		ARM_ARCH_V5TEJ,  FPU_ARCH_FPA},
++  {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_FPA},
+   {NULL, 0, 0}
+ };
+ 

@@ -1,0 +1,8 @@
+--- mozilla/browser/app/Makefile.in~	2004-12-02 17:04:21.000000000 +0000
++++ mozilla/browser/app/Makefile.in	2004-12-02 17:04:35.000000000 +0000
+@@ -320,4 +320,4 @@
+ 	$(INSTALL) $^ $(DIST)/bin/defaults/profile
+ 
+ install:: $(srcdir)/profile/prefs.js
+-	$(SYSINSTALL) $(IFLAGS1) $^ $(destdir)$(bindir)/defaults/profile
++	$(SYSINSTALL) $(IFLAGS1) $^ $(DESTDIR)$(bindir)/defaults/profile

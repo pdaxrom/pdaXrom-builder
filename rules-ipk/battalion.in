@@ -1,0 +1,8 @@
+config BATTALION
+	bool
+	prompt "battalion"
+
+config BATTALION_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on BATTALION

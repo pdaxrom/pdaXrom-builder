@@ -1,0 +1,10 @@
+#/etc/ppp/options
+#
+idle 30
+-detach
+asyncmap 0
+crtscts
+local
+lock
+115200
+#connect-delay 6000

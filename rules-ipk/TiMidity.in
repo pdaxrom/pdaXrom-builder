@@ -1,0 +1,18 @@
+config TIMIDITY
+	bool
+	prompt "TiMidity"
+
+config TIMIDITY_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on TIMIDITY
+
+config TIMIDITY-PATCHES
+	bool
+	prompt "TiMidity voice patches"
+	depends on TIMIDITY
+
+config TIMIDITY-PATCHES_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on TIMIDITY && TIMIDITY-PATCHES

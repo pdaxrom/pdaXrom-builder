@@ -1,0 +1,23 @@
+--- httpd-2.0.52/docs/conf/httpd-std.conf.in~	2004-11-04 18:15:31.000000000 +0000
++++ httpd-2.0.52/docs/conf/httpd-std.conf.in	2004-11-04 18:17:17.000000000 +0000
+@@ -232,6 +232,11 @@
+ #
+ @@LoadModule@@
+ 
++#LoadModule php4_module modules/libphp4.so
++
++AddType application/x-httpd-php .php
++AddType application/x-httpd-php-source .phps
++
+ #
+ # ExtendedStatus controls whether Apache will generate "full" status
+ # information (ExtendedStatus On) or just basic information (ExtendedStatus
+@@ -392,7 +397,7 @@
+ # negotiated documents.  The MultiViews Option can be used for the 
+ # same purpose, but it is much slower.
+ #
+-DirectoryIndex index.html index.html.var
++DirectoryIndex index.html index.html.var index.php index.htm
+ 
+ #
+ # AccessFileName: The name of the file to look for in each directory

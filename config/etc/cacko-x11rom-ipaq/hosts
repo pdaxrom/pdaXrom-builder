@@ -1,0 +1,34 @@
+# /etc/hosts -  hostname_to_address mappings for the resolver library
+#
+# The format is:
+#
+# ipaddr fully_qualified_hostname list_of_nicknames
+#
+# We strongly recommend to use a fully qualified hostname for your machine
+# if it is connected to any type of network. You can add short nicknames as
+# you like, but the official canonical name is the name that follows the
+# IP address and should always be a fully qualified hostname.
+#
+# If you don't have any network interfaces, you should put your hostname
+# in the line of your loopback device, which has the address 127.0.0.1.
+#
+#
+# The loopback device. It should always be available.
+#
+127.0.0.1	localhost.localdomain localhost ipaq
+#
+# Your first IP interface (if you are connected to any kind of network)
+#
+
+#
+# Your second IP interface (normally for routers only)
+#
+
+
+#
+# If you have a nameserver we recommend to use it instead of putting many
+# hosts in this file. If you don't have a nameserver though, you can add
+# hostnames and their IP addresses below this line.
+#
+#===========================================================================
+

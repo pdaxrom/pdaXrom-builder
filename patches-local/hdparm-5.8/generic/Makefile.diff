@@ -1,0 +1,15 @@
+--- hdparm/Makefile.old	2004-08-24 21:45:06.000000000 +0000
++++ hdparm/Makefile	2005-01-07 12:40:22.000000000 +0000
+@@ -16,10 +16,10 @@
+ CFLAGS := -O2 -W -Wall -Wbad-function-cast -Wcast-align -Wpointer-arith -Wcast-qual -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -fkeep-inline-functions -Wwrite-strings -Waggregate-return -Wnested-externs -Wtrigraphs $(CFLAGS)
+ 
+ 
+-LDFLAGS = -s
++LDFLAGS = 
+ INSTALL = install
+ INSTALL_DATA = $(INSTALL) -m 644
+-INSTALL_PROGRAM = $(INSTALL)
++INSTALL_PROGRAM = $(INSTALL) -D
+ 
+ all: hdparm
+ 

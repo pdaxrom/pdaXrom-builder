@@ -1,0 +1,18 @@
+config PERL
+	bool
+	prompt "perl"
+
+config PERL_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PERL
+
+config XML-PARSER
+	bool
+	prompt "XML-Parser"
+	depends on PERL
+
+config XML-PARSER_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XML-PARSER

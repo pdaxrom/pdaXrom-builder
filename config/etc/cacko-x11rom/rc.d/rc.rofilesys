@@ -1,0 +1,94 @@
+#!/bin/bash
+
+#export PATH=$PATH:/usr/sbin.rom:/usr/bin.rom
+
+RW_MTD_LINE=`cat /proc/mtd | grep "home" | tail -n 1`
+if [ "$RW_MTD_LINE" = "" ]; then
+    RW_MTD_LINE=`cat /proc/mtd | grep "\<NAND\>.*\<2\>" | tail -n 1`
+fi
+if [ "$RW_MTD_LINE" = "" ]; then
+    RW_MTD=""
+    RW_MTDBLK=""
+    RW_MTD_SIZE=0
+else
+    RW_MTD_NO=`echo $RW_MTD_LINE | cut -d: -f1 | cut -dd -f2`
+    RW_MTD_SIZE_HEX=`echo $RW_MTD_LINE | cut -d" " -f2`
+
+    if [ -x /sbin/devfsd ]; then
+	RW_MTD=/dev/mtd/$RW_MTD_NO
+	RW_MTDBLK=/dev/mtdblock/$RW_MTD_NO
+    else
+	RW_MTD=/dev/mtd$RW_MTD_NO
+	RW_MTDBLK=/dev/mtdblock$RW_MTD_NO
+    fi
+
+    RW_MTD_SIZE=`dc 0x$RW_MTD_SIZE_HEX 1024 / p`
+    initlog -s $"found $RW_MTD ${RW_MTD_SIZE}\"Kbyte\""
+fi
+
+if [ "$ZAURUS_RESET" = "HARD" ]; then
+
+if [ ! -x /sbin/devfsd ]; then
+    mount -t tmpfs -o size=12m none /dev
+    cd /
+    tar xf /root/.dev_default.tar 2> /dev/null > /dev/null
+    mkdir /dev/shm
+else
+    mount -t tmpfs -o size=12m none /dev/shm
+fi
+
+STRING=$"Starting filesystem: "
+msg -n $STRING
+
+mount -o remount / 2> /dev/null > /dev/null
+
+if [ $RW_MTD_SIZE -ne 0 ]; then
+    /sbin/eraseall --j --q $RW_MTD 2> /dev/null > /dev/null
+    mount -t jffs2 -o rw,noatime $RW_MTDBLK /home 2> /dev/null > /dev/null
+    mkdir /home/root
+    cd /
+    tar --no-same-owner -xf /root/.home_default.tar 2> /dev/null > /dev/null
+fi
+
+mkdir /dev/shm/tmp
+mkdir /dev/shm/run
+chmod 4777 /var/tmp
+chmod 777 /tmp
+touch /var/run/utmp
+cd /
+tar --no-same-owner -xf /root/.var_default.tar 2> /dev/null > /dev/null
+
+rc=$?
+if [ "$rc" = "0" ]; then
+    success "$STRING"
+else
+    failure "$STRING"
+fi
+msg
+
+else
+### SW Reset !
+
+if [ ! -x /sbin/devfsd ]; then
+    mount -t tmpfs -o size=12m none /dev
+    cd /
+    tar xf /root/.dev_default.tar 2> /dev/null > /dev/null
+    mkdir /dev/shm
+else
+    mount -t tmpfs -o size=12m none /dev/shm
+fi
+
+mount -o remount / 2> /dev/null > /dev/null
+
+if [ $RW_MTD_SIZE -ne 0 ]; then
+    mount -t jffs2 -o rw,noatime $RW_MTDBLK /home 2> /dev/null > /dev/null
+fi
+
+mkdir /dev/shm/tmp
+mkdir /dev/shm/run
+chmod 4777 /var/tmp
+chmod 777 /tmp
+touch /var/run/utmp
+cd /
+
+fi

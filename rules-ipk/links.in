@@ -1,0 +1,13 @@
+config LINKS
+	bool
+	prompt "links"
+
+config LINKS_GUI
+	bool
+	prompt "GUI version"
+	depends on LINKS && XFREE430
+
+config LINKS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on LINKS

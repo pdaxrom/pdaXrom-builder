@@ -1,0 +1,26 @@
+--- qtopia/src/settings/qipkg/packagewizard.cpp~	2004-12-24 17:39:38.000000000 +0000
++++ qtopia/src/settings/qipkg/packagewizard.cpp	2004-12-24 17:40:03.000000000 +0000
+@@ -1088,12 +1088,12 @@
+ void PackageWizard::readSettings()
+ {
+     // read from config file(s)
+-    readIpkgConfig(QPEApplication::qpeDir()+"/etc/ipkg.conf");
++    readIpkgConfig("/etc/ipkg.conf");
+ }
+ 
+ void PackageWizard::writeSettings()
+ {
+-    QFile conf(QPEApplication::qpeDir()+"/etc/ipkg.conf");
++    QFile conf("/etc/ipkg.conf");
+     if ( conf.open(IO_WriteOnly) ) {
+ 	QTextStream s(&conf);
+ 	s << "# Written by Qtopia Package Manager\n"; // No tr
+@@ -1135,7 +1135,7 @@
+ 	}
+ 	conf.close();
+     } else {
+-	qWarning("Cannot write to $QPEDIR/etc/ipkg.conf");
++	qWarning("Cannot write to /etc/ipkg.conf");
+     }
+ }
+ 

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=X-CD-Roast
+Comment=GUI utlity for CD burn
+Exec=xcdroast
+Terminal=0
+Type=Application
+Icon=xcdricon.png
+Categories=Applications
+StartupNotify=True
+SingleInstance=False

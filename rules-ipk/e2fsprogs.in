@@ -1,0 +1,12 @@
+#menu	"e2fsprogs           "
+
+config E2FSPROGS
+	bool
+	prompt "e2fsprogs"
+
+config E2FSPROGS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on E2FSPROGS
+	
+#endmenu

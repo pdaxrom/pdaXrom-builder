@@ -1,0 +1,9 @@
+config BATTERY-STATUS
+	bool
+	prompt "Battery Status applet"
+	depends on ROX
+
+config BATTERY-STATUS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on BATTERY-STATUS

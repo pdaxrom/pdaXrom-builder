@@ -1,0 +1,24 @@
+diff -Nur licq-1.3.0-PRE/bin/viewurl-auto.sh licq-1.3.0-PRE.new/bin/viewurl-auto.sh
+--- licq-1.3.0-PRE/bin/viewurl-auto.sh	1970-01-01 00:00:00.000000000 +0000
++++ licq-1.3.0-PRE.new/bin/viewurl-auto.sh	2004-09-18 16:25:25.000000000 +0000
+@@ -0,0 +1,20 @@
++#!/bin/sh
++#
++# A shell script to view a url using lynx and xterm
++# 
++# Alexander Chukov <sash@pdaXrom.org>
++#
++
++for app in dillo firefox mozilla skipstone konqueror amaya; do
++  if [ -x "`which $app`" ]; then 
++    exec "$app" "$1"
++    exit 0
++  fi
++done
++
++for app in w3m lynx links vim vi; do
++  if [ -x "`which $app`" ]; then 
++    exec xterm -e "$app" "$1"
++    exit 0
++  fi
++done

@@ -1,0 +1,12 @@
+config OPENSSL
+	bool "OpenSSL support in various tools"
+
+config OPENSSL_SHARED
+	bool "build shared lib"
+	default y
+	depends on OPENSSL
+
+config OPENSSL_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on OPENSSL

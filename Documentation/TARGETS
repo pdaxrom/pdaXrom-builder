@@ -1,0 +1,14 @@
+cacko-<arch>-linux-<gcc-version>-<glibc-version>
+
+Supported next architectures, 
+OS pdaXrom linux:
+
+corgi	- Sharp Zaurus SL-C7x0/860
+collie	- Sharp Zaurus SL-5500/5000D
+x86 	- x86 PC computers
+rs	- RiscStation 7500FE
+lh79520	- LH79520 Sharp evolution board
+
+OS Kalliosti OS:
+
+dc	- Sega Dreamcast (SH-4)

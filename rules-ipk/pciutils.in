@@ -1,0 +1,9 @@
+config PCIUTILS
+	bool
+	prompt "pciutils"
+	depends on ARCH_X86
+
+config PCIUTILS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PCIUTILS

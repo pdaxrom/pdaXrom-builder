@@ -1,0 +1,57 @@
+--- samba/source/configure~	2004-02-13 19:57:33.000000000 +0000
++++ samba/source/configure	2004-04-27 14:59:46.000000000 +0000
+@@ -14365,7 +14365,9 @@
+        if test "$cross_compiling" = yes; then
+   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+ echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+-   { (exit 1); exit 1; }; }
++   { 
++   echo "default is $linux_getgrouplist_ok"
++    }; }
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+ #line $LINENO "configure"
+@@ -20399,23 +20401,27 @@
+ 	    fi
+ 	done
+ 
+-	if test "$default_dos_charset" != "no" -a \
+-		"$default_dos_charset" != "cross" -a \
+-		"$default_display_charset" != "no" -a \
+-		"$default_display_charset" != "cross" -a \
+-		"$default_unix_charset" != "no" -a \
+-		"$default_unix_charset" != "cross"
+-	then
++	#if test "$default_dos_charset" != "no" -a \
++	#	"$default_dos_charset" != "cross" -a \
++	#	"$default_display_charset" != "no" -a \
++	#	"$default_display_charset" != "cross" -a \
++	#	"$default_unix_charset" != "no" -a \
++	#	"$default_unix_charset" != "cross"
++	#then
++	#	samba_cv_HAVE_NATIVE_ICONV=yes
++	#else 
++	#if test "$default_dos_charset" = "cross" -o \
++	#	     "$default_display_charset" = "cross" -o \
++	#	     "$default_unix_charset" = "cross"
++	#then
+ 		samba_cv_HAVE_NATIVE_ICONV=yes
+-	else if test "$default_dos_charset" = "cross" -o \
+-		     "$default_display_charset" = "cross" -o \
+-		     "$default_unix_charset" = "cross"
+-	then
+-		samba_cv_HAVE_NATIVE_ICONV=cross
+-	else
+-		samba_cv_HAVE_NATIVE_ICONV=no
+-	fi
+-	fi
++		default_dos_charset="\"CP850\""
++		default_display_charset="\"ASCII\""
++		default_unix_charset="\"UTF-8\""
++	#else
++	#	samba_cv_HAVE_NATIVE_ICONV=no
++	#fi
++	#fi
+ 
+         LIBS="$ic_save_LIBS"
+         if test x"$samba_cv_HAVE_NATIVE_ICONV" = x"yes"; then

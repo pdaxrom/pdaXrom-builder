@@ -1,0 +1,76 @@
+#!/bin/sh
+
+putstring () {
+    echo "<$1>$2</$1>" 		>> "$OUTDIR/AppInfo.xml"
+}
+
+name=`cat $1 | grep '^Name='`
+cate=`cat $1 | grep '^Categories='`
+
+DESTCAT=
+case `echo $cate | cut -d = -f 2 -` in
+    *Office*)
+	DESTCAT=Office
+	;;
+    *SystemSettings*)
+	DESTCAT=Settings
+	;;
+    *AudioVideo*)
+	DESTCAT=Multimedia
+	;;
+    *Graphics*)
+	DESTCAT=Graphics
+	;;
+    *Network*)
+	DESTCAT=Internet
+	;;
+    *Games*)
+	DESTCAT=Games
+	;;
+    *Utility*)
+	DESTCAT=Utils
+	;;
+    *)
+	;;
+esac
+
+OUTDIR=$2/$DESTCAT/`echo $name | tr "/" "-" | cut -d = -f 2 -`
+
+if [ -d "$OUTDIR" ]; then
+    exit 0
+fi
+
+mkdir -p "$OUTDIR"
+
+echo "<?xml version=\"1.0\"?>"	 > "$OUTDIR/AppInfo.xml"
+echo "<AppInfo>"		>> "$OUTDIR/AppInfo.xml"
+putstring "Summary" "`echo $name | cut -d = -f 2 -`"
+echo "<About>"			>> "$OUTDIR/AppInfo.xml"
+name=`cat $1 | grep '^Comment='`
+putstring "Purpose" "`echo "$name" | cut -d = -f 2 -`"
+echo "</About>"			>> "$OUTDIR/AppInfo.xml"
+echo "</AppInfo>"		>> "$OUTDIR/AppInfo.xml"
+
+name=`cat $1 | grep '^Icon='`
+picname=`echo "$name" | cut -d = -f 2 -`
+if   [ -f $2/../share/pixmaps/$picname ]; then
+    ln -sf /usr/share/pixmaps/$picname 		"$OUTDIR/.DirIcon"
+elif [ -f $2/../local/share/pixmaps/$picname ]; then
+    ln -sf /usr/local/share/pixmaps/$picname 	"$OUTDIR/.DirIcon"
+elif [ -f $2/../share/icons/$picname ]; then
+    ln -sf /usr/local/share/icons/$picname 	"$OUTDIR/.DirIcon"
+elif [ -f $2/../share/icons/$picname ]; then
+    ln -sf /usr/local/share/icons/$picname 	"$OUTDIR/.DirIcon"
+elif [ -f $2/../../$picname/$picname ]; then
+    ln -sf $picname 				"$OUTDIR/.DirIcon"
+elif [ -f $2/../../$picname ]; then
+    ln -sf $picname 				"$OUTDIR/.DirIcon"
+else
+    ln -sf /usr/share/pixmaps/$picname 		"$OUTDIR/.DirIcon"
+fi
+
+echo "#!/bin/sh"						 > "$OUTDIR/AppRun"
+name=`cat $1 | grep '^Exec='`
+echo "exec `echo "$name" | cut -d = -f 2 -` \"\$@\""	>> "$OUTDIR/AppRun"
+
+chmod 755 "$OUTDIR/AppRun"

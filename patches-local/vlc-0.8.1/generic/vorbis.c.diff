@@ -1,0 +1,11 @@
+--- vlc/modules/codec/vorbis.c~	2004-11-26 01:21:38.000000000 +0000
++++ vlc/modules/codec/vorbis.c	2004-11-26 01:21:44.000000000 +0000
+@@ -29,7 +29,7 @@
+ #include <vlc/input.h>
+ #include <vlc/sout.h>
+ 
+-#include <ogg/ogg.h>
++//#include <ogg/ogg.h>
+ 
+ #ifdef MODULE_NAME_IS_tremor
+ #include <tremor/ivorbiscodec.h>

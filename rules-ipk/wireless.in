@@ -1,0 +1,12 @@
+#menu    "Wireless Tools      "
+
+config WIRELESS
+        bool
+        prompt "Wireless Tools"
+
+config WIRELESS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on WIRELESS
+
+#endmenu

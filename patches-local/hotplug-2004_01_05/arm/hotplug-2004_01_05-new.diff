@@ -1,0 +1,4337 @@
+diff -Nur hotplug-2004_01_05/etc/hotplug/blacklist hotplug-2004_01_05-new/etc/hotplug/blacklist
+--- hotplug-2004_01_05/etc/hotplug/blacklist	2003-03-28 00:25:02.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/blacklist	1970-01-01 00:00:00.000000000 +0000
+@@ -1,20 +0,0 @@
+-#
+-# Listing a module here prevents the hotplug scripts from loading it.
+-# Usually that'd be so that some other driver will bind it instead,
+-# no matter which driver happens to get probed first.  Sometimes user
+-# mode tools can also control driver binding.
+-#
+-# Syntax:  driver name alone (without any spaces) on a line. Other
+-# lines are ignored.
+-#
+-
+-# uhci ... usb-uhci handles the same pci class
+-usb-uhci
+-# usbcore ... module is loaded implicitly, ignore it otherwise
+-usbcore
+-
+-# tulip ... de4x5, xircom_tulip_cb, dmfe (...) handle same devices
+-de4x5
+-# At least 2.4.3 and later xircom_tulip doesn't have that conflict
+-# xircom_tulip_cb
+-dmfe
+diff -Nur hotplug-2004_01_05/etc/hotplug/dasd.agent hotplug-2004_01_05-new/etc/hotplug/dasd.agent
+--- hotplug-2004_01_05/etc/hotplug/dasd.agent	2002-08-08 10:05:17.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/dasd.agent	1970-01-01 00:00:00.000000000 +0000
+@@ -1,251 +0,0 @@
+-#!/bin/bash
+-#
+-# Dasd hotplug policy agent for Linux 2.4 kernels
+-#
+-# Copyright (c) 2002 SuSE Linux AG, Nuremberg
+-#
+-# the GNU Public License applies
+-#
+-# Author:  Susanne Oberhauser <froh@suse.de>, 2002
+-#
+-#
+-# Kernel DASD hotplug params include:
+-#
+-#   s390 device address
+-: ${DEVNO?Bad DASD invocation: \$DEVNO is not set}
+-
+-#   Linux major and minor
+-: ${MAJOR?Bad DASD invocation: \$MAJOR is not set}
+-: ${MINOR?Bad DASD invocation: \$MINOR is not set}
+-
+-#   Linux device name (dasda, ...)
+-: ${DASDNAME?Bad DASD invocation: \$DASDNAME is not set}
+-
+-#   Hotplug event type (add, remove, partchk or partremove)
+-: ${ACTION?Bad DASD invocation: \$ACTION is not set}
+-
+-#
+-# they are generated here: /usr/src/linux/drivers/s390/block/dasd.c
+-#
+-
+-#
+-# HISTORY:
+-#
+-# 2002-08-06 Susanne Oberhauser <froh@suse.de>
+-#            created script
+-
+-cd /etc/hotplug
+-. hotplug.functions
+-
+-test -d /dev/dasd -a -d /dev/labels || {
+-    debug_mesg "/etc/init.d/boot.dasd_devfs_compat is not started.
+-ignoring $ACTION  $DEVNO  $MAJOR $MINOR  $DASDNAME"
+-    exit 0
+-}
+-
+-mesg "$ACTION  $DEVNO  $MAJOR $MINOR  $DASDNAME"
+-
+-
+-test -r dasd.permissions && . dasd.permissions || {
+-    mesg DASD permission handling not found
+-    exit 1
+-}
+-
+-# to preserve the script from doing anything real, call it with
+-# CONDOM=echo
+-: ${CONDOM=}
+-# abort on error or unset variables:
+-set -o errexit
+-set -o nounset
+-
+-function die {
+-    mesg "$*"
+-    exit 1
+-}
+-
+-
+-function create_node #
+-# environment:
+-#  TYPE (char, block)
+-#  NODE (filename including any leading directories)
+-#  MAJOR, MINOR
+-#  OWNER (user.group or unset, which means)
+-#  PERMISSIONS (symbolic or unset, which means minimal settings)
+-#
+-# when this function exits sucessfully,
+-# $NODE exists as $TYPE-device with $MAJOR and $MINOR, belongs to
+-# $OWNER and has $PERMISSIONS.
+-
+-{
+-    debug_mesg "create_node  $PERMISSIONS $OWNER $MAJOR $MINOR $TYPE $NODE"
+-    case "$TYPE" in
+-	block|b) TYPE=b;;
+-	char|c)  TYPE=c;;
+-	*) die "create_node: wrong TYPE given"
+-    esac
+-
+-
+-    # Don't remove the node, if it has the correct major/minor
+-
+-    if test -e "$NODE"
+-    then
+-
+-	# if the file exists, check that it is a $TYPE device with the
+-	# correct major and minor
+-
+-	if test -$TYPE "$NODE"
+-	then
+-	    ls -l $NODE | {
+-
+-		read existing_mode existing_nlink \
+-		    existing_user existing_group \
+-		    existing_major existing_minor \
+-		    dummy
+-
+-		if test "$existing_major" != "$MAJOR," -o "$existing_minor" != "$MINOR"
+-		then
+-		    # create a new node using the existing
+-		    # permissions, ownership and timestamp
+-		    $CONDOM rm -f $NODE
+-		    $CONDOM mknod --mode="a="  $NODE $TYPE $MAJOR $MINOR
+-		fi
+-	    }
+-	else
+-            # create a new node using the existing
+-            # permissions, ownership and timestamp
+-	    $CONDOM rm -f $NODE
+-	    $CONDOM mknod --mode="a="  $NODE $TYPE $MAJOR $MINOR
+-	fi
+-    else
+-	# TODO?: this does not support missing directories, yet:
+-	# if the node does not exist yet, create it
+-	$CONDOM mknod --mode="a="  $NODE $TYPE $MAJOR $MINOR
+-    fi
+-
+-    # always set ownership and permissions
+-    $CONDOM chown $OWNER       $NODE
+-    $CONDOM chmod $PERMISSIONS $NODE
+-}
+-
+-
+-function create_symlink
+-# uses these from the environment:
+-# LINK
+-# TARGET
+-# OWNER (user.group) of the link.  Directory components belong to root.root
+-# CONDOM
+-{
+-    debug_mesg "create_symlink $OWNER  $LINK -> $TARGET"
+-    # first create the directory if necessary:
+-    local link_dir=$(dirname "$LINK")
+-    test -d "$link_dir" || {
+-	test -e "$link_dir" && die "$link_dir exists but is not a directory:
+-$(ls -l $link_dir)"
+-    } || {
+-	$CONDOM install --directory --owner=root --group=root "$link_dir"
+-    }
+-    test -e "$LINK" && rm -rf "$LINK"
+-    $CONDOM ln -snf "$TARGET" "$LINK"
+-    $CONDOM chown   "$OWNER"  "$LINK"
+-}
+-
+-case $ACTION in
+-    add)
+-	export NODE=/dev/$DASDNAME
+-	export TYPE=block
+-	# get $OWNER and $PERMISSIONS
+-	MISC=$DEVNO \
+-	    dasd_permissions
+-	create_node
+-	LINK=/dev/dasd/$DEVNO/device TARGET=$NODE \
+-	    create_symlink
+-	LINK=/dev/dasd/$DEVNO/disk TARGET=$NODE \
+-	    create_symlink
+-	;;
+-
+-    remove)
+-	$CONDOM rm -f /dev/$DASDNAME*
+-	VOLSER=$(ls -l /dev/dasd/$DEVNO/VOLSER | sed -e 's,.*-> ,,')
+-	$CONDOM rm -rf /dev/dasd/$DEVNO
+-	test "${VOLSER}" != "" && $CONDOM rm -f "$VOLSER"
+-	;;
+-
+-    partchk)
+-	export NODE=/dev/$DASDNAME
+-	export VOLSER=$(dasdview -j -f $NODE | sed -e 's,[[:space:]]\+$,,')
+-	CHECKED_VOLSER=$(
+-	    echo "$VOLSER" |
+-	    sed -e '
+-		# spaces, slashes, asterisks and questionmarks are no good for filenames
+-		s/[ /*?]/  space, slash, asterisk or questionmark /g
+-		# nor are nonprinting characters
+-		s/[^[:print:]]/ nonprinting characters /g
+-		# "." and ".." are evil as well
+-		s/^\.$/ dot /
+-		s/^\.\.$/ dot dot /
+-		'
+-	    )
+-
+-	if test "$VOLSER" != "$CHECKED_VOLSER"
+-        then
+-		mesg "VOLSER label of $NODE is no legal filename: <$VOLSER> ->  <$CHECKED_VOLSER> ignoring it."
+-		VOLSER=""
+-	fi
+-		
+-
+-	# If the volser label has changed, this is also notified as a
+-	# 'partchk' action.  remove the old volser if present and
+-	# different from the new one.
+-
+-	# The VOLSER symlink in the DEVNO directory points to the
+-	# VOLSER file for deletion of the VOLSER label after device
+-	# removal (the device is no longer available then to query the
+-	# VOLSER from there).
+-
+-	test -e /dev/dasd/$DEVNO/VOLSER && {
+-	    OLD_VOLSER="$(ls -l /dev/dasd/$DEVNO/VOLSER | sed -e 's,.*-> ,,')"
+-	    test "$OLD_VOLSER" = "/dev/labels/$VOLSER" || {
+-		$CONDOM rm -f "$OLD_VOLSER"
+-	    }
+-	}
+-
+-	# Get ownership and permissions for the nodes and ownership
+-	# for the symlinks:
+-
+-	MISC=$VOLSER-$DEVNO \
+-	    dasd_permissions
+-	# add the volser symlink if no other dasd uses that volser yet.
+-	test "$VOLSER" != "" -a ! -e /dev/labels/"$VOLSER" && {
+-	    LINK=/dev/labels/"$VOLSER" TARGET=../dasd/$DEVNO \
+-		create_symlink
+-
+-	    TARGET=/dev/labels/"$VOLSER" LINK=/dev/dasd/$DEVNO/VOLSER \
+-		create_symlink
+-	}
+-
+-	# TODO: for the time being, we ignore /proc/partitions and
+-	# create all candidate partitions
+-	export TYPE=block
+-	for partition in 1 2 3
+-	  do
+-
+-	  NODE=/dev/$DASDNAME$partition
+-
+-	  # get ownership and permissions for the partition
+-	  MISC="$VOLSER"-$DEVNO-$partition dasd_permissions
+-
+-	  MINOR=$((MINOR + partition)) create_node
+-
+-	  LINK=/dev/dasd/$DEVNO/part$partition TARGET=$NODE \
+-	      create_symlink
+-	done
+-	;;
+-
+-    partremove)
+-	$CONDOM rm -f /dev/$DASDNAME[123]
+-	$CONDOM rm -rf /dev/dasd/$DEVNO/part*
+-	;;
+-    *)
+-	mesg DASD $ACTION event not supported
+-	exit 1 ;;
+-esac
+diff -Nur hotplug-2004_01_05/etc/hotplug/dasd.permissions hotplug-2004_01_05-new/etc/hotplug/dasd.permissions
+--- hotplug-2004_01_05/etc/hotplug/dasd.permissions	2002-08-08 09:53:23.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/dasd.permissions	1970-01-01 00:00:00.000000000 +0000
+@@ -1,30 +0,0 @@
+-#!/bin/bash
+-#
+-# Copyright (c) 2002 SuSE Linux AG, Nuremberg
+-#
+-# Author:  Susanne Oberhauser <froh@suse.de>, 2002
+-#
+-# the GNU Public License applies
+-#
+-
+-# modify this function at your heart's:
+-function dasd_permissions
+-{
+-
+-    case "$NODE-$MAJOR-$MINOR-$MISC" in
+-	# add your special ownership handling here, e.g.
+-	#
+-	# this feature is experimental, which means it's neither
+-	# supported nor maintained: you're on your own.
+-	#
+-	# /dev/dasd*-*-*-*-ORA*) OWNER=ora.ora; PERMISSIONS="ug=rw,o=";;
+-	#
+-	/dev/dasd*-*)
+-	    # default:
+-	    OWNER=root.disk
+-	    PERMISSIONS="ug=rw,o="
+-	    ;;
+-	*)
+-	    die "dasd_permissions: don't know what permissions to give $NODE-$MAJOR-$MINOR-$MISC"
+-    esac
+-}
+\ В конце файла нет новой строки
+diff -Nur hotplug-2004_01_05/etc/hotplug/firmware.agent hotplug-2004_01_05-new/etc/hotplug/firmware.agent
+--- hotplug-2004_01_05/etc/hotplug/firmware.agent	2003-10-07 19:34:19.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/firmware.agent	1970-01-01 00:00:00.000000000 +0000
+@@ -1,61 +0,0 @@
+-#!/bin/sh
+-#
+-# Firmware-specific hotplug policy agent.
+-#
+-# Kernel firmware hotplug params include:
+-#
+-#       ACTION=%s [add or remove]
+-#       DEVPATH=%s [in 2.5 kernels, /sys/$DEVPATH]
+-#       FIRMWARE=%s
+-#
+-# HISTORY:
+-#
+-# 24-Jul-2003   Initial version of "new" hotplug agent.
+-#
+-# $Id: firmware.agent,v 1.1 2003/10/07 19:34:19 kroah Exp $
+-#
+-
+-cd /etc/hotplug
+-. hotplug.functions
+-# DEBUG=yes export DEBUG
+-
+-# directory of the firmware files
+-FIRMWARE_DIR=/usr/lib/hotplug/firmware
+-
+-# mountpoint of sysfs
+-SYSFS=$(sed -n 's/^.* \([^ ]*\) sysfs .*$/\1/p' /proc/mounts)
+-
+-# use /proc for 2.4 kernels
+-if [ "$SYSFS" = "" ]; then
+-    SYSFS=/proc
+-fi
+-
+-#
+-# What to do with this firmware hotplug event?
+-#
+-case "$ACTION" in
+-
+-add)
+-    if [ ! -e $SYSFS/$DEVPATH/loading ]; then
+-        sleep 1
+-    fi
+-
+-    if [ -f $FIRMWARE_DIR/$FIRMWARE ]; then
+-        echo 1 > $SYSFS/$DEVPATH/loading
+-        cp $FIRMWARE_DIR/$FIRMWARE $SYSFS/$DEVPATH/data
+-        echo 0 > $SYSFS/$DEVPATH/loading
+-    else
+-        echo -1 > $SYSFS/$DEVPATH/loading
+-    fi
+-
+-    ;;
+-
+-remove)
+-    ;;
+-
+-*)
+-    mesg "Firmware '$ACTION' event not supported"
+-    exit 1
+-    ;;
+-
+-esac
+diff -Nur hotplug-2004_01_05/etc/hotplug/hotplug.functions hotplug-2004_01_05-new/etc/hotplug/hotplug.functions
+--- hotplug-2004_01_05/etc/hotplug/hotplug.functions	2003-10-07 21:15:38.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/hotplug.functions	2004-10-03 13:28:44.000000000 +0000
+@@ -1,204 +1,14 @@
++#!/bin/sh
+ #
+-# Setup and BASH utility functions for use in hotplug agents
+-#
+-# Most essential parameters are passed from the kernel using
+-# environment variables.  For more information, see the docs
+-# on-line at http://linux-hotplug.sourceforge.net or the
+-# sources for each hotplug-aware kernel subsystem.
+-#
+-# $Id: hotplug.functions,v 1.22 2003/10/07 21:15:38 kroah Exp $
++# Setup and utility functions for use in hotplug agents
+ #
++# Trimmed drastically for testing, start over with originals for production.
+ #
+ 
+-# DEBUG=yes; export DEBUG
++#DEBUG=yes export DEBUG
++#PATH=/var/bin:/bin:/sbin:/usr/sbin:/usr/bin
+ PATH=/bin:/sbin:/usr/sbin:/usr/bin
+ 
+-KERNEL=`uname -r`
+-MODULE_DIR=/lib/modules/$KERNEL
+-
+-HOTPLUG_DIR=/etc/hotplug
+-
+-if [ -f /etc/sysconfig/hotplug ]; then
+-    . /etc/sysconfig/hotplug
+-fi
+-
+-if [ -x /usr/bin/logger ]; then
+-    LOGGER=/usr/bin/logger
+-elif [ -x /bin/logger ]; then
+-    LOGGER=/bin/logger
+-else
+-    unset LOGGER
+-fi
+-#
+-# for diagnostics
+-#
+-if [ -t -o -z "$LOGGER" ]; then
+-    mesg () {
+-	echo "$@"
+-    }
+-else
+-    mesg () {
+-	$LOGGER -t $(basename $0)"[$$]" "$@"
+-    }
+-fi
+-
+-debug_mesg () {
+-    test "$DEBUG" = "" -o "$DEBUG" = no && return
+-    mesg "$@"
++mesg () {
++    /usr/bin/logger -t $0 "$@"
+ }
+-
+-#
+-# The modules.*map parsing uses BASH ("declare -i") and some version
+-# of AWK, typically /bin/gawk.  Most GNU/Linux distros have these,
+-# but some specialized ones (floppy based, etc) may not.  ("type -p"
+-# is also a bash-ism, more robust than "which".)
+-#
+-AWK=`type -p gawk`
+-if [ "$AWK" = "" ]; then
+-    AWK=`type -p awk`
+-fi
+-
+-
+-#
+-# Not "modprobe --autoclean" ... one driver module can handle many
+-# devices.  Unloading should be done when no devices are present.
+-# Autocleaning happens if none of the devices are open, once any of
+-# them gets opened; wrong timing.
+-#
+-MODPROBE="/sbin/modprobe -s"
+-#MODPROBE="/sbin/modprobe -vs"
+-
+-
+-####################################################################
+-#
+-# usage: load_driver type filename description
+-#
+-# modprobes driver module(s) if appropriate, and optionally
+-# invokes a driver-specific setup script (or user-mode driver).
+-#
+-# the "modules.*map" format file is guaranteed to exist
+-#
+-load_drivers ()
+-{
+-    local LOADED TYPE FILENAME DESCRIPTION LISTER
+-    DRIVERS=""
+-
+-    # make this routine more readable
+-    TYPE=$1
+-    FILENAME=$2
+-    DESCRIPTION=$3
+-
+-    # should we use usbmodules, pcimodules?  not on 2.5+, because sysfs
+-    # ought to expose the data we need to find all candidate drivers.
+-    # (on 2.5.48 it does for usb; but maybe not yet for pci.)
+-    case "$KERNEL" in
+-    2.2*|2.3*|2.4*)	LISTER=`type -p ${TYPE}modules` ;;
+-    *)			LISTER="" ;;
+-    esac
+-
+-    if [ "$LISTER" != "" ]; then
+-	# lister programs MIGHT be preferable to parsing from shell scripts:
+-	# - usbmodules used for (a) multi-interface devices, (b) coldplug
+-	# - pcimodules used only for coldplug
+-	case $TYPE in
+-	usb)
+-	    # "usbutils-0.8" (or later) is needed in $PATH
+-	    # only works if we have usbfs
+-	    # ... reads more descriptors than are passed in env
+-	    # ... doesn't handle comment syntax either
+-	    if [ "$DEVICE" = "" -o ! -f "$DEVICE" ]; then
+-		LISTER=
+-	    else
+-		DRIVERS=`$LISTER --mapfile $FILENAME --device $DEVICE`
+-	    fi ;;
+-
+-	pci)
+-	    debug_mesg "pcimodules is scanning more than $PCI_SLOT ..."
+-	    DRIVERS=`$LISTER`
+-	    ;;
+-	esac
+-    fi
+-
+-    # try parsing by shell scripts if no luck yet
+-    if [ "$DRIVERS" = "" ]; then
+-	${TYPE}_map_modules < $FILENAME
+-    fi
+-
+-    # FIXME remove dups and blacklisted modules from $DRIVERS here
+-
+-    if [ "$DRIVERS" = "" ]; then
+-	return
+-    fi
+-
+-    # Note that DRIVERS aren't all going to be modules.
+-    # For USB, some user-mode drivers or setup scripts may be listed.
+-    debug_mesg Setup $DRIVERS for $DESCRIPTION
+-
+-    # either kernel or user mode drivers may need to be set up
+-    for MODULE in $DRIVERS
+-    do
+-	# maybe driver modules need loading
+-        LOADED=false
+-	if ! lsmod | grep -q "^$MODULE " > /dev/null 2>&1; then
+-	    if grep -q "^$MODULE\$" $HOTPLUG_DIR/blacklist \
+-		    >/dev/null 2>&1; then
+-		debug_mesg "... blacklisted module:  $MODULE"
+-		continue
+-	    fi
+-
+-	    # statically linked modules aren't shown by 'lsmod',
+-	    # and user mode drivers will ONLY have a setup script;
+-	    # it's not an error if a module doesn't exist or won't load.
+-	    if $MODPROBE -n $MODULE >/dev/null 2>&1 &&
+-		    ! $MODPROBE $MODULE >/dev/null 2>&1 ; then
+-		mesg "... can't load module $MODULE"
+-	    else
+-		# /etc/modules.conf may have set non-default module
+-		# parameters ... handle per-device parameters in apps
+-		# (ioctls etc) not in setup scripts or modules.conf
+-		LOADED=true
+-	    fi
+-	else
+-	    # This module is already loaded
+-	    LOADED=true
+-	fi
+-
+-	# always run setup scripts after any matching kernel code has had
+-	# a chance to do its thing, no matter whether it was dynamically
+-	# or statically linked, or if there is only a user mode driver.
+-	# the script might re-enumerate usb devices after firmware download,
+-	# giving kernel code another chance.
+-	if [ -x $HOTPLUG_DIR/$TYPE/$MODULE ]; then
+-	    debug_mesg Module setup $MODULE for $DESCRIPTION
+-	    $HOTPLUG_DIR/$TYPE/$MODULE
+-	    LOADED=true
+-	fi
+-
+-	if [ $LOADED = false ]; then
+-	    mesg "missing kernel or user mode driver $MODULE "
+-	fi
+-	if echo "$MODULE" | grep -q "usb-storage" > /dev/null 2>&1 ; then
+-	    [ -x /usr/sbin/updfstab ] &&  /usr/sbin/updfstab
+-	fi
+-    done
+-}
+-
+-####################################################################
+-#
+-# usage: log_to_stdout filename
+-#
+-# writes a copy of the current hotplug event to stdout.
+-# add buffering, to avoid interleaving reports!
+-#
+-log_to_stdout ()
+-{
+-    if [ -x /bin/date ]; then
+-	echo "HOTPLUG_TIME='$(/bin/date)'"
+-    fi
+-
+-    env | egrep -v '^PATH=|^PWD=|^_=|^OLDPWD=|^SHLVL=|^HOME='
+-    echo ''
+-    # empty line terminates events
+-}
+-
+-# vim:syntax=sh
+diff -Nur hotplug-2004_01_05/etc/hotplug/ieee1394.agent hotplug-2004_01_05-new/etc/hotplug/ieee1394.agent
+--- hotplug-2004_01_05/etc/hotplug/ieee1394.agent	2003-09-16 19:42:17.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/ieee1394.agent	1970-01-01 00:00:00.000000000 +0000
+@@ -1,122 +0,0 @@
+-#!/bin/bash
+-#
+-# IEEE1394-specific hotplug policy agent.
+-#
+-# This should handle 2.4.10 (or later) IEEE1394 hotplugging, with a
+-# consistent framework for adding device and driver specific treatments.
+-#
+-# Kernel IEEE1394 params are:
+-#	
+-#	ACTION=add or remove
+-#	VENDOR_ID=24 bit vendor id
+-#	GUID=64 bit globally unique id
+-#	SPEFICIER_ID=24 bit id of owner of specification
+-#	VERSION=version of specification
+-#
+-# See IEEE1212 for details on these parameters.
+-#
+-# HISTORY:
+-#	26-Mar-2002	Small cleanups to match other .agent files. (gkh)
+-#	16-Sept-2001	Initial version from Kristian Hogsberg
+-#			<hogsberg@users.sourceforge.net> (plus tweaks)
+-#
+-# $Id: ieee1394.agent,v 1.10 2003/09/16 19:42:17 kroah Exp $
+-#
+-
+-cd /etc/hotplug
+-. hotplug.functions
+-# DEBUG=yes export DEBUG
+-
+-# generated by modutils 2.4.9 or later, for 2.4.10 and later kernels
+-MAP_CURRENT=$MODULE_DIR/modules.ieee1394map
+-
+-# accumulates list of modules we may care about
+-DRIVERS=
+-
+-if [ "$ACTION" = "" ]; then
+-    mesg Bad IEEE1394 agent invocation
+-    exit 1
+-fi
+-
+-
+-declare -i device_vendor_id device_specifier_id device_version
+-device_vendor_id="0x$VENDOR_ID"
+-device_specifier_id="0x$SPECIFIER_ID"
+-device_version="0x$VERSION"
+-
+-declare -i MATCH_VENDOR_ID MATCH_SPECIFIER_ID MATCH_VERSION
+-MATCH_VENDOR_ID=0x0001
+-MATCH_SPECIFIER_ID=0x0004
+-MATCH_VERSION=0x0008
+-
+-#
+-# stdin is "modules.ieee1394map" syntax
+-# on return, all matching modules were added to $DRIVERS
+-#
+-ieee1394_map_modules ()
+-{
+-    local module ignored
+-    declare -i match_flags vendor_id model_id
+-    declare -i specifier_id version
+-
+-    # comment line lists (current) pci_device_id field names
+-    read ignored
+-
+-    while read module match_flags vendor_id model_id specifier_id version
+-    do
+-	: check match for $module
+-
+-	: vendor_id $vendor_id $device_vendor_id
+-	if [ $(($match_flags & $MATCH_VENDOR_ID)) -ne 0 -a $vendor_id -ne $device_vendor_id ]; then
+-	    continue
+-	fi
+-
+-	: specifier_id $specifier_id $device_specifier_id
+-	if [ $(($match_flags & $MATCH_SPECIFIER_ID)) -ne 0 -a $specifier_id -ne $device_specifier_id ]; then
+-	    continue
+-	fi
+-
+-	: version $version $device_version
+-	if [ $(($match_flags & $MATCH_VERSION)) -ne 0 -a $version != $device_version ]; then
+-	    continue
+-	fi
+-
+-        DRIVERS="$module $DRIVERS"
+-    done
+-}
+-
+-#
+-# What to do with this IEEE1394 hotplug event?
+-#
+-case "$ACTION" in
+-
+-add)
+-    LABEL="IEEE1394 product 0x$VENDOR_ID/0x$SPECIFIER_ID/0x$VERSION"
+-
+-    # on 2.4 systems, modutils maintains MAP_CURRENT
+-    if [ -r $MAP_CURRENT ]; then
+-    	load_drivers ieee1394 $MAP_CURRENT "$LABEL"
+-    fi
+-
+-    if [ "$DRIVERS" == "" ]; then
+-	mesg "... no drivers for $LABEL"
+-	exit 2
+-    fi
+-    ;;
+-
+-remove)
+-    ieee1394_map_modules < $MAP_CURRENT
+-    for MODULE in $DRIVERS
+-    do
+-	if [ -x $HOTPLUG_DIR/ieee1394/$MODULE ]; then
+-            $HOTPLUG_DIR/ieee1394/$MODULE
+-	fi
+-    done
+-    ;;
+-
+-*)
+-    debug_mesg "IEEE1394 '$ACTION' event not supported"
+-    exit 1
+-    ;;
+-
+-esac
+diff -Nur hotplug-2004_01_05/etc/hotplug/input.agent hotplug-2004_01_05-new/etc/hotplug/input.agent
+--- hotplug-2004_01_05/etc/hotplug/input.agent	2003-10-13 23:46:58.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/input.agent	1970-01-01 00:00:00.000000000 +0000
+@@ -1,316 +0,0 @@
+-#!/bin/bash
+-#
+-# input-specific hotplug policy agent.
+-#
+-# This should handle 2.6.* input hotplugging,
+-# with a consistent framework for adding device and driver
+-# specific handling.
+-#
+-# Normally, adding a input device will modprobe handler(s) for
+-# this device.
+-#
+-# Kernel input hotplug params include (not all of them may be available):
+-#	
+-#	ACTION=%s [add or remove]
+-#	PRODUCT=%x/%x/%x/%x
+-#	NAME=%s
+-#	PHYS=%s
+-#	EV=%lx
+-#	KEY=%lx %lx ...
+-#	REL=%lx
+-#	ABS=%lx %lx ...
+-#	MSC=%lx
+-#	LED=%lx
+-#	SND=%lx
+-#	FF=%lx %lx ...
+-#
+-# HISTORY:
+-#
+-# 30-Jul-2003	initial version
+-#
+-
+-cd /etc/hotplug
+-. hotplug.functions
+-# DEBUG=yes export DEBUG
+-
+-# generated by module-init-tools
+-MAP_CURRENT=$MODULE_DIR/modules.inputmap
+-
+-# accumulates list of modules we may care about
+-DRIVERS=""
+-
+-if [ "$ACTION" = "" ]; then
+-    mesg Bad INPUT agent invocation, no action
+-    exit 1
+-fi
+-
+-# we can't "unset IFS" on bash1, so save a copy
+-DEFAULT_IFS="$IFS"
+-
+-#
+-# Each modules.inputmap format line corresponds to one entry in a
+-# MODULE_DEVICE_TABLE(input,...) declaration in a kernel file.
+-#
+-declare -i matchBits=0
+-declare -i i_bustype=0 i_vendor=0 i_product=0 i_version=0
+-declare -i i_evBits=0
+-declare i_keyBits i_relBits i_absBits i_mscBits i_ledBits i_sndBits i_ffBits
+-
+-input_join_words ()
+-{
+-    declare name=$1 array=$2 tmp
+-    if [ "$array" = '' ]; then
+-	return
+-    fi
+-
+-    set $array
+-
+-    tmp=$1
+-    shift
+-    while [ "$#" -gt 0 ]; do
+-	tmp="$tmp:$1"
+-	shift
+-    done
+-
+-    eval "$name=\"$tmp\""
+-}
+-
+-input_convert_vars ()
+-{
+-    if [ "$PRODUCT" != "" ]; then
+-	IFS=/
+-	set $PRODUCT ''
+-	IFS="$DEFAULT_IFS"
+-	i_bustype=0x$1
+-	i_vendor=0x$2
+-	i_product=0x$3
+-	i_version=0x$4
+-    fi
+-
+-    if [ "$EV" != "" ]; then
+-	i_evBits=0x$EV
+-    fi
+-
+-    input_join_words i_keyBits "$KEY"
+-    input_join_words i_relBits "$REL"
+-    input_join_words i_absBits "$ABS"
+-    input_join_words i_mscBits "$MSC"
+-    input_join_words i_ledBits "$LED"
+-    input_join_words i_sndBits "$SND"
+-    input_join_words i_ffBits  "$FF"
+-}
+-
+-declare -i INPUT_DEVICE_ID_MATCH_BUS=1
+-declare -i INPUT_DEVICE_ID_MATCH_VENDOR=2
+-declare -i INPUT_DEVICE_ID_MATCH_PRODUCT=4
+-declare -i INPUT_DEVICE_ID_MATCH_VERSION=8
+-declare -i INPUT_DEVICE_ID_MATCH_EVBIT=0x010
+-declare -i INPUT_DEVICE_ID_MATCH_KEYBIT=0x020
+-declare -i INPUT_DEVICE_ID_MATCH_RELBIT=0x040
+-declare -i INPUT_DEVICE_ID_MATCH_ABSBIT=0x080
+-declare -i INPUT_DEVICE_ID_MATCH_MSCBIT=0x100
+-declare -i INPUT_DEVICE_ID_MATCH_LEDBIT=0x200
+-declare -i INPUT_DEVICE_ID_MATCH_SNDBIT=0x400
+-declare -i INPUT_DEVICE_ID_MATCH_FFBIT=0x800
+-
+-
+-input_match_bits ()
+-{
+-    declare mod_bits=$1 dev_bits=$2
+-    declare -i mword dword
+-
+-    mword=0x${mod_bits##*:}
+-    dword=0x${dev_bits##*:}
+-
+-    while true; do
+-	if [ $(( $mword & $dword != $mword )) -eq 1 ]; then
+-	    return 1
+-	fi
+-
+-	mod_bits=${mod_bits%:*}
+-	dev_bits=${dev_bits%:*}
+-
+-	case "$mod_bits-$dev_bits" in
+-	    *:*-*:* )
+-		: continue
+-	    ;;
+-	    *:*-*|*-*:* )
+-		return 0
+-	    ;;
+-	    * )
+-		return 1
+-	    ;;
+-	esac
+-    done
+-}
+-
+-#
+-# stdin is "modules.inputmap" syntax
+-# on return, all matching modules were added to $DRIVERS
+-#
+-input_map_modules ()
+-{
+-    local line module
+-    declare -i matchBits
+-    declare -i bustype vendor product version
+-    declare -i evBits driverInfo 
+-    declare relBits mscBits ledBits sndBitskeyBits absBits ffBits
+-
+-    while read line
+-    do
+-        # comments are lines that start with "#" ...
+-	# be careful, they still get parsed by bash!
+-	case "$line" in
+-	\#*) continue ;;
+-	esac
+-
+-	set $line
+-
+-	module="$1"
+-	matchBits="$2"
+-
+-	bustype="$3"
+-	vendor="$4"
+-	product="$5"
+-	product="$6"
+-
+-	evBits="$7"
+-	keyBits="$8"
+-	relBits="$9"
+-
+-	shift 9
+-	absBits="$1"
+-	cbsBits="$2"
+-	ledBits="$3"
+-	sndBits="$4"
+-	ffBits="$5"
+-	driverInfo="$6"
+-
+-	: checkmatch $module
+-
+-	: bustype $bustype $i_bustype
+-        if [ $INPUT_DEVICE_ID_MATCH_BUS -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_BUS )) ] && 
+-	   [ $bustype -ne $i_bustype ]; then
+-	    continue
+-	fi
+-
+-	: vendor $vendor $i_vendor
+-        if [ $INPUT_DEVICE_ID_MATCH_VENDOR -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_VENDOR )) ] && 
+-	   [ $vendor -ne $i_vendor ]; then
+-	    continue
+-	fi
+-
+-	: product $product $i_product
+-        if [ $INPUT_DEVICE_ID_MATCH_PRODUCT -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_PRODUCT )) ] && 
+-	   [ $product -ne $i_product ]; then
+-	    continue
+-	fi
+-
+-	# version i_version $i_version < version $version
+-        if [ $INPUT_DEVICE_ID_MATCH_VERSION -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_VERSION )) ] && 
+-	   [ $version -ge $i_version ]; then
+-	    continue
+-	fi
+-
+-	: evBits $evBits $i_evBits
+-        if [ $INPUT_DEVICE_ID_MATCH_EVBIT -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_EVBIT )) ] && 
+-	   [ $evBits -ne $(( $evBits & $i_evBits)) ]; then
+-	    continue
+-	fi
+-	: keyBits $keyBits $i_keyBits
+-        if [ $INPUT_DEVICE_ID_MATCH_KEYBIT -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_KEYBIT )) ] && 
+-	   input_match_bits "$keyBits" "$i_keyBits"; then
+-	    continue
+-	fi
+-	: relBits $relBits $i_relBits
+-        if [ $INPUT_DEVICE_ID_MATCH_RELBIT -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_RELBIT )) ] && 
+-	   [ $relBits -ne $(( $relBits & $i_relBits)) ]; then
+-	    continue
+-	fi
+-
+-	: absBits $absBits $i_absBits
+-        if [ $INPUT_DEVICE_ID_MATCH_ABSBIT -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_ABSBIT )) ] && 
+-	   input_match_bits "$absBits" "$i_absBits"; then
+-	    continue
+-	fi
+-
+-	: mscBits $mscBits $i_mscBits
+-        if [ $INPUT_DEVICE_ID_MATCH_MSCBIT -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_MSCBIT )) ] && 
+-	   [ $mscBits -ne $(( $mscBits & $i_mscBits)) ]; then
+-	    continue
+-	fi
+-
+-	: ledBits $ledBits $_ledBits
+-        if [ $INPUT_DEVICE_ID_MATCH_LEDBIT -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_LEDBIT )) ] && 
+-	   input_match_bits "$ledBits" "$i_ledBits"; then
+-	    continue
+-	fi
+-
+-	: sndBits $sndBits $i_sndBits
+-        if [ $INPUT_DEVICE_ID_MATCH_SNDBIT -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_SNDBIT )) ] && 
+-	   [ $sndBits -ne $(( $sndBits & $i_sndBits)) ]; then
+-	    continue
+-	fi
+-
+-	: ffBits $ffBits $i_ffBits
+-        if [ $INPUT_DEVICE_ID_MATCH_FFBIT -eq $(( $matchBits & $INPUT_DEVICE_ID_MATCH_FFBIT )) ] && 
+-	   input_match_bits "$ffBits" "$i_ffBits"; then
+-	    continue
+-	fi
+-
+-	: driverInfo $driverInfo
+-	if [ $matchBits -eq 0 -a $driverInfo -eq 0 ]; then
+-		continue
+-	fi
+-
+-	# It was a match!
+-	case " $DRIVERS " in
+-	    *" $module "* )
+-		: already found
+-	    ;;
+-	    * )
+-		DRIVERS="$module $DRIVERS"
+-	    ;;
+-	esac
+-	: drivers $DRIVERS
+-    done
+-}
+-
+-#
+-# What to do with this INPUT hotplug event?
+-#
+-case $ACTION in
+-
+-add)
+-
+-    input_convert_vars
+-
+-    FOUND=false
+-    LABEL="INPUT product $PRODUCT"
+-
+-    if [ -r $MAP_CURRENT ]; then
+-	load_drivers input $MAP_CURRENT "$LABEL"
+-    fi
+-
+-    if [ "$DRIVERS" != "" ]; then
+-	FOUND=true
+-    fi
+-
+-    if [ "$FOUND" = "false" ]; then
+-	mesg "... no modules for $LABEL"
+-	exit 2
+-    fi
+-
+-    ;;
+-
+-remove)
+-    : nothing so far
+-
+-    ;;
+-
+-*)
+-    debug_mesg INPUT $ACTION event not supported
+-    exit 1
+-    ;;
+-
+-esac
+diff -Nur hotplug-2004_01_05/etc/hotplug/input.rc hotplug-2004_01_05-new/etc/hotplug/input.rc
+--- hotplug-2004_01_05/etc/hotplug/input.rc	2003-10-13 23:46:58.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/input.rc	1970-01-01 00:00:00.000000000 +0000
+@@ -1,147 +0,0 @@
+-#!/bin/bash
+-#
+-# input.rc	This loads handlers for those input devices
+-#		that have drivers compiled in kernel
+-#		Currently stopping is not supported
+-#
+-# Best invoked via /etc/init.d/hotplug or equivalent, with
+-# writable /tmp, /usr mounted, and syslogging active.
+-#
+-
+-
+-PATH=/sbin:/bin:/usr/sbin:/usr/bin
+-PROCDIR=/proc/bus/input
+-
+-# source function library
+-if [ -f /etc/init.d/functions ]; then
+-	. /etc/init.d/functions
+-elif [ -f /etc/rc.d/init.d/functions ]; then
+-	. /etc/rc.d/init.d/functions
+-fi
+-
+-if [ -f /etc/hotplug/hotplug.functions ]; then
+-	. /etc/hotplug/hotplug.functions
+-fi
+-
+-input_reset_state () {
+-
+-    PRODUCT=
+-    NAME=
+-    PHYS=
+-    EV=
+-    KEY=
+-    REL=
+-    ABS=
+-    MSC=
+-    LED=
+-    SND=
+-    FF=
+-
+-}
+-
+-#
+-# "COLD PLUG" ... load input handlers for compile-in input drivers loaded
+-# before the OS could really handle hotplug, perhaps because /sbin or
+-# $HOTPLUG_DIR wasn't available or /tmp wasn't writable.  When/if the
+-# /sbin/hotplug program is invoked then, hotplug event notifications
+-# get dropped.  To make up for such "cold boot" errors, we synthesize
+-# all the hotplug events we expect to have seen already.  They can be
+-# out of order, and some might be duplicates.
+-#
+-input_boot_events ()
+-{
+-    if [ ! -r $PROCDIR/devices ]; then
+-	    echo $"** can't synthesize input events - $PROCDIR/devices missing"
+-	    return
+-    fi
+-
+-    ACTION=add
+-    export ACTION
+-
+-    export PRODUCT NAME PHYS EV KEY REL ABS MSC LED SND FF
+-    input_reset_state
+-
+-    declare line
+-
+-    #
+-    # the following reads from /proc/bus/input/devices. It is inherently
+-    # racy (esp. as this file may be changed by input.agent invocation)
+-    # but so far input devices do not appear in sysfs
+-    #
+-    while read line; do
+-	case "$line" in
+-	    I:* )	# product ID
+-		eval "${line#I: }"
+-		PRODUCT=$Bus/$Vendor/$Product/$Version
+-	    ;;
+-	    N:* )	# name
+-		eval "${line#N: }"
+-		NAME="$Name"
+-	    ;;
+-	    P:* )	# Physical
+-		eval "${line#P: }"
+-		PHYS=$Phys
+-	;;
+-	    B:* )	# Controls supported
+-		line="${line#B: }"
+-		eval "${line%%=*}=\"${line#*=}\""
+-	    ;;
+-	    "" )	# End of block
+-		debug_mesg "Invoking input.agent"
+-		debug_mesg "PRODUCT=$PRODUCT"
+-		debug_mesg "NAME=$NAME"
+-		debug_mesg "PHYS=$PHYS"
+-		debug_mesg "EV=$EV"
+-		debug_mesg "KEY=$KEY"
+-		debug_mesg "REL=$REL"
+-		debug_mesg "ABS=$ABS"
+-		debug_mesg "MSC=$MSC"
+-		debug_mesg "LED=$LED"
+-		debug_mesg "SND=$SND"
+-		debug_mesg "FF=$FF"
+-		/etc/hotplug/input.agent < /dev/null
+-		input_reset_state
+-	    ;;
+-	esac
+-    done < $PROCDIR/devices
+-}
+-
+-
+-# See how we were called.
+-case "$1" in
+-  start)
+-	input_boot_events
+-        ;;
+-  stop)
+-	: not supported currently
+-        ;;
+-  status)
+-	echo $"INPUT status for kernel: " `uname -srm`
+-	echo ''
+-
+-	echo "INPUT devices:"
+-	if [ -r $PROCDIR/devices ]; then
+-	    grep "^[INHP]:" $PROCDIR/devices
+-	else
+-	    echo "$PROCDIR/devices not available"
+-	fi
+-	echo ''
+-
+-	echo "INPUT handlers:"
+-	if [ -r $PROCDIR/handlers ]; then
+-	    cat $PROCDIR/handlers
+-	else
+-	    echo "$PROCDIR/handlers not available"
+-	fi
+-
+-	echo ''
+-
+-	;;
+-  restart)
+-	# always invoke by absolute path, else PATH=$PATH:
+-	$0 stop && $0 start
+-	;;
+-  *)
+-        echo $"Usage: $0 {start|stop|status|restart}"
+-        exit 1
+-esac
+diff -Nur hotplug-2004_01_05/etc/hotplug/net.agent hotplug-2004_01_05-new/etc/hotplug/net.agent
+--- hotplug-2004_01_05/etc/hotplug/net.agent	2003-10-07 19:56:24.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/net.agent	2004-10-03 13:28:44.000000000 +0000
+@@ -1,64 +1,126 @@
+-#!/bin/bash
++#!/bin/sh
+ #
+ # Network hotplug policy agent for Linux 2.4 kernels
+ #
+ # Kernel NET hotplug params include:
+-#	
+-#	ACTION=%s [register or unregister]
+-#	INTERFACE=%s
++#        
++#        ACTION=%s [register or unregister]
++#        INTERFACE=%s
+ #
+ # HISTORY:
+ #
+-# 25-Feb-2001	Special case ppp and similar (redhat)
+-# 23-Jan-2001	Log invocation of "ifup" if debugging
+-# 04-Jan-2001	Initial version of "new" hotplug agent.
++# 25-Feb-2001        Special case ppp and similar (redhat)
++# 23-Jan-2001        Log invocation of "ifup" if debugging
++# 04-Jan-2001        Initial version of "new" hotplug agent.
++# 2001-Dec-19        Modified to work with ash, Sharp policy for usbd0 added
+ #
+-# $Id: net.agent,v 1.15 2003/10/07 19:56:24 kroah Exp $
++# $Id: net.agent,v 1.1 2001/06/07 21:53:06 jamey Exp $
+ #
++MODD=/var/modules/
++HOTPLUG_DIR=/etc/hotplug
+ 
+-cd /etc/hotplug
+-. hotplug.functions
+-# DEBUG=yes export DEBUG
++cd ${HOTPLUG_DIR}
++# ash "." fn does not start with current dir, use absolute path to fix
++. ${HOTPLUG_DIR}/hotplug.functions
+ 
+-if [ "$INTERFACE" = "" ]; then
+-    mesg Bad NET invocation: \$INTERFACE is not set
+-    exit 1
++[ "$DEBUG" != "" ] && mesg "arguments ($*) env (`env`)"
++
++set -x
++
++[ "$INTERFACE" = "" ] &&  mesg Bad NET invocation && exit 1
++
++# crude recursion prevention for when "ifconfig up" triggers another net.agent
++# This should not be needed, but it makes testing new scripts more pleasant.
++NAID=${INTERFACE}-${ACTION}
++NAL=/var/run/net.agent-${NAID}
++if [ -f ${NAL} ]; then
++    [ "${DEBUG}" = "yes" ] && mesg net.agent-${NAID} already running
++    exit 0
+ fi
++echo $$ > ${NAL}
++
++case ${INTERFACE} in
++usbd*)
++    . ${HOTPLUG_DIR}/usbdnet.conf
++    . ${HOTPLUG_DIR}/usbd.func
++    ;;
++esac
+ 
+ case $ACTION in
+-add|register)
+-    # Don't do anything if the network is stopped
+-    if [ ! -f /var/lock/subsys/network ]; then
+-       exit 0
+-    fi
++register)
++
++    # NOTE:  network configuration relies on administered state,
++    # we can't do much here without distro-specific knowledge
++    # such as whether/how to invoke DHCP, set up bridging, etc.
+ 
+     case $INTERFACE in
+-	# interfaces that are registered after being "up" (?)
+-	ppp*|ippp*|isdn*|plip*|lo*|irda*|dummy*|ipsec*|tun*|tap*)
+-	    debug_mesg assuming $INTERFACE is already up
+-	    exit 0
+-	    ;;
+-	# interfaces that are registered then brought up
+-	*)
+-	    # NOTE:  network configuration relies on administered state,
+-	    # we can't do much here without distro-specific knowledge
+-	    # such as whether/how to invoke DHCP, set up bridging, etc.
+-
+-	    # RedHat and similar
+-	    export IN_HOTPLUG=1
+-	    if [ -x /sbin/ifup ]; then
+-		debug_mesg invoke ifup $INTERFACE
+-		exec /sbin/ifup $INTERFACE
+-	    else
+-		mesg "how do I bring interfaces up on this distro?"
++
++    # interfaces that are registered after being "up" (?)
++    ppp*|ippp*|isdn*|plip*|lo*)
++        if [ "$DEBUG" != "" ]; then
++            mesg assuming $INTERFACE is already up
++        fi
++        rm -f ${NAL}
++        exit 0
++        ;;
++
++    # interfaces that are registered then brought up
++    usbd0)
++	# set up IP
++	#usbd_net_if_up
++	if [ "$NETMASK" = "" ]; then
++	    NETMASK=255.255.255.0
++	fi
++	ifconfig usbd0 $IP netmask $NETMASK
++	usbd_net_if_up
++	if [ "$GATEWAY" != "" ]; then
++	    route add default gw $GATEWAY
++	fi
++	if [ "$DNS" != "" ]; then
++	    STR="nameserver $DNS"
++	    FND=`cat /etc/resolv.conf | grep $DNS`
++	    if [ "$FND" = "" ]; then
++		echo $STR >>/etc/resolv.conf
+ 	    fi
+-	    ;;
++	fi
++        rm -f ${NAL}
++        exit 0
++        ;;
++
++    esac
++    # INTERFACE not matched
++    mesg $1 $ACTION event for $INTERFACE not handled
++    ;;
++
++unregister)
++    case $INTERFACE in
++    usbd0)
++	if [ "$GATEWAY" != "" ]; then
++	    route del default gw $GATEWAY
++	fi
++        if [ "$DEBUG" != "" ]; then
++            mesg ifconfig $INTERFACE down
++        fi
++        usbd_net_if_down
++        rm -f ${NAL}
++        exit 0
++        ;;
++    *)
++        if [ "$DEBUG" != "" ]; then
++            mesg NET $ACTION event not supported
++        fi
++        rm -f ${NAL}
++        exit 1 ;;
+     esac
+-    mesg $1 $ACTION event not handled
+     ;;
+ 
+ *)
+-    debug_mesg NET $ACTION event not supported
++    if [ "$DEBUG" != "" ]; then
++        mesg NET $ACTION event not supported
++    fi
++    rm -f ${NAL}
+     exit 1 ;;
+ 
+ esac
++rm -f ${NAL}
++exit 0
+diff -Nur hotplug-2004_01_05/etc/hotplug/pci.agent hotplug-2004_01_05-new/etc/hotplug/pci.agent
+--- hotplug-2004_01_05/etc/hotplug/pci.agent	2003-09-16 19:42:17.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/pci.agent	1970-01-01 00:00:00.000000000 +0000
+@@ -1,168 +0,0 @@
+-#!/bin/bash
+-#
+-# PCI-specific hotplug policy agent.
+-#
+-# This should handle 2.4.* PCI (including Cardbus)  hotplugging,
+-# with a consistent framework for adding device and driver specific
+-# treatments.
+-#
+-# Kernel Cardbus/PCI params are:
+-#	
+-#	ACTION=%s [add or remove]
+-#	PCI_CLASS=%06X
+-#	PCI_ID=%04X:%04X
+-#	PCI_SLOT_NAME=%s
+-#	PCI_SUBSYS_ID=%04X:%04X
+-#
+-# If /proc is mounted, /proc/bus/pci/$PCI_SLOT_NAME is almost the name
+-# of the binary device descriptor file ... just change ':' to '/'.
+-#
+-# On systems using Linux 2.4.* kernels, be sure to use the right
+-# modutils (2.4.1+).
+-#
+-#
+-# HISTORY:
+-#
+-# 26-Feb-2001	Cleanup, support comments (Gioele Barabucci)
+-# 13-Jan-2001	Initial version of "new" hotplug agent; needs
+-#		retesting.
+-# 17-Jan-2001	Update to latest kernel syntax (Dan Zink)
+-# 15-Feb-2001	Remove use of "<<" (Adam Richter)
+-#
+-# $Id: pci.agent,v 1.13 2003/09/16 19:42:17 kroah Exp $
+-#
+-
+-cd /etc/hotplug
+-. hotplug.functions
+-
+-# generated by modutils, for current 2.4.x kernels
+-MAP_CURRENT=$MODULE_DIR/modules.pcimap
+-
+-# accumulates list of modules we may care about
+-DRIVERS=
+-
+-if [ "$PCI_CLASS" = ""  -o "$PCI_CLASS" = "" ]; then
+-    mesg Bad PCI agent invocation
+-    exit 1
+-fi
+-
+-#
+-# Each modules.usbmap format line corresponds to one entry in a
+-# MODULE_DEVICE_TABLE(pci,...) declaration in a kernel file.
+-#
+-# Think of it as a database column with up to three "match specs"
+-# to associate kernel modules with particular devices or classes
+-# of device.  The match specs provide a reasonably good filtering
+-# mechanism, but some driver probe() routines need to provide
+-# extra filtering.
+-#
+-
+-# inputs to the match algorithm, from kernel by way of /sbin/hotplug
+-declare -i pci_class
+-declare -i pci_id_vendor pci_id_device
+-declare -i pci_subid_vendor pci_subid_device
+-
+-pci_convert_vars ()
+-{
+-    if [ "$AWK" = "" ]; then
+-	mesg "can't find awk!"
+-	exit 1
+-    fi
+-
+-    pci_class=0x$PCI_CLASS
+-
+-    set `echo $PCI_ID | $AWK -F: '{print "0x" $1, "0x" $2 }'` ''
+-    pci_id_vendor=$1
+-    pci_id_device=$2
+-
+-    set `echo $PCI_SUBSYS_ID | $AWK -F: '{print "0x" $1, "0x" $2 }'` ''
+-    pci_subid_vendor=$1
+-    pci_subid_device=$2
+-}
+-
+-declare -i PCI_ANY
+-PCI_ANY=0xffffffff
+-
+-
+-#
+-# stdin is "modules.pcimap" syntax
+-# on return, ONE matching module was added to $DRIVERS
+-#
+-pci_map_modules ()
+-{
+-    # convert the usb_device_id fields to integers as we read them 
+-    local module ignored
+-    declare -i vendor device
+-    declare -i subvendor subdevice
+-    declare -i class class_mask
+-    declare -i class_temp
+-
+-    # comment line lists (current) pci_device_id field names
+-    read ignored
+-
+-    # look at each pci_device_id entry
+-    # collect one match in $DRIVERS
+-    while read module vendor device subvendor subdevice class class_mask ignored
+-    do
+-	# comments are lines that start with "#" ...
+-	# be careful, they still get parsed by bash!
+-	case "$module" in
+-	\#*) continue ;;
+-	esac
+-
+-	: checkmatch $module
+-
+-	: vendor $vendor $pci_id_vendor
+-	if [ $vendor -ne $PCI_ANY -a $vendor -ne $pci_id_vendor ]; then
+-	    continue
+-	fi
+-	: device $device $pci_id_device
+-	if [ $device -ne $PCI_ANY -a $device -ne $pci_id_device ]; then
+-	    continue
+-	fi
+-	: sub-vendor $subvendor $pci_subid_vendor
+-	if [ $subvendor -ne $PCI_ANY -a $subvendor -ne $pci_subid_vendor ]; then
+-	    continue
+-	fi
+-	: sub-device $subdevice $pci_subid_device
+-	if [ $subdevice -ne $PCI_ANY -a $subdevice -ne $pci_subid_device ]; then
+-	    continue
+-	fi
+-
+-	class_temp="$pci_class & $class_mask"
+-	if [ $class_temp -eq $class ]; then
+-	    DRIVERS="$module $DRIVERS"
+-	    : drivers $DRIVERS
+-	    break
+-	fi
+-    done
+-}
+-
+-
+-#
+-# What to do with this PCI hotplug event?
+-#
+-case $ACTION in
+-
+-add)
+-    pci_convert_vars
+-
+-    LABEL="PCI slot $PCI_SLOT_NAME"
+-
+-    # on 2.4 systems, modutils maintains MAP_CURRENT
+-    if [ -r $MAP_CURRENT ]; then
+-    	load_drivers pci $MAP_CURRENT "$LABEL"
+-    fi
+-
+-    if [ "$DRIVERS" == "" ]; then
+-	mesg "... no modules for $LABEL"
+-	exit 2
+-    fi
+-    ;;
+-
+-*)
+-    debug_mesg PCI $ACTION event not supported
+-    exit 1
+-    ;;
+-
+-esac
+diff -Nur hotplug-2004_01_05/etc/hotplug/pci.rc hotplug-2004_01_05-new/etc/hotplug/pci.rc
+--- hotplug-2004_01_05/etc/hotplug/pci.rc	2003-06-28 00:13:10.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/pci.rc	1970-01-01 00:00:00.000000000 +0000
+@@ -1,96 +0,0 @@
+-#!/bin/sh
+-# vim: syntax=sh
+-#
+-# pci.rc	mostly to recover lost boot-time pci hotplug events
+-#
+-# $Id: pci.rc,v 1.7 2003/06/06 18:27:23 dbrownell Exp $
+-#
+-
+-PATH=/sbin:/bin:/usr/sbin:/usr/bin
+-
+-cd /etc/hotplug
+-
+-# source function library
+-if [ -f /etc/init.d/functions ]; then
+-	. /etc/init.d/functions
+-elif [ -f /etc/rc.d/init.d/functions ]; then
+-	. /etc/rc.d/init.d/functions
+-fi
+-
+-. hotplug.functions
+-
+-
+-# # override any of the defaults?
+-# if [ -f /etc/sysconfig/pci ]; then
+-#     . /etc/sysconfig/pci
+-# fi
+-
+-pci_boot_events ()
+-{
+-    #
+-    # FIXME on 2.5, /sys/bus/pci/devices gives some of this
+-    # information, and more can be gotten with 'lspci'.
+-    # don't expect pcimodules to exist!!
+-    #
+-    LISTER=`type -p pcimodules`
+-    if [ "$LISTER" = "" -o ! -f /proc/bus/pci/devices -o ! -x pci.agent ]; then
+-	    echo $"** can't synthesize pci hotplug events"
+-	    return
+-    fi
+-
+-    # make sure the pci agent will run
+-    ACTION=add
+-    PCI_CLASS=0
+-    PCI_ID=0:0
+-    PCI_SLOT=0:0.0
+-    PCI_SUBSYS_ID=0:0
+-    export ACTION PCI_CLASS PCI_ID PCI_SLOT PCI_SUBSYS_ID
+-
+-    # these notifications will be handled by pcimodules
+-    for BUS in `cd /proc/bus/pci;find * -type d -print`; do
+-	for SLOT_FUNC in `cd /proc/bus/pci/$BUS; echo *`; do
+-	    PCI_SLOT=$BUS:$SLOT_FUNC
+-	    : hotplug pci for $PCI_SLOT
+-	    /sbin/hotplug pci
+-	done
+-    done
+-}
+-
+-# See how we were called.
+-case "$1" in
+-  start)
+-	pci_boot_events
+-        ;;
+-  stop)
+-	# echo $"pci stop -- ignored"
+-        ;;
+-  status)
+-	echo $"PCI Status for kernel: "  `uname -srm`
+-	echo ''
+-
+-	if [ -f /proc/bus/pci/devices ]; then
+-	    COUNT=`ls /proc/bus/pci | wc -l`
+-	    if [ $COUNT -gt 1 ]; then
+-		COUNT=`expr $COUNT - 1`
+-		echo $"PCI up; bus count is $COUNT"
+-		if [ -x /sbin/lspci ]; then
+-		    /sbin/lspci
+-		fi
+-	    else
+-		echo $"no PCI busses?"
+-	    fi
+-	    echo ''
+-	else
+-	    echo $"no PCI /proc support?"
+-	fi
+-	echo ''
+-
+-	;;
+-  restart)
+-	# always invoke by absolute path, else PATH=$PATH:
+-	$0 stop && $0 start
+-	;;
+-  *)
+-        echo $"Usage: $0 {start|stop|status|restart}"
+-        exit 1
+-esac
+diff -Nur hotplug-2004_01_05/etc/hotplug/scsi.agent hotplug-2004_01_05-new/etc/hotplug/scsi.agent
+--- hotplug-2004_01_05/etc/hotplug/scsi.agent	2002-12-11 22:05:06.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/scsi.agent	1970-01-01 00:00:00.000000000 +0000
+@@ -1,50 +0,0 @@
+-#!/bin/bash
+-#
+-# SCSI hotplug agent for 2.5 kernels 
+-#
+-#	ACTION=add
+-#	DEVPATH=devices/scsi0/0:0:0:0
+-#
+-
+-cd /etc/hotplug
+-. hotplug.functions
+-
+-case $ACTION in
+-
+-add)
+-    # 2.5.50 kernel bug: this happens sometimes
+-    if [ ! -d /sys/$DEVPATH ]; then
+-	mesg "bogus sysfs DEVPATH=$DEVPATH"
+-	exit 1
+-    fi
+-
+-    TYPE=$(cat /sys/$DEVPATH/type)
+-    case "$TYPE" in
+-    # 2.5.51 style attributes; <scsi/scsi.h> TYPE_* constants
+-    0)		TYPE=disk ; MODULE=sd_mod ;;
+-    # FIXME some tapes use 'osst' not 'st'
+-    1)		TYPE=tape ; MODULE=st ;;
+-    2)		TYPE=printer ;;
+-    3)		TYPE=processor ;;
+-    4)		TYPE=worm ; MODULE=sr_mod ;;
+-    5)		TYPE=cdrom ; MODULE=sr_mod ;;
+-    6)		TYPE=scanner ;;
+-    7)		TYPE=mod ; MODULE=sd_mod ;;
+-    8)		TYPE=changer ;;
+-    9)		TYPE=comm ;;
+-    14)		TYPE=enclosure ;;
+-    esac
+-    if [ "$MODULE" != "" ]; then
+-	mesg "$TYPE at $DEVPATH"
+-	modprobe $MODULE
+-    else
+-	mesg "how to add device type=$TYPE at $DEVPATH ??"
+-    fi
+-    ;;
+-
+-*)
+-    debug_mesg SCSI $ACTION event not supported
+-    exit 1
+-    ;;
+-
+-esac
+diff -Nur hotplug-2004_01_05/etc/hotplug/tape.agent hotplug-2004_01_05-new/etc/hotplug/tape.agent
+--- hotplug-2004_01_05/etc/hotplug/tape.agent	2002-10-10 13:43:24.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/tape.agent	1970-01-01 00:00:00.000000000 +0000
+@@ -1,253 +0,0 @@
+-#!/bin/bash
+-###############################################################################
+-# Tape hotplug agent for Linux 2.4 kernels
+-#
+-# Copyright (c) 2002 IBM Development Germany, Boeblingen
+-#
+-# the GNU Public License applies
+-# 
+-# Author: Stefan Bader <Stefan.Bader@de.ibm.com>, 2002
+-#
+-# History:
+-#   2002-10-14 Stefan Bader <Stefan.Bader@de.ibm.com>
+-#              Fixed remove char case (missing statement)
+-#   2002-10-01 Stefan Bader <Stefan.Bader@de.ibm.com>
+-#              Created inital version
+-#
+-# Generated by:
+-#   /usr/src/linux/drivers/s390/char/tape.c
+-#
+-# Evionment:
+-#   ACTION    ::= add | remove
+-#   DEVNO     ::= <4 digit hex number>
+-#   MAJOR     ::= <dec major number>
+-#   MINOR     ::= <dec minor number>
+-#   INTERFACE ::= char | block
+-###############################################################################
+-: ${ACTION?Bad invocation: \$ACTION is not set}
+-: ${DEVNO?Bad invocation: \$DEVNO is not set}
+-: ${MAJOR?Bad invocation: \$MAJOR is not set}
+-: ${MINOR?Bad invocation: \$MINOR is not set}
+-: ${INTERFACE?Bad invocation: \$INTERFACE is not set}
+-
+-# Convert to lowercase (just in case)
+-DEVNO=$(echo $DEVNO | tr A-F a-f)
+-
+-cd /etc/hotplug
+-. hotplug.functions
+-
+-mesg "$ACTION $DEVNO $MAJOR $MINOR $INTERFACE"
+-
+-if test -r tape.permissions; then
+-	. tape.permissions
+-else
+-	mesg "Tape permission handling not found"
+-	exit 1
+-fi
+-
+-#==============================================================================
+-# To preserve the script from doing anything real, call it with
+-# CONDOM=echo
+-: ${CONDOM=}
+-# To try things on an alternate location set ROOTDIR to a different base
+-#: ${ROOTDIR=}
+-: ${ROOTDIR=}
+-# Abort on error or unset variables:
+-set -o errexit
+-set -o nounset
+-#==============================================================================
+-
+-#------------------------------------------------------------------------------
+-# Environment: none
+-# Parameters : $1 : abort message
+-#              $2 : optional return code
+-#------------------------------------------------------------------------------
+-# Abort handling
+-abort() {
+-	local RC
+-
+-	if test "$#" -lt 2; then
+-		RC=1
+-	else
+-		RC=$2
+-	fi
+-
+-	mesg "$1 RC($RC)"
+-	exit $RC
+-}
+-
+-#------------------------------------------------------------------------------
+-# Environment: INTERFACE
+-#              MINOR
+-# Parameters:  none
+-#
+-# Prints:      Tape number [0..127]
+-# Returns:     0
+-#------------------------------------------------------------------------------
+-tape_number() {
+-	if test "$INTERFACE" = "block"; then
+-		echo $MINOR
+-	else
+-		echo "$(($MINOR / 2))"
+-	fi
+-	return 0
+-}
+-
+-#------------------------------------------------------------------------------
+-# Environment: ROOTDIR
+-#              DEVNO
+-#              CONDOM
+-# Parameters:  $1 : variable part of the link name
+-#              $2 : variable part of the target node name
+-#
+-# Creates a symbolic link to access the tape device by devno
+-#
+-# Prints:      nothing
+-# Returns:     0 on success, otherwise 1
+-#------------------------------------------------------------------------------
+-create_symlink() {
+-	local LINK=$ROOTDIR/dev/tape/$DEVNO/$1
+-	local TARGET=../../../$2$(tape_number)
+-
+-	# Do not create link if devfs compatibility mode is not started
+-	if test ! -d $ROOTDIR/dev/tape; then
+-		return 0
+-	fi
+-
+-	if test ! -d $(dirname $LINK); then
+-		$CONDOM mkdir -p $(dirname $LINK)                  || return 1
+-	fi
+-	mesg "Creating symlink $LINK -> $TARGET"
+-	$CONDOM rm -f $LINK                                        || return 1
+-	$CONDOM ln -s $TARGET $LINK                                || return 1
+-
+-	return 0
+-}
+-
+-#------------------------------------------------------------------------------
+-# Environment: MAJOR
+-#              MINOR
+-# Parameters:  $1 : node name
+-#              $2 : device type (b|c)
+-#
+-# Tests whether the node already exists with the correct type, major and minor
+-#
+-# Prints:      nothing
+-# Returns:     0 if the node is ok, otherwise 1
+-#------------------------------------------------------------------------------
+-verify_node() {
+-	local NAME="$1"
+-	local TYPE="$2"
+-	local RC=1
+-
+-	if test -$TYPE "$NAME"; then
+-		local MAJMIN=$(ls -l "$NAME"|awk '{print $5 $6}')
+-
+-		if test "$(echo $MAJMIN|cut -d, -f1)" = "$MAJOR"; then
+-			if test "$(echo $MAJMIN|cut -d, -f2)" = "$MINOR"; then
+-				RC=0
+-			fi
+-		fi
+-	fi
+-
+-	return $RC
+-}
+-
+-#------------------------------------------------------------------------------
+-# Environment: ROOTDIR
+-#              INTERFACE
+-#              CONDOM
+-#              MAJOR
+-#              MINOR
+-#              OWNER
+-#              PERMISSIONS
+-# Parameters:  $1 : device type (b|c)
+-#              $2 : variable part of the device node name ([brn]tibm)
+-#
+-# Creates a device node for the tpae device (if it doesn't exist) and sets
+-# the permissions.
+-#
+-# Prints:      nothing
+-# Returns:     0 on success, otherwise 1
+-#------------------------------------------------------------------------------
+-create_node() {
+-	local TYPE="$1"
+-	local NAME="$ROOTDIR/dev/$2$(tape_number)"
+-
+-	# FIXME: This would currently recreate the device node if it isn't
+-	#        right even if devfs compatibility isn't enabled. Should
+-	#        ownership and permissions be preserved in that case???
+-	if ! verify_node $NAME $TYPE; then
+-		mesg "Creating devicenode $NAME"
+-		$CONDOM rm -f "$NAME"                              || return 1
+-		$CONDOM mknod "$NAME" $TYPE $MAJOR $MINOR          || return 1
+-	fi
+-
+-	# We only want to change ownership and permissions if devfs compa-
+-	# tibility is enabled.
+-	tape_permissions $DEVNO
+-	if test "$OWNER" != "" -a -d $ROOTDIR/dev/tape; then
+-		$CONDOM chown $OWNER "$NAME"                       || return 1
+-
+-		if test "$PERMISSIONS" != ""; then
+-			$CONDOM chmod "$PERMISSIONS" "$NAME"       || return 1
+-		fi
+-	fi
+-
+-	return 0
+-}
+-
+-#------------------------------------------------------------------------------
+-# Main
+-#------------------------------------------------------------------------------
+-case "$ACTION" in
+-	add)
+-		case "$INTERFACE" in
+-			block)
+-				create_node    b btibm             || return 1
+-				create_symlink block/disc btibm    || return 1
+-				;;
+-			char)
+-				create_node    c ntibm             || return 1
+-				create_symlink char/norewind ntibm || return 1
+-				MINOR=$(($MINOR + 1))
+-				create_node    c rtibm             || return 1
+-				create_symlink char/rewind rtibm   || return 1
+-				;;
+-			*)
+-				abort "Unknown interface type <$INTERFACE>"
+-				;;
+-		esac
+-		;;
+-	remove)
+-		case "$INTERFACE" in
+-			char)
+-				$CONDOM rm -rf $ROOTDIR/dev/tape/$DEVNO/char
+-				if test -d $ROOTDIR/dev/tape; then
+-					$CONDOM rm -f \
+-					$ROOTDIR/dev/[nr]tibm$(tape_number)
+-				fi
+-				;;
+-			block)
+-				$CONDOM rm -rf $ROOTDIR/dev/tape/$DEVNO/block
+-				if test -d $ROOTDIR/dev/tape; then
+-					$CONDOM \
+-					rm -f $ROOTDIR/dev/btibm$(tape_number)
+-				fi
+-				;;
+-			*)
+-				abort "Unknown interface type <$INTERFACE>"
+-				;;
+-		esac
+-
+-		if test "$(ls $ROOTDIR/dev/tape/$DEVNO)" = ""; then
+-			$CONDOM rmdir $ROOTDIR/dev/tape/$DEVNO
+-		fi
+-		;;
+-	*)
+-		abort "$(basename $0): $ACTION event not supported"
+-		;;
+-esac
+-
+-exit 0
+-
+diff -Nur hotplug-2004_01_05/etc/hotplug/tape.permissions hotplug-2004_01_05-new/etc/hotplug/tape.permissions
+--- hotplug-2004_01_05/etc/hotplug/tape.permissions	2002-10-08 11:09:14.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/tape.permissions	1970-01-01 00:00:00.000000000 +0000
+@@ -1,24 +0,0 @@
+-#!/bin/bash
+-#
+-# Copyright (c) 2002 IBM Development Germany, Boeblingen
+-#
+-# Author:  Stefan Bader <Stefan.Bader@de.ibm.com>
+-#
+-# the GNU Public License applies
+-#
+-tape_permissions() {
+-	local DEVNO="$1"
+-
+-	case "$DEVNO" in
+-		#
+-		# You could set other permissions to specific tape device
+-		# numbers here. E.g. the following would override the default
+-		# for tape 1a32
+-		#
+-		# 1a32) OWNER=nobody.users PERMISSIONS="u=rw,go=";;
+-
+-		*)    OWNER=root.root PERMISSIONS="ug=rw,o=";;
+-	esac
+-
+-	return 0
+-}
+diff -Nur hotplug-2004_01_05/etc/hotplug/usb.agent hotplug-2004_01_05-new/etc/hotplug/usb.agent
+--- hotplug-2004_01_05/etc/hotplug/usb.agent	2003-10-13 23:52:54.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usb.agent	1970-01-01 00:00:00.000000000 +0000
+@@ -1,450 +0,0 @@
+-#!/bin/bash
+-#
+-# USB-specific hotplug policy agent.
+-#
+-# This should handle 2.2.18+, 2.4.*, and 2.5.* USB hotplugging,
+-# with a consistent framework for adding device and driver
+-# specific handling.
+-#
+-# Normally, adding a usb device will modprobe a driver.  If there
+-# is a /etc/hotplug/usb/$DRIVER script set up, it will also run,
+-# handling tasks like loading firmware or starting daemons.
+-#
+-# Kernel USB hotplug params include:
+-#	
+-#	ACTION=%s [add or remove]
+-#	DEVPATH=%s [in 2.5 kernels, /sys/$DEVPATH]
+-#	PRODUCT=%x/%x/%x
+-#	INTERFACE=%d/%d/%d [ for interface 0, if TYPE=0/*/* ]
+-#	TYPE=%d/%d/%d
+-#
+-# And if usbfs (originally called usbdevfs) is configured, also:
+-#
+-#	DEVFS=/proc/bus/usb [gone in 2.5]
+-#	DEVICE=/proc/bus/usb/%03d/%03d
+-#
+-# This script then adds the variable:
+-#
+-#       REMOVER=/var/run/usb/<some string unique to $DEVICE>
+-#
+-# This is the path where the script would like to find a remover, if
+-# the target device needs one. This script is executed on remove if
+-# it is executable when the remove happens.
+-#
+-# If usbfs is mounted on /proc/bus/usb, $DEVICE is a file which
+-# can be read to get the device's current configuration descriptor.
+-# (The "usbmodules" utility does that.)  Or it can be used by a
+-# user mode driver to interact with the usb device.  USB hotplug
+-# does *not* require usbfs (or sysfs) to work, although on 2.4
+-# some devices work better if "usbmodules" can help.
+-#
+-# For Linux 2.5+ kernels, there's no need for "usbmodules".  For
+-# two reasons:  first, hotplug is invoked for each interface, not
+-# just the first one.  Second, sysfs exposes descriptors so they
+-# are easy to use for "coldplug" event simulation.  (But sysfs is
+-# not a replacement for the driver I/O capabilities in usbfs.)
+-#
+-# On systems using Linux 2.4.* kernels, be sure to use the right
+-# modutils (2.4.2+).  That ensures that hotplugging uses the list
+-# of modules installed for your kernel, rather than the one that's
+-# included here for use on systems without MODULE_DEVICE_TABLE
+-# support.
+-#
+-#
+-# HISTORY:
+-#
+-# 20-Nov-2002	some 2.5 updates; handle new 'device' hotplug; turn off
+-#		'sleep' hack since hcds must all queue control traffic
+-# 08-Aug-2002	support for multiple usermaps (maxk), minor cleanup
+-# 18-Jan-2002	fix match algorithm in usb_map_modules()
+-# 14-Jan-2002	fix work around 2.2 brokeness of $PRODUCT
+-# 09-Jan-2002	REMOVER for system without usbdevfs
+-#
+-# 14-Mar-2001	Cleanup, bitmask the match_flags
+-# 26-Feb-2001	Cleanup, support comments (Gioele Barabucci)
+-# 15-Feb-2001	Remove use of "<<" (Adam Richter)
+-# 23-Jan-2001	Update 2.2 handling; unfortunately there's no "feature
+-#		test" that can work robustly
+-# 05-Jan-2001	Quick hack for kernel 2.4.0 and modutils 2.4.1
+-# 03-Jan-2001	Initial version of "new" hotplug agent, using feedback
+-#		and contributions from Adam Richter, Ryan VanderBijl,
+-#		Norbert Preining, Florian Lohoff, David Brownell and
+-#		others.  To replace the original /etc/usb/policy. (db)
+-#
+-# $Id: usb.agent,v 1.35 2003/10/13 23:52:54 kroah Exp $
+-#
+-
+-if [ -f /etc/sysconfig/usb ]; then
+-    . /etc/sysconfig/usb
+-fi
+-
+-cd /etc/hotplug
+-. hotplug.functions
+-# DEBUG=yes export DEBUG
+-
+-# generated by modutils, for current 2.4.x (and later) kernels
+-MAP_CURRENT=$MODULE_DIR/modules.usbmap
+-
+-# used if MAP_CURRENT is missing; for 2.2.x kernels
+-MAP_DISTMAP=$HOTPLUG_DIR/usb.distmap
+-
+-#
+-# used for kernel drivers that don't show up in CURRENT or DISTMAP,
+-# currently input drivers (joysticks, keyboards, etc).  newer systems
+-# should use input hotplug events instead.
+-#
+-MAP_HANDMAP=$HOTPLUG_DIR/usb.handmap
+-
+-#
+-# used to run config scripts for user mode drivers (jPhoto, gPhoto2,
+-# rio500 tools, etc) ... instead of naming kernel modules, it names
+-# config scripts.  those could change $DEVICE permissions, etc.
+-#
+-# for purely user mode drivers, scripts $HOTPLUG_DIR/usb/NAME should be
+-# installed with usermap files in $HOTPLUG_DIR/usb/NAME.usermap instead
+-# of continuing to use/modify $MAP_USERMAP 
+-#
+-MAP_USERMAP=$HOTPLUG_DIR/usb.usermap
+-
+-
+-# accumulates list of modules we may care about
+-DRIVERS=""
+-
+-if [ "$ACTION" = "" ]; then
+-    mesg Bad USB agent invocation, no action
+-    exit 1
+-fi
+-
+-# starting in kernel 2.5 there are two kinds of USB hotplug events.
+-# - per-interface; 2.2/2.4 kernels only reported the first one.
+-#	"new" events have nonzero /sys/$DEVPATH/bInterfaceNumber
+-# - per-device; "new" events don't have $PRODUCT
+-SYSFS=/sys
+-if [ "$PRODUCT" = "" ]; then
+-    # this is either an error, or we're on a 2.5 system...
+-    if [ "$DEVPATH" = "" ]; then
+-	mesg Bad USB agent invocation
+-	exit 1
+-    fi
+-
+-    # sysfs files may already be gone
+-    if [ $ACTION = 'remove' ]; then
+-	exit 0
+-    fi
+-
+-    # we could be running before usb populated these attributes...
+-    if [ ! -f $SYSFS/$DEVPATH/bNumConfigurations ]; then
+-	# FIXME wait till they appear, or N seconds elapse
+-	sleep 2
+-    fi
+-
+-    # this could care about changing the default config, or warning
+-    # when the user hooked a fast device up so it runs slowly.
+-    TMP=$(cat $SYSFS/$DEVPATH/bNumConfigurations)
+-    if [ $TMP -ne 1 -a "$ACTION" = add ]; then
+-	mesg Keeping default configuration with $SYSFS/$DEVPATH
+-    fi
+-
+-    # NOTE:  it might be good to add an extension hook here rather
+-    # than ignore these events, but even device-scope tasks such
+-    # as firmware download can still use the interface-0 event
+-    # (as they did with 2.2/2.4 hotplug setup scripts).
+-    exit 0
+-fi
+-
+-# we can't "unset IFS" on bash1, so save a copy
+-DEFAULT_IFS="$IFS"
+-
+-#
+-# Each modules.usbmap format line corresponds to one entry in a
+-# MODULE_DEVICE_TABLE(usb,...) declaration in a kernel file.
+-#
+-# Think of it as a database column with up to three "match specs"
+-# to associate kernel modules with particular devices or classes
+-# of device.  The match specs provide a reasonably good filtering
+-# mechanism, but some driver probe() routines need to provide
+-# extra filtering.
+-#
+-declare -i usb_idVendor usb_idProduct usb_bcdDevice
+-declare -i usb_bDeviceClass usb_bDeviceSubClass usb_bDeviceProtocol
+-declare -i usb_bInterfaceClass usb_bInterfaceSubClass usb_bInterfaceProtocol
+-
+-usb_convert_vars ()
+-{
+-    if [ "$AWK" = "" ]; then
+-	mesg "can't find awk!"
+-	exit 1
+-    fi
+-
+-    # work around 2.2.early brokenness
+-    # munges the usb_bcdDevice such that it is a integer rather
+-    # than a float: e.g. 1.0 become 0100
+-    PRODUCT=`echo $PRODUCT | sed -e "s+\.\([0-9]\)$+.\10+" -e "s/\.$/00/" \
+-                                  -e "s+/\([0-9]\)\.\([0-9][0-9]\)+/0\1\2+" \
+-			  -e "s+/\([0-9][0-9]\)\.\([0-9][0-9]\)+/\1\2+"`
+-    set `echo $PRODUCT | $AWK -F/ '{print "0x" $1, "0x" $2, "0x" $3 }'` ''
+-    usb_idVendor=$1
+-    usb_idProduct=$2
+-    usb_bcdDevice=$3
+-
+-    if [ "$TYPE" != "" ]; then
+-    	IFS=/
+-    	set $TYPE ''
+-	usb_bDeviceClass=$1
+-        usb_bDeviceSubClass=$2
+-        usb_bDeviceProtocol=$3
+-	IFS="$DEFAULT_IFS"
+-    elif [ -r $SYSFS/$DEVPATH/bDeviceClass ]; then
+-	usb_bDeviceClass=0x$(cat $SYSFS/$DEVPATH/bDeviceClass)
+-	usb_bDeviceSubClass=0x$(cat $SYSFS/$DEVPATH/bDeviceSubClass)
+-	usb_bDeviceProtocol=0x$(cat $SYSFS/$DEVPATH/bDeviceProtocol)
+-    else
+-	# out-of-range values
+-	usb_bDeviceClass=1000
+-	usb_bDeviceSubClass=1000
+-	usb_bDeviceProtocol=1000
+-    fi
+-
+-    if [ "$INTERFACE" != "" ]; then
+-	IFS=/
+-	set $INTERFACE ''
+-	usb_bInterfaceClass=$1
+-	usb_bInterfaceSubClass=$2
+-    	usb_bInterfaceProtocol=$3
+-	IFS="$DEFAULT_IFS"
+-    elif [ -r $SYSFS/$DEVPATH/bInterfaceClass ]; then
+-	usb_bInterfaceClass=0x$(cat $SYSFS/$DEVPATH/bInterfaceClass)
+-	usb_bInterfaceSubClass=0x$(cat $SYSFS/$DEVPATH/bInterfaceSubClass)
+-	usb_bInterfaceProtocol=0x$(cat $SYSFS/$DEVPATH/bInterfaceProtocol)
+-    else
+-	# out-of-range values
+-	usb_bInterfaceClass=1000
+-	usb_bInterfaceSubClass=1000
+-	usb_bInterfaceProtocol=1000
+-    fi
+-}
+-
+-declare -i USB_MATCH_VENDOR=0x0001
+-declare -i USB_MATCH_PRODUCT=0x0002
+-declare -i USB_MATCH_DEV_LO=0x0004
+-declare -i USB_MATCH_DEV_HI=0x0008
+-declare -i USB_MATCH_DEV_CLASS=0x0010
+-declare -i USB_MATCH_DEV_SUBCLASS=0x0020
+-declare -i USB_MATCH_DEV_PROTOCOL=0x0040
+-declare -i USB_MATCH_INT_CLASS=0x0080
+-declare -i USB_MATCH_INT_SUBCLASS=0x0100
+-declare -i USB_MATCH_INT_PROTOCOL=0x0200
+-
+-#
+-# stdin is "modules.usbmap" syntax
+-# on return, all matching modules were added to $DRIVERS
+-#
+-usb_map_modules ()
+-{
+-    # convert the usb_device_id fields to integers as we read them 
+-    local line module
+-    declare -i match_flags
+-    declare -i idVendor idProduct bcdDevice_lo bcdDevice_hi
+-    declare -i bDeviceClass bDeviceSubClass bDeviceProtocol
+-    declare -i bInterfaceClass bInterfaceSubClass bInterfaceProtocol
+-
+-    # look at each usb_device_id entry
+-    # collect all matches in $DRIVERS
+-
+-    while read line
+-    do
+-        # comments are lines that start with "#" ...
+-	# be careful, they still get parsed by bash!
+-	case "$line" in
+-	\#*) continue ;;
+-	esac
+-
+-	set $line
+-
+-	module=$1
+-	match_flags=$2
+-
+-	idVendor=$3
+-	idProduct=$4
+-	bcdDevice_lo=$5
+-	bcdDevice_hi=$6
+-
+-	bDeviceClass=$7
+-	bDeviceSubClass=$8
+-	bDeviceProtocol=$9
+-
+-	shift 9
+-	bInterfaceClass=$1
+-	bInterfaceSubClass=$2
+-	bInterfaceProtocol=$3
+-
+-	: checkmatch $module
+-
+-	: idVendor $idVendor $usb_idVendor
+-        if [ $USB_MATCH_VENDOR -eq $(( $match_flags & $USB_MATCH_VENDOR )) ] && 
+-	   [ $idVendor -ne $usb_idVendor ]; then
+-	    continue
+-	fi
+-
+-	: idProduct $idProduct $usb_idProduct
+-	if [ $USB_MATCH_PRODUCT -eq $(( $match_flags & $USB_MATCH_PRODUCT )) ] &&
+-	   [ $idProduct -ne $usb_idProduct ]; then
+-	    continue
+-	fi
+-
+-	: bcdDevice range $bcdDevice_hi $bcdDevice_lo actual $usb_bcdDevice
+-	if [ $USB_MATCH_DEV_LO -eq $(( $match_flags & $USB_MATCH_DEV_LO )) ] &&
+-	   [ $usb_bcdDevice -lt $bcdDevice_lo ]; then
+-	    continue
+-	fi
+-
+-	# bcdDevice_lo <= bcdDevice <= bcdDevice_hi
+-	if [ $USB_MATCH_DEV_HI -eq $(( $match_flags & $USB_MATCH_DEV_HI )) ] &&
+-	   [ $usb_bcdDevice -gt $bcdDevice_hi ]; then
+-	    continue
+-	fi
+-
+-	: bDeviceClass $bDeviceClass $usb_bDeviceClass
+-	if [ $USB_MATCH_DEV_CLASS -eq $(( $match_flags & $USB_MATCH_DEV_CLASS )) ] &&
+-	   [ $bDeviceClass -ne $usb_bDeviceClass ]; then
+-	    continue
+-	fi
+-	: bDeviceSubClass $bDeviceSubClass $usb_bDeviceSubClass
+-	if [ $USB_MATCH_DEV_SUBCLASS -eq $(( $match_flags & $USB_MATCH_DEV_SUBCLASS )) ] &&
+-	   [ $bDeviceSubClass -ne $usb_bDeviceSubClass ]; then
+-	    continue
+-	fi
+-	: bDeviceProtocol $bDeviceProtocol $usb_bDeviceProtocol
+-	if [ $USB_MATCH_DEV_PROTOCOL -eq $(( $match_flags & $USB_MATCH_DEV_PROTOCOL )) ] &&
+-	   [ $bDeviceProtocol -ne $usb_bDeviceProtocol ]; then
+-	    continue
+-	fi
+-
+-	# NOTE:  for now, this only checks the first of perhaps
+-	# several interfaces for this device.
+-
+-	: bInterfaceClass $bInterfaceClass $usb_bInterfaceClass
+-	if [ $USB_MATCH_INT_CLASS -eq $(( $match_flags & $USB_MATCH_INT_CLASS )) ] &&
+-	   [ $bInterfaceClass -ne $usb_bInterfaceClass ]; then
+-	    continue
+-	fi
+-	: bInterfaceSubClass $bInterfaceSubClass $usb_bInterfaceSubClass
+-	if [ $USB_MATCH_INT_SUBCLASS -eq $(( $match_flags & $USB_MATCH_INT_SUBCLASS )) ] &&
+-	   [ $bInterfaceSubClass -ne $usb_bInterfaceSubClass ]; then
+-	    continue
+-	fi
+-	: bInterfaceProtocol $bInterfaceProtocol $usb_bInterfaceProtocol
+-	if [ $USB_MATCH_INT_PROTOCOL -eq $(( $match_flags & $USB_MATCH_INT_PROTOCOL )) ] &&
+-	   [ $bInterfaceProtocol -ne $usb_bInterfaceProtocol ]; then
+-	    continue
+-	fi
+-
+-	# It was a match!
+-	DRIVERS="$module $DRIVERS"
+-	: drivers $DRIVERS
+-    done
+-}
+-
+-#
+-# declare a REMOVER name that the add action can use to create a
+-# remover, or that the remove action can use to execute a remover.
+-#
+-if [ "$DEVICE" = "" ]; then
+-  declare -rx REMOVER=/var/run/usb/`echo "$INTERFACE/$PRODUCT/$TYPE" | sed -e 's;/;%;g'`
+-else
+-  declare -rx REMOVER=/var/run/usb/`echo $DEVICE | sed -e 's;/;%;g'`
+-fi
+-
+-#
+-# What to do with this USB hotplug event?
+-#
+-case $ACTION in
+-
+-add)
+-    # partial workaround for 2.4 uhci/usb-uhci driver problem:  they don't
+-    # queue control requests, so device drivers can confuse each other if
+-    # they happen to issue requests at the same time ... it happens easily
+-    # with slow HID devices and "usbmodules".
+-    # starting with 2.5 (DEVPATH set), all hcds must queue control traffic.
+-    if [ "$DEVPATH" = "" ]; then
+-	sleep 3
+-    fi
+-
+-    usb_convert_vars
+-
+-    FOUND=false
+-    LABEL="USB product $PRODUCT"
+-
+-    if [ -e "$REMOVER" ]; then
+-	rm -f "$REMOVER"
+-    fi
+-
+-    # on 2.4 systems, modutils 2.4.2+ maintains MAP_CURRENT
+-    # ... otherwise we can't rely on it (sigh)
+-    case "$KERNEL" in
+-    2.4.*|2.5.*|2.6.*)
+-	if [ -r $MAP_CURRENT ]; then
+-	    load_drivers usb $MAP_CURRENT "$LABEL"
+-	fi;;
+-    *)
+-	if [ -r $MAP_DISTMAP ]; then
+-	    load_drivers usb $MAP_DISTMAP "$LABEL"
+-	fi;;
+-    esac
+-    if [ "$DRIVERS" != "" ]; then
+-	FOUND=true
+-    fi
+-
+-    # cope with special driver module configurations
+-    # (mostly HID devices, until we have an input.agent)
+-    # not needed on 2.6 - they are loaded by hotplug
+-    case "$KERNEL" in
+-	2.6.* )
+-	    : nothing
+-	;;
+-	* )
+-	    if [ -r $MAP_HANDMAP ]; then
+-		load_drivers usb $MAP_HANDMAP "$LABEL"
+-		if [ "$DRIVERS" != "" ]; then
+-		    FOUND=true
+-		fi
+-	    fi
+-	;;
+-    esac
+-
+-    # some devices have user-mode drivers (no kernel module, but config)
+-    # or specialized user-mode setup helpers 
+-    MODPROBE=:
+-    for MAP in $MAP_USERMAP $HOTPLUG_DIR/usb/*.usermap
+-    do
+-        if [ -r $MAP ]; then
+-	    load_drivers usb $MAP "$LABEL"
+-	    if [ "$DRIVERS" != "" ]; then
+-		FOUND=true
+-	    fi
+-	fi
+-    done
+-
+-    if [ "$FOUND" = "false" ]; then
+-	mesg "... no modules for $LABEL"
+-	exit 2
+-    fi
+-    ;;
+-
+-remove)
+-    if [ -x $REMOVER ]; then
+-	$REMOVER
+-    fi
+-    rm -f $REMOVER
+-
+-    if [ -x /usr/sbin/updfstab ]; then
+-        /usr/sbin/updfstab
+-    fi
+-    ;;
+-
+-*)
+-    debug_mesg USB $ACTION event not supported
+-    exit 1
+-    ;;
+-
+-esac
+diff -Nur hotplug-2004_01_05/etc/hotplug/usb.agent.orig hotplug-2004_01_05-new/etc/hotplug/usb.agent.orig
+--- hotplug-2004_01_05/etc/hotplug/usb.agent.orig	2003-10-13 23:45:10.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usb.agent.orig	1970-01-01 00:00:00.000000000 +0000
+@@ -1,442 +0,0 @@
+-#!/bin/bash
+-#
+-# USB-specific hotplug policy agent.
+-#
+-# This should handle 2.2.18+, 2.4.*, and 2.5.* USB hotplugging,
+-# with a consistent framework for adding device and driver
+-# specific handling.
+-#
+-# Normally, adding a usb device will modprobe a driver.  If there
+-# is a /etc/hotplug/usb/$DRIVER script set up, it will also run,
+-# handling tasks like loading firmware or starting daemons.
+-#
+-# Kernel USB hotplug params include:
+-#	
+-#	ACTION=%s [add or remove]
+-#	DEVPATH=%s [in 2.5 kernels, /sys/$DEVPATH]
+-#	PRODUCT=%x/%x/%x
+-#	INTERFACE=%d/%d/%d [ for interface 0, if TYPE=0/*/* ]
+-#	TYPE=%d/%d/%d
+-#
+-# And if usbfs (originally called usbdevfs) is configured, also:
+-#
+-#	DEVFS=/proc/bus/usb [gone in 2.5]
+-#	DEVICE=/proc/bus/usb/%03d/%03d
+-#
+-# This script then adds the variable:
+-#
+-#       REMOVER=/var/run/usb/<some string unique to $DEVICE>
+-#
+-# This is the path where the script would like to find a remover, if
+-# the target device needs one. This script is executed on remove if
+-# it is executable when the remove happens.
+-#
+-# If usbfs is mounted on /proc/bus/usb, $DEVICE is a file which
+-# can be read to get the device's current configuration descriptor.
+-# (The "usbmodules" utility does that.)  Or it can be used by a
+-# user mode driver to interact with the usb device.  USB hotplug
+-# does *not* require usbfs (or sysfs) to work, although on 2.4
+-# some devices work better if "usbmodules" can help.
+-#
+-# For Linux 2.5+ kernels, there's no need for "usbmodules".  For
+-# two reasons:  first, hotplug is invoked for each interface, not
+-# just the first one.  Second, sysfs exposes descriptors so they
+-# are easy to use for "coldplug" event simulation.  (But sysfs is
+-# not a replacement for the driver I/O capabilities in usbfs.)
+-#
+-# On systems using Linux 2.4.* kernels, be sure to use the right
+-# modutils (2.4.2+).  That ensures that hotplugging uses the list
+-# of modules installed for your kernel, rather than the one that's
+-# included here for use on systems without MODULE_DEVICE_TABLE
+-# support.
+-#
+-#
+-# HISTORY:
+-#
+-# 20-Nov-2002	some 2.5 updates; handle new 'device' hotplug; turn off
+-#		'sleep' hack since hcds must all queue control traffic
+-# 08-Aug-2002	support for multiple usermaps (maxk), minor cleanup
+-# 18-Jan-2002	fix match algorithm in usb_map_modules()
+-# 14-Jan-2002	fix work around 2.2 brokeness of $PRODUCT
+-# 09-Jan-2002	REMOVER for system without usbdevfs
+-#
+-# 14-Mar-2001	Cleanup, bitmask the match_flags
+-# 26-Feb-2001	Cleanup, support comments (Gioele Barabucci)
+-# 15-Feb-2001	Remove use of "<<" (Adam Richter)
+-# 23-Jan-2001	Update 2.2 handling; unfortunately there's no "feature
+-#		test" that can work robustly
+-# 05-Jan-2001	Quick hack for kernel 2.4.0 and modutils 2.4.1
+-# 03-Jan-2001	Initial version of "new" hotplug agent, using feedback
+-#		and contributions from Adam Richter, Ryan VanderBijl,
+-#		Norbert Preining, Florian Lohoff, David Brownell and
+-#		others.  To replace the original /etc/usb/policy. (db)
+-#
+-# $Id: usb.agent,v 1.34 2003/10/13 23:45:10 kroah Exp $
+-#
+-
+-if [ -f /etc/sysconfig/usb ]; then
+-    . /etc/sysconfig/usb
+-fi
+-
+-cd /etc/hotplug
+-. hotplug.functions
+-# DEBUG=yes export DEBUG
+-
+-# generated by modutils, for current 2.4.x (and later) kernels
+-MAP_CURRENT=$MODULE_DIR/modules.usbmap
+-
+-# used if MAP_CURRENT is missing; for 2.2.x kernels
+-MAP_DISTMAP=$HOTPLUG_DIR/usb.distmap
+-
+-#
+-# used for kernel drivers that don't show up in CURRENT or DISTMAP,
+-# currently input drivers (joysticks, keyboards, etc).  newer systems
+-# should use input hotplug events instead.
+-#
+-MAP_HANDMAP=$HOTPLUG_DIR/usb.handmap
+-
+-#
+-# used to run config scripts for user mode drivers (jPhoto, gPhoto2,
+-# rio500 tools, etc) ... instead of naming kernel modules, it names
+-# config scripts.  those could change $DEVICE permissions, etc.
+-#
+-# for purely user mode drivers, scripts $HOTPLUG_DIR/usb/NAME should be
+-# installed with usermap files in $HOTPLUG_DIR/usb/NAME.usermap instead
+-# of continuing to use/modify $MAP_USERMAP 
+-#
+-MAP_USERMAP=$HOTPLUG_DIR/usb.usermap
+-
+-
+-# accumulates list of modules we may care about
+-DRIVERS=""
+-
+-if [ "$ACTION" = "" ]; then
+-    mesg Bad USB agent invocation, no action
+-    exit 1
+-fi
+-
+-# starting in kernel 2.5 there are two kinds of USB hotplug events.
+-# - per-interface; 2.2/2.4 kernels only reported the first one.
+-#	"new" events have nonzero /sys/$DEVPATH/bInterfaceNumber
+-# - per-device; "new" events don't have $PRODUCT
+-SYSFS=/sys
+-if [ "$PRODUCT" = "" ]; then
+-    # this is either an error, or we're on a 2.5 system...
+-    if [ "$DEVPATH" = "" ]; then
+-	mesg Bad USB agent invocation
+-	exit 1
+-    fi
+-
+-    # sysfs files may already be gone
+-    if [ $ACTION = 'remove' ]; then
+-	exit 0
+-    fi
+-
+-    # we could be running before usb populated these attributes...
+-    if [ ! -f $SYSFS/$DEVPATH/bNumConfigurations ]; then
+-	# FIXME wait till they appear, or N seconds elapse
+-	sleep 2
+-    fi
+-
+-    # this could care about changing the default config, or warning
+-    # when the user hooked a fast device up so it runs slowly.
+-    TMP=$(cat $SYSFS/$DEVPATH/bNumConfigurations)
+-    if [ $TMP -ne 1 -a "$ACTION" = add ]; then
+-	mesg Keeping default configuration with $SYSFS/$DEVPATH
+-    fi
+-
+-    # NOTE:  it might be good to add an extension hook here rather
+-    # than ignore these events, but even device-scope tasks such
+-    # as firmware download can still use the interface-0 event
+-    # (as they did with 2.2/2.4 hotplug setup scripts).
+-    exit 0
+-fi
+-
+-# we can't "unset IFS" on bash1, so save a copy
+-DEFAULT_IFS="$IFS"
+-
+-#
+-# Each modules.usbmap format line corresponds to one entry in a
+-# MODULE_DEVICE_TABLE(usb,...) declaration in a kernel file.
+-#
+-# Think of it as a database column with up to three "match specs"
+-# to associate kernel modules with particular devices or classes
+-# of device.  The match specs provide a reasonably good filtering
+-# mechanism, but some driver probe() routines need to provide
+-# extra filtering.
+-#
+-declare -i usb_idVendor usb_idProduct usb_bcdDevice
+-declare -i usb_bDeviceClass usb_bDeviceSubClass usb_bDeviceProtocol
+-declare -i usb_bInterfaceClass usb_bInterfaceSubClass usb_bInterfaceProtocol
+-
+-usb_convert_vars ()
+-{
+-    if [ "$AWK" = "" ]; then
+-	mesg "can't find awk!"
+-	exit 1
+-    fi
+-
+-    # work around 2.2.early brokenness
+-    # munges the usb_bcdDevice such that it is a integer rather
+-    # than a float: e.g. 1.0 become 0100
+-    PRODUCT=`echo $PRODUCT | sed -e "s+\.\([0-9]\)$+.\10+" -e "s/\.$/00/" \
+-                                  -e "s+/\([0-9]\)\.\([0-9][0-9]\)+/0\1\2+" \
+-			  -e "s+/\([0-9][0-9]\)\.\([0-9][0-9]\)+/\1\2+"`
+-    set `echo $PRODUCT | $AWK -F/ '{print "0x" $1, "0x" $2, "0x" $3 }'` ''
+-    usb_idVendor=$1
+-    usb_idProduct=$2
+-    usb_bcdDevice=$3
+-
+-    if [ "$TYPE" != "" ]; then
+-    	IFS=/
+-    	set $TYPE ''
+-	usb_bDeviceClass=$1
+-        usb_bDeviceSubClass=$2
+-        usb_bDeviceProtocol=$3
+-	IFS="$DEFAULT_IFS"
+-    elif [ -r $SYSFS/$DEVPATH/bDeviceClass ]; then
+-	usb_bDeviceClass=0x$(cat $SYSFS/$DEVPATH/bDeviceClass)
+-	usb_bDeviceSubClass=0x$(cat $SYSFS/$DEVPATH/bDeviceSubClass)
+-	usb_bDeviceProtocol=0x$(cat $SYSFS/$DEVPATH/bDeviceProtocol)
+-    else
+-	# out-of-range values
+-	usb_bDeviceClass=1000
+-	usb_bDeviceSubClass=1000
+-	usb_bDeviceProtocol=1000
+-    fi
+-
+-    if [ "$INTERFACE" != "" ]; then
+-	IFS=/
+-	set $INTERFACE ''
+-	usb_bInterfaceClass=$1
+-	usb_bInterfaceSubClass=$2
+-    	usb_bInterfaceProtocol=$3
+-	IFS="$DEFAULT_IFS"
+-    elif [ -r $SYSFS/$DEVPATH/bInterfaceClass ]; then
+-	usb_bInterfaceClass=0x$(cat $SYSFS/$DEVPATH/bInterfaceClass)
+-	usb_bInterfaceSubClass=0x$(cat $SYSFS/$DEVPATH/bInterfaceSubClass)
+-	usb_bInterfaceProtocol=0x$(cat $SYSFS/$DEVPATH/bInterfaceProtocol)
+-    else
+-	# out-of-range values
+-	usb_bInterfaceClass=1000
+-	usb_bInterfaceSubClass=1000
+-	usb_bInterfaceProtocol=1000
+-    fi
+-}
+-
+-declare -i USB_MATCH_VENDOR=0x0001
+-declare -i USB_MATCH_PRODUCT=0x0002
+-declare -i USB_MATCH_DEV_LO=0x0004
+-declare -i USB_MATCH_DEV_HI=0x0008
+-declare -i USB_MATCH_DEV_CLASS=0x0010
+-declare -i USB_MATCH_DEV_SUBCLASS=0x0020
+-declare -i USB_MATCH_DEV_PROTOCOL=0x0040
+-declare -i USB_MATCH_INT_CLASS=0x0080
+-declare -i USB_MATCH_INT_SUBCLASS=0x0100
+-declare -i USB_MATCH_INT_PROTOCOL=0x0200
+-
+-#
+-# stdin is "modules.usbmap" syntax
+-# on return, all matching modules were added to $DRIVERS
+-#
+-usb_map_modules ()
+-{
+-    # convert the usb_device_id fields to integers as we read them 
+-    local line module
+-    declare -i match_flags
+-    declare -i idVendor idProduct bcdDevice_lo bcdDevice_hi
+-    declare -i bDeviceClass bDeviceSubClass bDeviceProtocol
+-    declare -i bInterfaceClass bInterfaceSubClass bInterfaceProtocol
+-
+-    # look at each usb_device_id entry
+-    # collect all matches in $DRIVERS
+-
+-    while read line
+-    do
+-        # comments are lines that start with "#" ...
+-	# be careful, they still get parsed by bash!
+-	case "$line" in
+-	\#*) continue ;;
+-	esac
+-
+-	set $line
+-
+-	module=$1
+-	match_flags=$2
+-
+-	idVendor=$3
+-	idProduct=$4
+-	bcdDevice_lo=$5
+-	bcdDevice_hi=$6
+-
+-	bDeviceClass=$7
+-	bDeviceSubClass=$8
+-	bDeviceProtocol=$9
+-
+-	shift 9
+-	bInterfaceClass=$1
+-	bInterfaceSubClass=$2
+-	bInterfaceProtocol=$3
+-
+-	: checkmatch $module
+-
+-	: idVendor $idVendor $usb_idVendor
+-        if [ $USB_MATCH_VENDOR -eq $(( $match_flags & $USB_MATCH_VENDOR )) ] && 
+-	   [ $idVendor -ne $usb_idVendor ]; then
+-	    continue
+-	fi
+-
+-	: idProduct $idProduct $usb_idProduct
+-	if [ $USB_MATCH_PRODUCT -eq $(( $match_flags & $USB_MATCH_PRODUCT )) ] &&
+-	   [ $idProduct -ne $usb_idProduct ]; then
+-	    continue
+-	fi
+-
+-	: bcdDevice range $bcdDevice_hi $bcdDevice_lo actual $usb_bcdDevice
+-	if [ $USB_MATCH_DEV_LO -eq $(( $match_flags & $USB_MATCH_DEV_LO )) ] &&
+-	   [ $usb_bcdDevice -lt $bcdDevice_lo ]; then
+-	    continue
+-	fi
+-
+-	# bcdDevice_lo <= bcdDevice <= bcdDevice_hi
+-	if [ $USB_MATCH_DEV_HI -eq $(( $match_flags & $USB_MATCH_DEV_HI )) ] &&
+-	   [ $usb_bcdDevice -gt $bcdDevice_hi ]; then
+-	    continue
+-	fi
+-
+-	: bDeviceClass $bDeviceClass $usb_bDeviceClass
+-	if [ $USB_MATCH_DEV_CLASS -eq $(( $match_flags & $USB_MATCH_DEV_CLASS )) ] &&
+-	   [ $bDeviceClass -ne $usb_bDeviceClass ]; then
+-	    continue
+-	fi
+-	: bDeviceSubClass $bDeviceSubClass $usb_bDeviceSubClass
+-	if [ $USB_MATCH_DEV_SUBCLASS -eq $(( $match_flags & $USB_MATCH_DEV_SUBCLASS )) ] &&
+-	   [ $bDeviceSubClass -ne $usb_bDeviceSubClass ]; then
+-	    continue
+-	fi
+-	: bDeviceProtocol $bDeviceProtocol $usb_bDeviceProtocol
+-	if [ $USB_MATCH_DEV_PROTOCOL -eq $(( $match_flags & $USB_MATCH_DEV_PROTOCOL )) ] &&
+-	   [ $bDeviceProtocol -ne $usb_bDeviceProtocol ]; then
+-	    continue
+-	fi
+-
+-	# NOTE:  for now, this only checks the first of perhaps
+-	# several interfaces for this device.
+-
+-	: bInterfaceClass $bInterfaceClass $usb_bInterfaceClass
+-	if [ $USB_MATCH_INT_CLASS -eq $(( $match_flags & $USB_MATCH_INT_CLASS )) ] &&
+-	   [ $bInterfaceClass -ne $usb_bInterfaceClass ]; then
+-	    continue
+-	fi
+-	: bInterfaceSubClass $bInterfaceSubClass $usb_bInterfaceSubClass
+-	if [ $USB_MATCH_INT_SUBCLASS -eq $(( $match_flags & $USB_MATCH_INT_SUBCLASS )) ] &&
+-	   [ $bInterfaceSubClass -ne $usb_bInterfaceSubClass ]; then
+-	    continue
+-	fi
+-	: bInterfaceProtocol $bInterfaceProtocol $usb_bInterfaceProtocol
+-	if [ $USB_MATCH_INT_PROTOCOL -eq $(( $match_flags & $USB_MATCH_INT_PROTOCOL )) ] &&
+-	   [ $bInterfaceProtocol -ne $usb_bInterfaceProtocol ]; then
+-	    continue
+-	fi
+-
+-	# It was a match!
+-	DRIVERS="$module $DRIVERS"
+-	: drivers $DRIVERS
+-    done
+-}
+-
+-#
+-# declare a REMOVER name that the add action can use to create a
+-# remover, or that the remove action can use to execute a remover.
+-#
+-if [ "$DEVICE" = "" ]; then
+-  declare -rx REMOVER=/var/run/usb/`echo "$INTERFACE/$PRODUCT/$TYPE" | sed -e 's;/;%;g'`
+-else
+-  declare -rx REMOVER=/var/run/usb/`echo $DEVICE | sed -e 's;/;%;g'`
+-fi
+-
+-#
+-# What to do with this USB hotplug event?
+-#
+-case $ACTION in
+-
+-add)
+-    # partial workaround for 2.4 uhci/usb-uhci driver problem:  they don't
+-    # queue control requests, so device drivers can confuse each other if
+-    # they happen to issue requests at the same time ... it happens easily
+-    # with slow HID devices and "usbmodules".
+-    # starting with 2.5 (DEVPATH set), all hcds must queue control traffic.
+-    if [ "$DEVPATH" = "" ]; then
+-	sleep 3
+-    fi
+-
+-    usb_convert_vars
+-
+-    FOUND=false
+-    LABEL="USB product $PRODUCT"
+-
+-    if [ -e "$REMOVER" ]; then
+-	rm -f "$REMOVER"
+-    fi
+-
+-    # on 2.4 systems, modutils 2.4.2+ maintains MAP_CURRENT
+-    # ... otherwise we can't rely on it (sigh)
+-    case "$KERNEL" in
+-    2.4.*|2.5.*|2.6.*)
+-	if [ -r $MAP_CURRENT ]; then
+-	    load_drivers usb $MAP_CURRENT "$LABEL"
+-	fi;;
+-    *)
+-	if [ -r $MAP_DISTMAP ]; then
+-	    load_drivers usb $MAP_DISTMAP "$LABEL"
+-	fi;;
+-    esac
+-    if [ "$DRIVERS" != "" ]; then
+-	FOUND=true
+-    fi
+-
+-    # cope with special driver module configurations
+-    # (mostly HID devices, until we have an input.agent)
+-    if [ -r $MAP_HANDMAP ]; then
+-    	load_drivers usb $MAP_HANDMAP "$LABEL"
+-	if [ "$DRIVERS" != "" ]; then
+-	    FOUND=true
+-	fi
+-    fi
+-    
+-    # some devices have user-mode drivers (no kernel module, but config)
+-    # or specialized user-mode setup helpers 
+-    MODPROBE=:
+-    for MAP in $MAP_USERMAP $HOTPLUG_DIR/usb/*.usermap
+-    do
+-        if [ -r $MAP ]; then
+-	    load_drivers usb $MAP "$LABEL"
+-	    if [ "$DRIVERS" != "" ]; then
+-		FOUND=true
+-	    fi
+-	fi
+-    done
+-
+-    if [ "$FOUND" = "false" ]; then
+-	mesg "... no modules for $LABEL"
+-	exit 2
+-    fi
+-    ;;
+-
+-remove)
+-    if [ -x $REMOVER ]; then
+-	$REMOVER
+-    fi
+-    rm -f $REMOVER
+-
+-    if [ -x /usr/sbin/updfstab ]; then
+-        /usr/sbin/updfstab
+-    fi
+-    ;;
+-
+-*)
+-    debug_mesg USB $ACTION event not supported
+-    exit 1
+-    ;;
+-
+-esac
+diff -Nur hotplug-2004_01_05/etc/hotplug/usb.agent.rej hotplug-2004_01_05-new/etc/hotplug/usb.agent.rej
+--- hotplug-2004_01_05/etc/hotplug/usb.agent.rej	2003-10-13 23:46:58.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usb.agent.rej	1970-01-01 00:00:00.000000000 +0000
+@@ -1,35 +0,0 @@
+-***************
+-*** 397,408 ****
+-  
+-      # cope with special driver module configurations
+-      # (mostly HID devices, until we have an input.agent)
+--     if [ -r $MAP_HANDMAP ]; then
+--     	load_drivers usb $MAP_HANDMAP "$LABEL"
+-- 	if [ "$DRIVERS" != "" ]; then
+-- 	    FOUND=true
+-- 	fi
+--     fi
+-  
+-      # some devices have user-mode drivers (no kernel module, but config)
+-      # or specialized user-mode setup helpers 
+---- 397,416 ----
+-  
+-      # cope with special driver module configurations
+-      # (mostly HID devices, until we have an input.agent)
+-+     # not needed on 2.6 - they are loaded by hotplug
+-+     case "$KERNEL" in
+-+ 	2.6.* )
+-+ 	    : nothing
+-+ 	;;
+-+ 	* )
+-+ 	    if [ -r $MAP_HANDMAP ]; then
+-+ 		load_drivers usb $MAP_HANDMAP "$LABEL"
+-+ 		if [ "$DRIVERS" != "" ]; then
+-+ 		    FOUND=true
+-+ 		fi
+-+ 	    fi
+-+ 	;;
+-+     esac
+-  
+-      # some devices have user-mode drivers (no kernel module, but config)
+-      # or specialized user-mode setup helpers 
+diff -Nur hotplug-2004_01_05/etc/hotplug/usbd.agent hotplug-2004_01_05-new/etc/hotplug/usbd.agent
+--- hotplug-2004_01_05/etc/hotplug/usbd.agent	1970-01-01 00:00:00.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usbd.agent	2004-10-03 13:28:44.000000000 +0000
+@@ -0,0 +1,153 @@
++#!/bin/sh
++
++HOTPLUG_DIR=/etc/hotplug
++
++cd ${HOTPLUG_DIR}
++# ash "." fn does not start with current dir, use absolute path just in case
++. ${HOTPLUG_DIR}/hotplug.functions
++#DEBUG=Y
++
++AGENT=usbd
++FTYPE=net
++[ -r ${HOTPLUG_DIR}/usbd.ftype ] && FTYPE=`cat ${HOTPLUG_DIR}/usbd.ftype`
++[ "$DEBUG" != "" ] && mesg "arguments ($*) env (`env`)"
++
++KERNEL_VER=`/bin/uname -r`
++MODULE_PATH=/lib/modules/$KERNEL_VER/kernel/drivers/usb/device
++MODULE_MONITOR=usbdmonitor
++MODULE_CORE=usbdcore
++MODULE_SERIAL=serial_fd
++MODULE_NET=net_fd
++MODULE_STORAGE=storage_fd
++MODULE_STORAGE_OPT="storage_device=`cat /etc/hotplug/usbdstorage.conf`"
++MODULE_BI=sa1100_bi
++MODULE_BI_OPT=
++
++checkAndRemoveAll()
++{
++	[ "$DEBUG" != "" ] && mesg checkAndRemoveAll ${MODULE_BI} ${MODULE_STORAGE} ${MODULE_NET} ${MODULE_SERIAL} ${MODULE_CORE}
++	for M in ${MODULE_BI} ${MODULE_STORAGE} ${MODULE_NET} ${MODULE_SERIAL} ${MODULE_CORE}; do
++	        [ "$DEBUG" != "" ] && mesg check \[${M}\]
++		[ "$DEBUG" != "" ] && grep ${M} /proc/modules > /dev/null && mesg found ${M}
++		grep ${M} /proc/modules > /dev/null && /sbin/rmmod ${M}
++	done
++}
++
++loadAll()
++{
++	/sbin/insmod ${MODULE_PATH}/${MODULE_CORE}.o
++	case ${FTYPE} in
++	serial)
++		/sbin/insmod ${MODULE_PATH}/serial_fd/${MODULE_SERIAL}.o
++		;;
++	net)
++		/sbin/insmod ${MODULE_PATH}/net_fd/${MODULE_NET}.o
++		;;
++	storage)
++		/sbin/insmod ${MODULE_PATH}/storage_fd/${MODULE_STORAGE}.o ${MODULE_STORAGE_OPT}
++		MODULE_BI_OPT="shortpacket=1 recvpacket=256"
++		;;
++	*)
++       		mesg unknown usbd FTYPE \[${FTYPE}\]
++		exit 1
++		;;
++	esac
++	/sbin/insmod ${MODULE_PATH}/bi/${MODULE_BI}.o ${MODULE_BI_OPT}
++}
++
++#set -x
++
++[ -z ${AGENT} ] && mesg no AGENT && exit 1
++[ -z ${INTERFACE} ] && mesg no INTERFACE && exit 1
++[ -z ${ACTION} ] && mesg no ACTION && exit 1
++
++case ${AGENT} in
++
++usbd) 
++
++	case ${INTERFACE} in
++	monitor)
++		case ${ACTION} in
++
++			# called to load all usb device modules
++		load)	
++			[ "$DEBUG" != "" ] && mesg LOAD for ${FTYPE} ...
++			checkAndRemoveAll
++			loadAll
++			#sleep 2
++			#ifconfig usbd0 $IP
++			[ "$DEBUG" != "" ] && mesg LOAD for ${FTYPE} done.
++			;;
++
++			# called to handle power management event
++		suspend) 
++			[ "$DEBUG" != "" ] && mesg SUSPEND ...
++			checkAndRemoveAll
++			[ "$DEBUG" != "" ] && mesg SUSPEND done.
++			;;
++
++			# called to reload after power management event
++		restore-loaded)
++			[ "$DEBUG" != "" ] && mesg RESTORE-LOADED for ${FTYPE} ...
++			checkAndRemoveAll
++			loadAll
++			#sleep 2
++			#ifconfig usbd0 $IP
++			[ "$DEBUG" != "" ] && mesg RESTORE-LOADED for ${FTYPE} done.
++			;;
++
++			# called to unload after power management event
++		restore-unloaded)
++			[ "$DEBUG" != "" ] && mesg RESTORE-UNLOADED ...
++			# do nothing
++			[ "$DEBUG" != "" ] && mesg RESTORE-UNLOADED done.
++			;;
++
++			# called to unload all usb device modules
++		unload)
++			[ "$DEBUG" != "" ] && mesg UNLOAD ...
++			checkAndRemoveAll
++			[ "$DEBUG" != "" ] && mesg UNLOAD done.
++			;;
++
++		*)
++        		mesg unknown monitor ACTION \[${ACTION}\]
++			exit 1
++			;;
++		esac
++		# let the usbdmonitor module know we are finished
++		if [ -f /proc/usb-monitor ]; then
++			echo Done > /proc/usb-monitor
++		fi
++		;;
++	
++	usbd0)
++		case ${ACTION} in
++		register)
++			ifconfig usbd0 $IP
++			;;
++		unregister)
++			ifconfig usbd0 down
++			;;
++		*)
++        		mesg unknown usbd0 ACTION \[${ACTION}\]
++			exit 1
++			;;
++		esac
++		;;
++
++        *)
++        	mesg unknown INTERFACE \[${INTERFACE}\]
++		exit 1
++		;;
++	esac
++	;;
++
++*)
++        mesg unknown AGENT \[${AGENT}\]
++	exit 1
++	;;
++
++esac
++
++exit 0
+diff -Nur hotplug-2004_01_05/etc/hotplug/usbd.func hotplug-2004_01_05-new/etc/hotplug/usbd.func
+--- hotplug-2004_01_05/etc/hotplug/usbd.func	1970-01-01 00:00:00.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usbd.func	2004-10-03 13:28:44.000000000 +0000
+@@ -0,0 +1,106 @@
++#
++dhcpd_pid=/var/run/dhcpd-usbd0.pid
++dhcpcd_pid=/var/run/dhcpcd-usbd0.pid
++
++
++usbd_net_if_up()
++{
++	if [ "$NETMASK" = "" ]; then
++		NETMASK=255.255.255.0
++	fi
++#	ifconfig usbd0 $IP netmask $NETMASK
++#	/etc/rc.d/init.d/samba start
++#	echo Start samba. >> /var/samba.log
++	# DHCP server
++	if [ "$DHCPS" = "yes" -a -f /usr/sbin/dhcpd ]; then
++		if [ ! -f $dhcpd_pid ]; then
++			IP1=`echo $IP | cut -d. -f1`
++			IP2=`echo $IP | cut -d. -f2`
++			IP3=`echo $IP | cut -d. -f3`
++			IP4=`echo $IP | cut -d. -f4`
++			NM1=`echo $NETMASK | cut -d. -f1`
++			NM2=`echo $NETMASK | cut -d. -f2`
++			NM3=`echo $NETMASK | cut -d. -f3`
++			NM4=`echo $NETMASK | cut -d. -f4`
++			dhcpd_conf=/etc/hotplug/dhcpcd.conf
++			dhcpd_leases=/var/state/dhcp/dhcpd-usbd0.leases
++			echo "#" > $dhcpd_conf
++
++			if [ `expr $NM2 = 0` = 1 -a `expr $NM3 = 0` = 1 ]; then
++				#class A
++				SUBNET=$IP1.0.0
++				echo "subnet $SUBNET.0 netmask $NETMASK {" >> $dhcpd_conf
++				if [ `expr $IP2 = 0` = 1 -a `expr $IP3 = 0` = 1 -a `expr $IP4 = 1` = 1 ]; then
++					echo "range $SUBNET.2 $SUBNET.2;" >> $dhcpd_conf
++				else
++					echo "range $SUBNET.1 $SUBNET.1;" >> $dhcpd_conf
++				fi
++			elif [ `expr $NM3 = 0` = 1 ]; then
++				#class B
++				SUBNET=$IP1.$IP2.0
++				echo "subnet $SUBNET.0 netmask $NETMASK {" >> $dhcpd_conf
++				if [ `expr $IP3 = 0` = 1 -a `expr $IP4 = 1` = 1 ]; then
++					echo "range $SUBNET.2 $SUBNET.2;" >> $dhcpd_conf
++				else
++					echo "range $SUBNET.1 $SUBNET.1;" >> $dhcpd_conf
++				fi
++			else
++				#class C
++				SUBNET=$IP1.$IP2.$IP3
++				echo "subnet $SUBNET.0 netmask $NETMASK {" >> $dhcpd_conf
++				if [ `expr $IP4 = 1` = 1 ]; then
++					echo "range $SUBNET.2 $SUBNET.2;" >> $dhcpd_conf
++				else
++					echo "range $SUBNET.1 $SUBNET.1;" >> $dhcpd_conf
++				fi
++			fi
++#			if [ `expr $IP4 \< 128` = 1 ]; then
++#				echo "range $SUBNET.128 $SUBNET.254;" >> $dhcpd_conf
++#			else
++#				echo "range $SUBNET.1 $SUBNET.127;" >> $dhcpd_conf
++#			fi
++			echo "option netbios-name-servers $IP;" >> $dhcpd_conf
++			echo "option netbios-node-type 8;" >> $dhcpd_conf
++			echo "default-lease-time 600;" >> $dhcpd_conf
++			echo "max-lease-time 7200;" >> $dhcpd_conf
++			echo "}" >> $dhcpd_conf
++			if [ ! -d /var/state/dhcp ]; then
++				mkdir -p /var/state/dhcp
++			fi
++			if [ ! -f $dhcpd_leases ]; then
++				touch $dhcpd_leases
++			fi
++			/usr/sbin/dhcpd -cf $dhcpd_conf -lf $dhcpd_leases -pf $dhcpd_pid usbd0 > /dev/null 2>&1
++		fi
++	fi
++	# DHCP client
++	if [ "$DHCPC" = "yes" -a -f /sbin/dhcpcd ]; then
++		if [ ! -f $dhcpcd_pid ]; then
++			/sbin/dhcpcd usbd0 >/dev/null 2>&1
++		fi
++	fi
++}
++
++usbd_net_if_down()
++{
++	if [ -f $dhcpd_pid ]; then
++		PID=`cat $dhcpd_pid`
++		if [ "$PID" != "" ]; then
++			kill $PID
++		fi
++		rm -f $dhcpd_pid
++	fi
++	if [ -f $dhcpcd_pid ]; then
++		PID=`cat $dhcpcd_pid`
++		if [ "$PID" != "" ]; then
++			kill $PID
++		fi
++		rm -f $dhcpd_pid
++	fi
++	# samba
++#	echo Stop samba. >> /var/samba.log
++
++#	ifconfig usbd0 down
++	# 02.05.15 moved to here
++#	/etc/rc.d/init.d/samba stop
++}
+diff -Nur hotplug-2004_01_05/etc/hotplug/usb.distmap hotplug-2004_01_05-new/etc/hotplug/usb.distmap
+--- hotplug-2004_01_05/etc/hotplug/usb.distmap	2001-02-16 20:56:39.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usb.distmap	1970-01-01 00:00:00.000000000 +0000
+@@ -1,220 +0,0 @@
+-# usb module         match_flags idVendor idProduct bcdDevice_lo bcdDevice_hi bDeviceClass bDeviceSubClass bDeviceProtocol bInterfaceClass bInterfaceSubClass bInterfaceProtocol driver_info
+-iforce               0x0003 0x046d   0xc281    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-cpia_usb             0x0003 0x0553   0x0002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-acm                  0x0070 0x0000   0x0000    0x0000       0x0000       0x02         0x00            0x00            0x00            0x00            0x00            0x00000000
+-audio                0x0180 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x01            0x01            0x00            0x00000000
+-bluetooth            0x0070 0x0000   0x0000    0x0000       0x0000       0xe0         0x01            0x01            0x00            0x00            0x00            0x00000000
+-dabusb               0x0003 0x0547   0x2131    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-dabusb               0x0003 0x0547   0x9999    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-dc2xx                0x0003 0x040a   0x0120    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-dc2xx                0x0003 0x040a   0x0130    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-dc2xx                0x0003 0x040a   0x0131    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-dc2xx                0x0003 0x040a   0x0132    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-dc2xx                0x0003 0x040a   0x0100    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-dc2xx                0x0003 0x040a   0x0110    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-dc2xx                0x0003 0x040a   0x0111    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-dc2xx                0x0003 0x040a   0x0112    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-dc2xx                0x0003 0xf003   0x6002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-dsbr100              0x0003 0x04b4   0x1002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-hid                  0x0080 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x03            0x00            0x00            0x00000000
+-ibmcam               0x000f 0x0545   0x8080    0x0002       0x0002       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-ibmcam               0x000f 0x0545   0x8080    0x030a       0x030a       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x03e8   0x0008    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x0506   0x03e8    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x0557   0x2002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x0557   0x4000    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x0565   0x0002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x0565   0x0005    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x05e9   0x0008    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x06e1   0x0008    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x0707   0x0100    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x07aa   0x0001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x0846   0x1001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x13d2   0x0400    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x066b   0x2202    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x1645   0x0005    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x2001   0x4000    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-kaweth               0x0003 0x07b8   0x4000    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-mdc800               0x0003 0x055f   0xa800    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-microtek             0x0003 0x04ce   0x0300    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-microtek             0x0003 0x05da   0x0094    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-microtek             0x0003 0x05da   0x0099    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-microtek             0x0003 0x05da   0x009a    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-microtek             0x0003 0x05da   0x00a0    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-microtek             0x0003 0x05da   0x00a3    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-microtek             0x0003 0x05da   0x80a3    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-microtek             0x0003 0x05da   0x80ac    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-ov511                0x0003 0x05a9   0x0511    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-ov511                0x0003 0x05a9   0xa511    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-ov511                0x0003 0x0813   0x0002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x083a   0x1046    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x07a6   0x8511    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x07a6   0x0986    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x08dd   0x0986    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x08dd   0x0987    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x08dd   0x0988    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x08dd   0x8511    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x07aa   0x0004    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x2001   0x4001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x2001   0x4002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x2001   0x4003    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x2001   0xabc1    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x07b8   0xabc1    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x07b8   0x4002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x04bb   0x0904    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x056e   0x4002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x066b   0x2202    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x066b   0x2203    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x066b   0x2204    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x066b   0x2206    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x0411   0x0001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x0707   0x0200    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-pegasus              0x0003 0x15e8   0x9100    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-printer              0x0070 0x0000   0x0000    0x0000       0x0000       0x07         0x01            0x01            0x00            0x00            0x00            0x00000000
+-printer              0x0070 0x0000   0x0000    0x0000       0x0000       0x07         0x01            0x02            0x00            0x00            0x00            0x00000000
+-printer              0x0070 0x0000   0x0000    0x0000       0x0000       0x07         0x01            0x03            0x00            0x00            0x00            0x00000000
+-printer              0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x07            0x01            0x01            0x00000000
+-printer              0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x07            0x01            0x02            0x00000000
+-printer              0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x07            0x01            0x03            0x00000000
+-rio500               0x0003 0x0841   0x0001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04a5   0x2060    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04a5   0x2040    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04a5   0x2022    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x06bd   0x0001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x06bd   0x0002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x06bd   0x2061    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x06bd   0x0100    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0458   0x2001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x03f0   0x0205    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x03f0   0x0101    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x03f0   0x0105    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x03f0   0x0102    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x03f0   0x0401    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x03f0   0x0701    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x03f0   0x0201    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x03f0   0x0601    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0638   0x0268    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x05da   0x0099    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x05da   0x0094    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x05da   0x00a0    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x05da   0x009a    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x05da   0x00a3    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x05da   0x80a3    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x05da   0x80ac    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x055f   0x0001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0400   0x1000    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x055f   0x0002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x055f   0x0003    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x055f   0x0006    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0300    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0380    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0301    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0381    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0302    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0382    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0303    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0383    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0340    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0360    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0341    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x0461   0x0361    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04b8   0x0101    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04b8   0x0103    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04b8   0x0104    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04b8   0x0106    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04b8   0x0107    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x1606   0x0010    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x1606   0x0030    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x1606   0x0230    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04a7   0x0221    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04a7   0x0211    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04a7   0x0231    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04a7   0x0311    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04a7   0x0321    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-scanner              0x0003 0x04a7   0x0331    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-belkin_sa            0x0003 0x050d   0x0103    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-belkin_sa            0x0003 0x056c   0x8007    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-belkin_sa            0x0003 0x0565   0x0001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-digi_acceleport      0x0003 0x05c5   0x0002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-digi_acceleport      0x0003 0x05c5   0x0004    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-empeg                0x0003 0x084f   0x0001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-ftdi_sio             0x0003 0x0403   0x8372    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-ftdi_sio             0x0003 0x0403   0x6001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x0105    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x0103    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x0106    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x0101    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x0102    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x0109    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x0112    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x0107    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x0108    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x010f    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x0110    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan              0x0003 0x06cd   0x010a    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan_pda          0x0003 0x06cd   0x0103    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-keyspan_pda          0x0003 0x06cd   0x0104    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-mct_u232             0x0003 0x0711   0x0210    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-mct_u232             0x0003 0x0711   0x0230    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-mct_u232             0x0003 0x0711   0x0200    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-omninet              0x0003 0x0586   0x1000    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-visor                0x0003 0x082d   0x0100    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-whiteheat            0x0003 0x0710   0x8001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-whiteheat            0x0003 0x0710   0x0001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x03ee   0x0000    0x0000       0x0245       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x03f0   0x0107    0x0200       0x0200       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x04e6   0x0001    0x0200       0x0200       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x04e6   0x0002    0x0100       0x0100       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x04e6   0x0006    0x0100       0x0200       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x04e6   0x0007    0x0100       0x0200       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x04e6   0x0009    0x0200       0x0200       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x04e6   0x000a    0x0200       0x0200       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x04e6   0x000b    0x0100       0x0100       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x04e6   0x000c    0x0100       0x0100       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x04e6   0x0101    0x0200       0x0200       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x054c   0x0010    0x0106       0x0210       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x054c   0x002d    0x0100       0x0100       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x057b   0x0000    0x0000       0x0299       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x057b   0x0000    0x0300       0x9999       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x059f   0xa601    0x0200       0x0200       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x05ab   0x0031    0x0100       0x0100       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x0644   0x0000    0x0100       0x0100       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x0693   0x0002    0x0100       0x0100       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x0693   0x0005    0x0100       0x0100       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x0781   0x0001    0x0200       0x0200       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x0781   0x0100    0x0100       0x0100       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x0781   0x0002    0x0009       0x0009       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x07af   0x0004    0x0100       0x0100       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x000f 0x07af   0x0005    0x0100       0x0100       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x01            0x01            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x02            0x01            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x03            0x01            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x04            0x01            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x05            0x01            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x06            0x01            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x01            0x00            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x02            0x00            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x03            0x00            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x04            0x00            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x05            0x00            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x06            0x00            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x01            0x50            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x02            0x50            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x03            0x50            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x04            0x50            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x05            0x50            0x00000000
+-usb-storage          0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x08            0x06            0x50            0x00000000
+-usbcore              0x0080 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x09            0x00            0x00            0x00000000
+-usbnet               0x0003 0x0547   0x2720    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00002a08
+-usbnet               0x0003 0x0525   0x1080    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00002cf0
+-usbnet               0x0003 0x067b   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00002d70
+-usbnet               0x0003 0x067b   0x0001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00002d70
+-uss720               0x0003 0x047e   0x1001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-uss720               0x0003 0x0557   0x2001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-uss720               0x0003 0x0729   0x1284    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-wacom                0x0003 0x056a   0x0010    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-wacom                0x0003 0x056a   0x0020    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000001
+-wacom                0x0003 0x056a   0x0021    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000002
+-wacom                0x0003 0x056a   0x0022    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000003
+-wacom                0x0003 0x056a   0x0023    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000004
+-wacom                0x0003 0x056a   0x0024    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000005
+diff -Nur hotplug-2004_01_05/etc/hotplug/usbdnet hotplug-2004_01_05-new/etc/hotplug/usbdnet
+--- hotplug-2004_01_05/etc/hotplug/usbdnet	1970-01-01 00:00:00.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usbdnet	2004-10-03 13:28:44.000000000 +0000
+@@ -0,0 +1,21 @@
++#!/bin/sh
++
++. /etc/hotplug/usbdnet.conf
++. /etc/hotplug/usbd.func
++
++case $1 in
++
++up) 
++	usbd_net_if_up
++	;;
++down) 
++	usbd_net_if_down
++	;;
++*)
++	exit 1
++	;;
++
++esac
++
++exit 0
++
+diff -Nur hotplug-2004_01_05/etc/hotplug/usbdnet.conf hotplug-2004_01_05-new/etc/hotplug/usbdnet.conf
+--- hotplug-2004_01_05/etc/hotplug/usbdnet.conf	1970-01-01 00:00:00.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usbdnet.conf	2004-10-03 13:28:44.000000000 +0000
+@@ -0,0 +1,4 @@
++IP=192.168.129.201
++NETMASK=255.255.255.0
++DHCPS=no
++DHCPC=no
+diff -Nur hotplug-2004_01_05/etc/hotplug/usbdstorage.agent hotplug-2004_01_05-new/etc/hotplug/usbdstorage.agent
+--- hotplug-2004_01_05/etc/hotplug/usbdstorage.agent	1970-01-01 00:00:00.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usbdstorage.agent	2004-10-03 13:28:44.000000000 +0000
+@@ -0,0 +1,71 @@
++#!/bin/sh
++#
++# Network hotplug policy agent for Linux 2.4 kernels
++#
++# Kernel NET hotplug params include:
++#        
++#        ACTION=%s [register or unregister]
++#        INTERFACE=%s
++#
++# HISTORY:
++#
++# 25-Feb-2001        Special case ppp and similar (redhat)
++# 23-Jan-2001        Log invocation of "ifup" if debugging
++# 04-Jan-2001        Initial version of "new" hotplug agent.
++# 2001-Dec-19        Modified to work with ash, Sharp policy for usbd0 added
++#
++# $Id: usbdstorage.agent,v 1.3 2003/10/21 00:22:54 sakamoto Exp $
++#
++
++DEVICE_CF=/dev/hda1
++DEVICE_SD=/dev/mmcd/disc0/part1
++STORAGE_PID=/var/run/usbdstorage.pid
++
++case ${ACTION} in
++active)
++    echo ${INTERFACE} > ${STORAGE_PID}
++    ;;
++inactive)
++    rm -f ${STORAGE_PID}
++    ;;
++mount)
++    case ${INTERFACE} in
++    ${DEVICE_CF})
++        /etc/pcmcia/ide start hda
++        ;;
++    ${DEVICE_SD})
++        /etc/sdcontrol insert
++        ;;
++    *)
++        exit 1
++        ;;
++    esac
++    ;;
++umount)
++    case ${INTERFACE} in
++    ${DEVICE_CF})
++        /etc/pcmcia/ide stop hda
++        ;;
++    ${DEVICE_SD})
++        /etc/sdcontrol compeject
++        ;;
++    *)
++        exit 1
++        ;;
++    esac
++    ;;
++connect)
++    ;;
++disconnect)
++    ;;
++insert)
++    ;;
++eject)
++    ;;
++*)
++    exit 1
++    ;;
++esac
++
++exit 0
++ 
+\ В конце файла нет новой строки
+diff -Nur hotplug-2004_01_05/etc/hotplug/usb.handmap hotplug-2004_01_05-new/etc/hotplug/usb.handmap
+--- hotplug-2004_01_05/etc/hotplug/usb.handmap	2003-10-07 19:51:38.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usb.handmap	1970-01-01 00:00:00.000000000 +0000
+@@ -1,50 +0,0 @@
+-#
+-# This file contains modutils format usbmap entries
+-# with special driver mappings that the kernel
+-# for some reason does not expose through modutils
+-#
+-# Comments get read by bash so dont use punctuation
+-# RETEST ESPECIALLY AFER CHANGES TO COMMENTS
+-#
+-#
+-# usbcore hub driver metadata passes different metadata than
+-# policy agents see unless extra data from usbdevfs can be used
+-#
+-usbcore              0x0090 0x0000   0x0000    0x0000       0x0000       0x09         0x00            0x00            0x09            0x00            0x00            0x00000000
+-#
+-# recognize keyboard and mouse boot protocols to avoid
+-# parsing all HID descriptors
+-#
+-keybdev              0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x03            0x01            0x01            0x00000000
+-mousedev             0x0380 0x0000   0x0000    0x0000       0x0000       0x00         0x00            0x00            0x03            0x01            0x02            0x00000000
+-#
+-# In the big picture not many HID devices are keyboards or mice
+-# HID device classes are defined with HID reports and so far
+-# there is no hotplugging support for hid or the input subsystem
+-#
+-# This section mapping HID devices to their input subsystem
+-# handlers will probably grow a lot
+-#
+-# FIXME  describe each device by vendor and product name
+-# PLEASE DO NOT SUBMIT ANY MORE PATCHES WITHOUT SUCH COMMENTS
+-#
+-mousedev             0x0003 0x05a4   0x9998    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-joydev               0x0003 0x046d   0xc207    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-joydev               0x0003 0x045e   0x0008    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-joydev               0x0003 0x047d   0x3002    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-joydev               0x0003 0x07b5   0x9902    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-# Saitek Cyborg 3D USB
+-joydev               0x0003 0x06a3   0x0006    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-#Gravis Gamepad Pro  
+-joydev		     0x0003 0x0428   0x4001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000  	
+-# Wacom tablets need "evdev" but don't depend on it;
+-# XFree86 wacom_drv needs both.
+-evdev                0x0003 0x056a   0x0010    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-evdev                0x0003 0x056a   0x0020    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-evdev                0x0003 0x056a   0x0021    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-evdev                0x0003 0x056a   0x0022    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-evdev                0x0003 0x056a   0x0023    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-evdev                0x0003 0x056a   0x0024    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-evdev                0x0003 0x056a   0x0011    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-evdev                0x0003 0x056a   0x0042    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+-usblcd		     0x0003 0x1212   0x0001    0x0000       0x0000       0x00         0x00            0x00            0x00            0x00            0x00            0x00000000
+diff -Nur hotplug-2004_01_05/etc/hotplug/usb.rc hotplug-2004_01_05-new/etc/hotplug/usb.rc
+--- hotplug-2004_01_05/etc/hotplug/usb.rc	2003-09-25 00:09:08.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usb.rc	1970-01-01 00:00:00.000000000 +0000
+@@ -1,377 +0,0 @@
+-#!/bin/sh
+-# vim: syntax=sh
+-#
+-# usb.rc	This brings the USB subsystem up and down safely.
+-#
+-# $Id: usb.rc,v 1.19 2003/09/25 00:09:08 kroah Exp $
+-#
+-# Best invoked via /etc/init.d/hotplug or equivalent, with
+-# writable /tmp, /usr mounted, and syslogging active.
+-#
+-# Bus management is basically unrelated to runlevel changes; it
+-# relates to physical topology, including possibly hotpluggable
+-# busses (USB, Cardbus) or controllers.  If a bus is physically
+-# present, it should normally be available.
+-# 
+-# USB-dependant systems (iMacs, "legacy free" x86 systems, and so on)
+-# should statically link USB keyboard support into the kernel (USB core,
+-# EHCI/OHCI/UHCI/..., hid, input, keybdev; and likely mousedev) so the
+-# system console can't be removed by accident.
+-
+-
+-PATH=/sbin:/bin:/usr/sbin:/usr/bin
+-
+-STATIC_MODULE_LIST=
+-X11_USBMICE_HACK=false
+-
+-# source function library
+-if [ -f /etc/init.d/functions ]; then
+-	. /etc/init.d/functions
+-elif [ -f /etc/rc.d/init.d/functions ]; then
+-	. /etc/rc.d/init.d/functions
+-fi
+-
+-
+-# override any of the defaults above?
+-if [ -f /etc/sysconfig/usb ]; then
+-    . /etc/sysconfig/usb
+-fi
+-
+-
+-MOUSE_MODULES="mousedev input"
+-
+-# In its currently-recommended configuration, XFree86 3.3.6 always opens
+-# /dev/input/mice; so mousedev and input must be loaded before X11 starts.
+-if [ $X11_USBMICE_HACK = true ]; then
+-    STATIC_MODULE_LIST="$MOUSE_MODULES $STATIC_MODULE_LIST"
+-fi
+-
+-
+-#
+-# "COLD PLUG" ... recovery from partial USB init that may have happened
+-# before the OS could really handle hotplug, perhaps because /sbin or
+-# $HOTPLUG_DIR wasn't available or /tmp wasn't writable.  When/if the
+-# /sbin/hotplug program is invoked then, hotplug event notifications
+-# get dropped.  To make up for such "cold boot" errors, we synthesize
+-# all the hotplug events we expect to have seen already.  They can be
+-# out of order, and some might be duplicates.
+-#
+-# Note that on 2.5 the init filesystem may have loaded some of the more
+-# essential usb drivers (maybe usb-storage for a boot disk, and hid),
+-# but we may still need to load less important ones or invoke setup
+-# scripts that couldn't run earlier.
+-#
+-usb_boot_events ()
+-{
+-	#
+-	# FIXME on 2.5, /sys/bus/usb/devices/* gives all of the
+-	# info we need.  Interface hotplug events come from the
+-	# "*:*" files, and device events (do them first) come
+-	# from the others. 
+-	#
+-	# don't expect usbmodules to exist!!  and remove the
+-	# dependency (below) on usbfs to decide whether we should
+-	# be synthesizing coldplug events.
+-	#
+-
+-	# synthesize hotplug events if we can 
+-	# we need (non-bash) programs to parse descriptors.
+-	LISTER=`type -p usbmodules`
+-	if [ "$LISTER" = "" -o ! -f /proc/bus/usb/devices ]; then
+-		echo $"** can't synthesize root hub events"
+-		return
+-	fi
+-
+-	# make sure the usb agent will run
+-	ACTION=add
+-	PRODUCT=0/0/0
+-	export ACTION PRODUCT
+-
+-	DEVFS=/proc/bus/usb
+-	DEVICE=
+-	export DEVFS DEVICE
+-
+-	# these notifications will be handled by usbmodules
+-	# NOTE: we're not providing a full set of hotplug
+-	# parameters for USB.  that's why "usbmodules" is a
+-	# requirement: it reads usbfs to get the others.
+-	# (it's included in usbutils 0.8 and later)
+-	#
+-	# FIXME usbmodules, or something, should set real
+-	# PRODUCT and DEVICE strings so /etc/hotplug/usb/*
+-	# scripts can rely on them ...
+-	for DEVICE in /proc/bus/usb/*/*
+-	do
+-		/etc/hotplug/usb.agent
+-	done
+-}
+-
+-
+-maybe_start_usb ()
+-{
+-    local COUNT SYNTHESIZE
+-    COUNT=0
+-
+-    # if USB is partially initted then synthesize "cold plug" events. the
+-    # kernel probably dropped many "hot plug" events, and those it didn't
+-    # drop likely couldn't trigger all the setup actions (kicking daemons,
+-    # dropping config records, and so on).
+-
+-    # if it's not initted at all (no hcds loaded) no synthesized events
+-    # will be needed, we'll see real ones.  knowing that there are no
+-    # hcds available through version-portable logic is a nightmare, so
+-    # assume we synthesize unless "usbfs" is clearly not initted (which
+-    # we currently need when synthesizing, anyway).
+-
+-    SYNTHESIZE=true
+-    if [ ! -d /proc/bus/usb ]; then
+-	SYNTHESIZE=false
+-    fi
+-
+-    # if distro hasn't already done part of this ... load core,
+-    # and mount usbfs before the first hotplug agent fires
+-    # (so it'll be available to the agents).
+-    modprobe -q usbcore >/dev/null 2>&1
+-    if [ -d /proc/bus/usb ]; then
+-	# if it's not mounted, try to mount it
+-	if [ ! -f /proc/bus/usb/devices ]; then
+-	    if grep -q "[	 ]/proc/bus/usb[	 ]" /etc/fstab ; then
+-		mount /proc/bus/usb
+-	    else
+-		# NOTE: name is changing to "usbfs" from "usbdevfs"
+-		# NOTE: some versions don't create empty 'devices' files
+-		mount -t usbdevfs usbdevfs /proc/bus/usb
+-	    fi
+-	fi
+-    fi
+-
+-    # Load Host Controller Drivers (HCDs) ... this automatically handles
+-    # systems with multiple controllers (EHCI, OHCI, UHCI) without needing
+-    # /proc or tools (lspci -v|grep USB, etc) to do so.  If hotplugging
+-    # is enabled on this system, initting a root hub will cause hotplug
+-    # events to fire for every device on the tree at that root.
+-
+-    # FIXME: some of this should be driven by PCI hotplugging, and have
+-    # the blacklist control which uhci driver gets used (before 2.5).
+-
+-    # "new style" HCDs ... more common code
+-    modprobe -q ehci-hcd >/dev/null 2>&1
+-    modprobe -q ohci-hcd >/dev/null 2>&1
+-    modprobe -q uhci-hcd >/dev/null 2>&1
+-
+-    # "old style" HCDs ... more driver-specific bugs
+-    modprobe -q usb-ohci >/dev/null 2>&1
+-    # NOTE: this prefers "uhci"; you may prefer "usb-uhci".
+-    # modprobe -q usb-uhci >/dev/null 2>&1 || modprobe -q uhci >/dev/null 2>&1
+-    modprobe -q uhci >/dev/null 2>&1 || modprobe -q usb-uhci >/dev/null 2>&1
+-
+-    # ... add any non-PCI HCDS here.  Examples include the
+-    # CRIS usb-host, Philips ISP-1161, Symlogic 811HS, and so on.
+-    # ohci-hcd can handle some non-pci variants.
+-
+-    if [ -d /proc/bus/usb ]; then
+-	# If we see there are no busses, we "failed" and
+-	# can report so even if we're partially nonmodular.
+-	#
+-	# NOTE: this fails on older kernels, where usbdevfs had two files
+-	# ('devices' and 'drivers') with no hcds registered, but works on
+-	# newer kernels where usbfs has zero files until hcds register,
+-	# and might not have the 'drivers' file.
+-	COUNT=`ls /proc/bus/usb | wc -l`
+-	if [ $COUNT -lt 2 ]; then
+-	    umount /proc/bus/usb
+-	    rmmod usbcore >/dev/null 2>&1
+-	    return 1
+-	fi
+-
+-    # if USB is fully modular and yet can clean up,
+-    # we know init failed without needing usbfs
+-    elif rmmod usbcore >/dev/null 2>&1; then
+-	return 1
+-    fi
+-
+-    # hotplug events didn't fire during booting;
+-    # cope with devices that enumerated earlier
+-    # and may not have been fully configured.
+-    if [ $SYNTHESIZE = true ]; then
+-    	usb_boot_events
+-    fi
+-
+-    # Some modules are statically loaded, perhaps because they are
+-    # needed to activate filesystem device nodes.
+-    for MODULE in $STATIC_MODULE_LIST; do
+-	modprobe $MODULE
+-    done
+-
+-    # we did everything we could ...
+-    return 0
+-}
+-
+-maybe_stop_usb ()
+-{
+-    # call this multiple times if you had to take down components of the
+-    # USB subsystem by hand; it cleans up whatever can
+-    # be cleaned up, letting the system quiesce further.
+-
+-    # NOTE:  this list of "all USB modules" is unfortunate, but it seems
+-    # inevitable until modutils supports the notion of drivers with use
+-    # counts of zero that shouldn't be removed until after their device
+-    # gets removed.  Maybe in 2.5 ... of necessity, the list is partial.
+-
+-    # disconnect all controllers we can, and kernel drivers
+-    # HCDs first, so most drivers reduce their use counts.
+-    rmmod ehci-hcd >/dev/null 2>&1
+-    rmmod ohci-hcd >/dev/null 2>&1
+-    rmmod uhci-hcd >/dev/null 2>&1
+-    rmmod usb-ohci >/dev/null 2>&1
+-    rmmod usb-uhci >/dev/null 2>&1
+-    rmmod     uhci >/dev/null 2>&1
+-
+-    # user mode code may keep usbfs busy for a while yet ...
+-
+-    # OK, usbcore won't actually be removed unless there happen to be
+-    # no USB drivers loaded, and usbfs isn't mounted.  let's force
+-    # removal of autocleanable modules before trying to rmmod usbcore
+-    rmmod -as
+-# note: module-init-tools 0.8a doesn't handle "-as" flags
+-
+-    # Now let's workaround the fact that some USB modules never increase
+-    # their module use counts, so that "rmmod -a" won't unload them.
+-    # (And we can't use "modprobe --autoclean" anyway.)
+-    rmmod acm              >/dev/null 2>&1
+-    rmmod audio            >/dev/null 2>&1
+-    rmmod auerswald        >/dev/null 2>&1
+-    rmmod belkin_sa        >/dev/null 2>&1
+-    rmmod bluetooth        >/dev/null 2>&1
+-    rmmod catc             >/dev/null 2>&1
+-    rmmod CDCEther         >/dev/null 2>&1
+-    rmmod cpia_usb         >/dev/null 2>&1
+-    rmmod cyberjack        >/dev/null 2>&1
+-    rmmod dabusb           >/dev/null 2>&1
+-    rmmod dc2xx            >/dev/null 2>&1
+-    rmmod digi_acceleport  >/dev/null 2>&1
+-    rmmod dsbr100          >/dev/null 2>&1
+-    rmmod emi26            >/dev/null 2>&1
+-    rmmod empeg            >/dev/null 2>&1
+-    rmmod ftdi_sio         >/dev/null 2>&1
+-    rmmod hci_usb          >/dev/null 2>&1
+-    rmmod hid              >/dev/null 2>&1
+-    rmmod hpusbscsi        >/dev/null 2>&1
+-    rmmod ibmcam           >/dev/null 2>&1
+-    rmmod iforce           >/dev/null 2>&1
+-    rmmod io_edgeport      >/dev/null 2>&1
+-    rmmod ipaq             >/dev/null 2>&1
+-    rmmod ir-usb           >/dev/null 2>&1
+-    rmmod irda-usb         >/dev/null 2>&1
+-    rmmod kaweth           >/dev/null 2>&1
+-    rmmod keyspan          >/dev/null 2>&1
+-    rmmod keyspan_pda      >/dev/null 2>&1
+-    rmmod kl5kusb105       >/dev/null 2>&1
+-    rmmod mct_u232         >/dev/null 2>&1
+-    rmmod mdc800           >/dev/null 2>&1
+-    rmmod microtek         >/dev/null 2>&1
+-    rmmod omninet          >/dev/null 2>&1
+-    rmmod ov511            >/dev/null 2>&1
+-    rmmod pegasus          >/dev/null 2>&1
+-    rmmod pl2303           >/dev/null 2>&1
+-    rmmod printer          >/dev/null 2>&1
+-    rmmod pwc pwcx         >/dev/null 2>&1
+-    rmmod rio500           >/dev/null 2>&1
+-    rmmod rtl8150          >/dev/null 2>&1
+-    rmmod scanner          >/dev/null 2>&1
+-    rmmod se401            >/dev/null 2>&1
+-    rmmod stv680           >/dev/null 2>&1
+-    rmmod usbkbd           >/dev/null 2>&1
+-    rmmod usbmouse         >/dev/null 2>&1
+-    rmmod usbnet           >/dev/null 2>&1
+-    rmmod usbtest          >/dev/null 2>&1
+-    rmmod usb-storage      >/dev/null 2>&1
+-    rmmod uss720           >/dev/null 2>&1
+-    rmmod vicam            >/dev/null 2>&1
+-    rmmod visor            >/dev/null 2>&1
+-    rmmod wacom            >/dev/null 2>&1
+-    rmmod whiteheat        >/dev/null 2>&1
+-
+-    if [ "$STATIC_MODULE_LIST" != "" ]; then
+-	rmmod $STATIC_MODULE_LIST >/dev/null 2>&1
+-    fi
+-
+-    # remove the helper modules that some usb modules need
+-    rmmod usbserial        >/dev/null 2>&1
+-    rmmod usbvideo         >/dev/null 2>&1
+-
+-    # ok, hope that user mode drivers/managers closed their fds.
+-    umount /proc/bus/usb >/dev/null 2>&1
+-
+-    rmmod usbcore >/dev/null 2>&1
+-
+-    # we did everything we could ...
+-    return 0;
+-}
+-
+-# See how we were called.
+-case "$1" in
+-  start)
+-	maybe_start_usb
+-        ;;
+-  stop)
+-	maybe_stop_usb
+-        ;;
+-  status)
+-	echo $"USB Status for kernel: " `uname -srm`
+-	echo ''
+-
+-	if [ -f /proc/bus/usb/devices ]; then
+-	    # as noted above:  this fails on older kernels,
+-	    # where usbfs created files differently.
+-	    COUNT=`ls /proc/bus/usb | wc -l`
+-	    if [ $COUNT -ge 2 ]; then
+-		COUNT=`expr $COUNT - 2`
+-		echo $"USB up; bus count is $COUNT"
+-		grep "^[TPSI]:" /proc/bus/usb/devices
+-	    else
+-		echo $"usbfs partially up; no busses"
+-	    fi
+-	    echo ''
+-
+-	    echo $"USB Drivers Loaded: "
+-	    if [ -f /proc/bus/usb/drivers ]; then
+-		cat /proc/bus/usb/drivers
+-	    fi
+-	    if [ -d /sys/bus/usb ]; then
+-		ls -1 /sys/bus/usb/drivers
+-	    fi
+-	else
+-	    echo $"usbfs is unavailable. "
+-	    if [ -f /proc/modules ] && fgrep -q usbcore /proc/modules; then
+-		echo $"USB module is loaded. "
+-	    else
+-		echo $"USB may be statically linked. "
+-	    fi
+-	    echo $"If khubd is running, that shows USB is available."
+-	fi
+-	echo ''
+-
+-	if [ -f /proc/sys/kernel/hotplug ]; then
+-	    echo $"khubd/hotplug thread: "
+-	else
+-	    echo $"khubd thread:"
+-	fi
+-	ps -l | head -1
+-	ps -Al | egrep 'khubd' | grep -v grep
+-	echo ''
+-
+-	lsmod
+-	echo ''
+-
+-	# /proc/devices too? "usb", "input", and others ...
+-
+-	;;
+-  restart)
+-	# always invoke by absolute path, else PATH=$PATH:
+-	$0 stop && $0 start
+-	;;
+-  *)
+-        echo $"Usage: $0 {start|stop|status|restart}"
+-        exit 1
+-esac
+diff -Nur hotplug-2004_01_05/etc/hotplug/usb.usermap hotplug-2004_01_05-new/etc/hotplug/usb.usermap
+--- hotplug-2004_01_05/etc/hotplug/usb.usermap	2001-01-16 19:22:46.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug/usb.usermap	1970-01-01 00:00:00.000000000 +0000
+@@ -1 +0,0 @@
+-# usb module         match_flags idVendor idProduct bcdDevice_lo bcdDevice_hi bDeviceClass bDeviceSubClass bDeviceProtocol bInterfaceClass bInterfaceSubClass bInterfaceProtocol driver_info
+diff -Nur hotplug-2004_01_05/etc/hotplug.d/default/default.hotplug hotplug-2004_01_05-new/etc/hotplug.d/default/default.hotplug
+--- hotplug-2004_01_05/etc/hotplug.d/default/default.hotplug	2003-05-02 05:01:45.000000000 +0000
++++ hotplug-2004_01_05-new/etc/hotplug.d/default/default.hotplug	1970-01-01 00:00:00.000000000 +0000
+@@ -1,110 +0,0 @@
+-#!/bin/bash
+-#
+-# This version of /sbin/hotplug should works on most GNU/Linux systems
+-# using Linux 2.2.18+ or 2.4.* kernels.  On 2.2.*, only USB has such
+-# hotplugging support; on 2.4.*, so do PCI/Cardbus and network interfaces.
+-#
+-# In 2.5, both classes and busses can report hotplug events as part
+-# of the driver model core functionality.  Plus, /sys/$DEVPATH is
+-# available for scripting, as well as the $ACTION being reported.
+-#
+-# The kernel HOTPLUG configuration option needs to be enabled, and most
+-# device drivers will be compiled for MODULES (make allmod).
+-#
+-#
+-# HISTORY:
+-#
+-# 21-Nov-2002	Optionally log events; 2.5 notes (db)
+-# 26-Feb-2001	Cleanup (Gioele Barabucci)
+-# 14-Feb-2001	Better diagnostics: logging, agent list (contributors)
+-# 04-Jan-2001	First "New" version, which only delegates to
+-#		specialized hotplug agents.
+-#
+-# $Id: default.hotplug,v 1.1 2003/05/02 05:01:45 kroah Exp $
+-#
+-
+-cd /etc/hotplug
+-. hotplug.functions
+-
+-# DEBUG=yes export DEBUG
+-
+-debug_mesg "arguments ($*) env (`env`)"
+-
+-#
+-# Only one required argument:  event type type being dispatched.
+-# Examples:  usb, pci, isapnp, net, ieee1394, printer, disk,
+-# parport, input, ide, cpu, system, ... with 2.5, lots more.
+-# Other parameters are passed in the environment, or positionally
+-# through argv.
+-# 
+-if [ $# -lt 1 -o "$1" = "help" -o "$1" = "--help" ]; then
+-    if [ -t ]; then
+-	echo "Usage: $0 AgentName [AgentArguments]"
+-
+-	AGENTS=""
+-	for AGENT in /etc/hotplug/*.agent ; do
+-	    TYPE=`basename $AGENT | sed s/.agent//`
+-	    if [ -x $AGENT ]; then
+-		AGENTS="$AGENTS $TYPE"
+-	    else
+-		AGENTS="$AGENTS ($TYPE)"
+-	    fi
+-	done
+-	echo "AgentName values on this system: $AGENTS" 
+-    else
+-	mesg "illegal usage $*"
+-    fi
+-    exit 1
+-fi
+-
+-#
+-# Delegate event handling:
+-#   /sbin/hotplug FOO ..args.. ==> /etc/hotplug/FOO.agent ..args..
+-#
+-AGENT=/etc/hotplug/$1.agent
+-if [ -x $AGENT ]; then
+-    shift
+-    if [ "$DEBUG" != "" ]; then
+-	mesg "invoke $AGENT ($@)"
+-    fi
+-    exec $AGENT "$@"
+-    mesg "couldn't exec $AGENT"
+-    exit 1
+-fi
+-
+-debug_mesg "no runnable $AGENT is installed"
+-
+-#
+-# Optionally log events we don't handle directly.
+-# Some program or person has asked for $LOG data.
+-#
+-LOG=/var/log/hotplug/$1.events
+-if [ ! -w $LOG ]; then
+-    # catch-all for unclaimed events
+-    LOG=/var/log/hotplug/events
+-fi
+-if [ -w $LOG ]; then
+-    # record all basic event data
+-    HOTPLUG_TYPE=$1
+-    shift
+-    HOTPLUG_ARGS="$*"
+-    export HOTPLUG_ARGS HOTPLUG_TYPE
+-
+-    # use to tempfile to buffer events
+-    # FIXME buffering acts oddly when logging to pipes,
+-    # it'd be better not to need a tempfile
+-    TMP=$(mktemp /var/log/hotplug/e-$HOTPLUG_TYPE-XXXXXXXX)
+-    if [ $? -ne 0 ]; then
+-	mesg "couldn't create tempfile for logging"
+-	exit 1
+-    fi
+-
+-    debug_mesg "log to $LOG ($HOTPLUG_TYPE $HOTPLUG_ARGS)"
+-    log_to_stdout > $TMP
+-    cat $TMP >> $LOG
+-    rm -f $TMP
+-
+-    exit 0
+-fi
+-
+-exit 1
+diff -Nur hotplug-2004_01_05/etc/rc.d/init.d/hotplug hotplug-2004_01_05-new/etc/rc.d/init.d/hotplug
+--- hotplug-2004_01_05/etc/rc.d/init.d/hotplug	2003-03-28 00:25:03.000000000 +0000
++++ hotplug-2004_01_05-new/etc/rc.d/init.d/hotplug	1970-01-01 00:00:00.000000000 +0000
+@@ -1,54 +0,0 @@
+-#!/bin/sh
+-#
+-# hotplug This scripts starts hotpluggable subsystems.
+-#
+-# chkconfig: 2345 01 99
+-# description:	Starts and stops each hotpluggable subsystem. \
+-#		On startup, may simulate hotplug events for devices \
+-#		that were present at boot time, before filesystems \
+-#		(or other resources) used by hotplug agents were available.
+-#
+-# $Id: hotplug,v 1.3 2002/12/03 02:01:48 dbrownell Exp $
+-#
+-
+-PATH=/sbin:/bin:/usr/sbin:/usr/bin
+-
+-# source function library
+-if [ -f /etc/init.d/functions ]; then
+-	. /etc/init.d/functions
+-elif [ -f /etc/rc.d/init.d/functions ]; then
+-	. /etc/rc.d/init.d/functions
+-fi
+-
+-case "$1" in
+-    start|restart|status)
+-	for RC in /etc/hotplug/*.rc
+-	do
+-	    $RC $1
+-	done
+-	touch /var/lock/subsys/hotplug
+-	;;
+-    stop)
+-	for RC in /etc/hotplug/*.rc
+-        do
+-            $RC stop
+-        done
+-        rm -f /var/lock/subsys/hotplug
+-        ;;
+-    force-reload)
+-	for RC in /etc/hotplug/*.rc
+-        do
+-            $RC stop
+-        done
+-	for RC in /etc/hotplug/*.rc
+-        do
+-            $RC start
+-        done
+-        rm -f /var/lock/subsys/hotplug
+-        ;;
+-
+-    *)
+-	echo $"Usage: $0 {start|stop|restart|status|force_reload}"
+-	exit 3
+-	;;
+-esac
+diff -Nur hotplug-2004_01_05/etc/usbcontrol hotplug-2004_01_05-new/etc/usbcontrol
+--- hotplug-2004_01_05/etc/usbcontrol	1970-01-01 00:00:00.000000000 +0000
++++ hotplug-2004_01_05-new/etc/usbcontrol	2004-10-03 13:28:44.000000000 +0000
+@@ -0,0 +1,36 @@
++#!/bin/sh
++#
++# usbcontrol 1.0 2001/8/10 21:03:45 (Hideki Hayami)
++#
++# USB drivers settings
++#
++# The first argument should be either 'serial', 'net', 'storage' or 'remove'.
++#
++
++ACTION=$1
++KERNEL_VER=`/bin/uname -r`
++MODULE_PATH=/lib/modules/$KERNEL_VER/kernel/drivers/usb/device
++MODULE_MONITOR=usbdmonitor
++
++checkAndRemove()
++{
++	if grep -q $MODULE_MONITOR /proc/modules ; then
++		# unloading monitor generates hotplug unload event
++		/sbin/rmmod $MODULE_MONITOR
++	fi
++}
++
++# Record ACTION for use by /etc/hotplug/usbd.agent
++echo $ACTION > /etc/hotplug/usbd.ftype
++
++case "$ACTION" in
++'serial' | 'net' | 'storage')
++	checkAndRemove
++	/sbin/insmod $MODULE_PATH/$MODULE_MONITOR.o
++	;;
++'remove')
++	checkAndRemove
++	;;
++esac
++
++exit 0
+diff -Nur hotplug-2004_01_05/rc.d/init.d/usb hotplug-2004_01_05-new/rc.d/init.d/usb
+--- hotplug-2004_01_05/rc.d/init.d/usb	1970-01-01 00:00:00.000000000 +0000
++++ hotplug-2004_01_05-new/rc.d/init.d/usb	2004-10-03 13:28:44.000000000 +0000
+@@ -0,0 +1,63 @@
++#!/bin/bash
++
++# rc.usb 1.00 2001/08/10 22:20:17 (Hideki Hayami)
++#
++# Tags for init configuration tools
++#
++# control script: /etc/usbcontrol
++#
++# description:	currently default USB setting is for serial class
++#
++
++# Source function library.
++. /etc/rc.d/init.d/functions
++
++CONTROL=/etc/usbcontrol
++#USB_DEFAULT=serial
++USB_DEFAULT=net
++#USB_DEFAULT=storage
++
++usage()
++{
++    echo "Usage: $0 {start|stop|status|restart|reload}"
++}
++
++
++if [ $# -lt 1 ] ; then usage ; exit 0 ; fi
++action=$1
++
++case "$action" in
++
++start)
++    if [ -x $CONTROL ] ; then
++        if [ -s /etc/hotplug/usbdstorage.conf ] ; then USB_DEFAULT=storage; 
++        fi
++
++        action "Loading USB modules:" $CONTROL $USB_DEFAULT
++	RETVAL=$?
++	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/usb
++    fi
++    ;;
++
++stop)
++    if [ -x $CONTROL ] ; then
++        action "Unloading USB modules:" $CONTROL remove
++	rm -f /var/lock/subsys/usb
++    fi
++    ;;
++
++status)
++    ;;
++
++restart|reload)
++    $0 stop
++    $0 start
++    ;;
++
++*)
++    usage
++    ;;
++
++esac
++
++exit 0
+diff -Nur hotplug-2004_01_05/sbin/hotplug hotplug-2004_01_05-new/sbin/hotplug
+--- hotplug-2004_01_05/sbin/hotplug	2003-09-24 20:27:42.000000000 +0000
++++ hotplug-2004_01_05-new/sbin/hotplug	2004-10-03 13:28:44.000000000 +0000
+@@ -1,36 +1,72 @@
+ #!/bin/sh
+ #
+-# A generic /sbin/hotplug multiplexer program
++# This version of /sbin/hotplug should works on most GNU/Linux systems
++# using Linux 2.2.18+ or 2.4.* kernels.  On 2.2.*, only USB has such
++# hotplugging support; on 2.4.*, so do PCI/Cardbus and network interfaces.
+ #
+-# This script allows any program to be called when /sbin/hotplug is
+-# called.  It will run any programs located in the default hotplug
+-# directory (currently /etc/hotplug.d/) that match up with the first
+-# argument that this script is called with.  The matching is done by
+-# adding a directory name to the default directory and looking for any
+-# programs in that directory that are executable, and end in .hotplug
+-# (to allow backup programs to be live on safely.)
+-# 
+-# For example, if /sbin/hotplug is called with the usb argument then
+-# this script will look in the /etc/hotplug.d/usb/ directory for any
+-# executable programs that end in .hotplug.
+-#
+-# After all programs in the argument directory are executed, the
+-# "default" directory is searched for any executable programs in it,
+-# that end in .hotplug.  The default directory is currently
+-# /etc/hotplug.d/default/
+-#
+-# - Greg Kroah-Hartman
+-#   May 1, 2003
+-#
+-# Released under the GPL Version 2.
+-#
+-
+-DIR="/etc/hotplug.d"
+-
+-for I in "${DIR}/$1/"*.hotplug "${DIR}/"default/*.hotplug ; do
+-	if [ -f $I ]; then
+-		test -x $I && $I $1 ;
+-	fi
+-done
++# The kernel HOTPLUG configuration option needs to be enabled, and KMOD
++# will normally be enabled so that kernels needn't statically link every
++# known driver.
++#
++#
++# HISTORY:
++#
++# 27-Jan-2001	Minor updates, Gioele Barabucci
++# 04-Jan-2001	First "New" version, which only delegates to
++#		specialized hotplug agents.
++# 2001-Dec-19   modified to work with ash instead of bash
++#
++# $Id: hotplug,v 1.3 2001/02/14 18:21:27 dbrownell Exp $
++#
++HOTPLUG_DIR=/etc/hotplug
++
++cd ${HOTPLUG_DIR}
++# ash "." fn does not start with current dir, use absolute path to fix
++. ${HOTPLUG_DIR}/hotplug.functions
++
++[ "$DEBUG" != "" ] && mesg "arguments ($*) env (`env`)"
++
++#
++# Only one required argument:  event type type being dispatched.
++# Examples:  usb, pci, isapnp, net, ieee1394, printer, disk,
++# parport, ... 
++#
++if [ $# -lt 1 -o "$1" = help -o "$1" = '--help' ]; then
++    if [ -t ]; then
++	echo "Usage: $0 AgentName ..."
++
++	AGENTS=""
++	for AGENT in /etc/hotplug/*.agent ; do
++	    TYPE=`basename $AGENT | sed s/.agent//`
++	    if [ -x $AGENT ] ; then
++		AGENTS="$AGENTS $TYPE"
++	    else
++		AGENTS="$AGENTS ($TYPE)"
++	    fi
++	done
++	echo "AgentName values on this system: $AGENTS" 
++	echo "Most agents also require particular environment parameters."
++    else
++	mesg "illegal usage $*"
++    fi
++    exit 1
++fi
++
++AGENT=/etc/hotplug/$1.agent
++
++#
++# Delegate event handling:
++#   /sbin/hotplug FOO ..args.. ==> /etc/hotplug/FOO.agent ..args..
++#
++if [ -x $AGENT ]; then
++    shift
++    if [ "$DEBUG" != "" ]; then
++	mesg "invoke $AGENT"
++    fi
++    exec $AGENT "$@"
++    mesg "couldn't exec $AGENT"
++    exit 1
++fi
+ 
++mesg "no runnable $AGENT is installed"
+ exit 1

@@ -1,0 +1,12 @@
+--- gtk+-2.2.4/configure~	2004-08-24 04:50:29.000000000 +0000
++++ gtk+-2.2.4/configure	2004-08-24 04:51:27.000000000 +0000
+@@ -24746,7 +24746,8 @@
+ cat >>conftest.$ac_ext <<_ACEOF
+ /* end confdefs.h.  */
+ 
+-#include <freetype/freetype.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ #include FT_ERRORS_H
+ 
+ int

@@ -1,0 +1,8 @@
+config MTOOLS
+	bool
+	prompt "mtools"
+
+config MTOOLS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on MTOOLS

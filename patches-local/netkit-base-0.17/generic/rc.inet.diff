@@ -1,0 +1,51 @@
+diff -Nur netkit-base-0.17/etc.sample/rc.inet netkit-base-0.17-patched/etc.sample/rc.inet
+--- netkit-base-0.17/etc.sample/rc.inet	1970-01-01 00:00:00.000000000 +0000
++++ netkit-base-0.17-patched/etc.sample/rc.inet	2002-05-20 06:55:14.000000000 +0000
+@@ -0,0 +1,47 @@
++#!/bin/bash
++
++#
++# /etc/rc.d/init.d/S15inet - Start/Stop the inetd daemon(s).
++#
++
++# Comment out the following exit line to enable this script.
++# exit 0
++
++# Source function library.
++. /etc/rc.d/init.d/functions
++
++DAEMON="/usr/sbin/inetd"
++
++case "$1" in
++
++    start)
++	msg -n "Starting inetd:"
++	daemon --survive=5 $DAEMON
++	if [ "$?" = "0" ]; then
++	    touch /var/lock/subsys/inet
++	fi
++	msg
++	;;
++
++    stop)
++	msg -n "Stopping inetd:"
++	killproc $DAEMON
++	msg
++	rm -f /var/lock/subsys/inet
++	;;
++
++    restart)
++	$0 stop
++	sleep 1
++	$0 start
++	;;
++
++    *)
++	echo "Usage: $0 (start|stop|restart)"
++	exit 1
++	;;
++
++esac
++
++exit 0
++

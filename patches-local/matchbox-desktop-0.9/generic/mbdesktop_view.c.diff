@@ -1,0 +1,46 @@
+--- matchbox-desktop-0.8/src/mbdesktop_view.c~	2004-02-03 15:14:49.000000000 +0000
++++ matchbox-desktop-0.8/src/mbdesktop_view.c	2004-07-12 23:31:44.000000000 +0000
+@@ -67,6 +67,13 @@
+ 	  return;
+ 	}
+ 
++      if (mb->desktop_height > mb->desktop_width) {
++	MBPixbufImage *img_tmp1;
++	img_tmp1 = mb_pixbuf_img_transform(mb->pixbuf, img_tmp, MBPIXBUF_TRANS_ROTATE_90);
++	mb_pixbuf_img_free(mb->pixbuf, img_tmp);
++	img_tmp = img_tmp1;
++      }
++
+       for (dy=0; dy < mb->desktop_height; dy += img_tmp->height)
+ 	for (dx=0; dx < mb->desktop_width; dx += img_tmp->width)
+ 	  {
+@@ -98,6 +105,14 @@
+ 	  mbdesktop_view_init_bg(mb);
+ 	  return;
+ 	}
++
++      if (mb->desktop_height > mb->desktop_width) {
++	MBPixbufImage *img_tmp1;
++	img_tmp1 = mb_pixbuf_img_transform(mb->pixbuf, img_tmp, MBPIXBUF_TRANS_ROTATE_90);
++	mb_pixbuf_img_free(mb->pixbuf, img_tmp);
++	img_tmp = img_tmp1;
++      }
++
+       mb->bg_img = mb_pixbuf_img_scale(mb->pixbuf, img_tmp, mb->desktop_width, 
+ 				       mb->desktop_height);
+       mb_pixbuf_img_free(mb->pixbuf, img_tmp);
+@@ -116,6 +131,14 @@
+ 	  mbdesktop_view_init_bg(mb);
+ 	  return;
+ 	}
++
++      if (mb->desktop_height > mb->desktop_width) {
++	MBPixbufImage *img_tmp1;
++	img_tmp1 = mb_pixbuf_img_transform(mb->pixbuf, img_tmp, MBPIXBUF_TRANS_ROTATE_90);
++	mb_pixbuf_img_free(mb->pixbuf, img_tmp);
++	img_tmp = img_tmp1;
++      }
++
+       dx = (mb->desktop_width - img_tmp->width) / 2;
+       if (dx < 0) dx = 0;
+       dy = (mb->desktop_height - img_tmp->height) / 2;

@@ -1,0 +1,9 @@
+config BASH
+	bool
+	prompt "Bash"
+	depends on NCURSES
+
+config BASH_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on BASH

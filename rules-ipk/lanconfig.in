@@ -1,0 +1,9 @@
+config LANCONFIG
+	bool
+	prompt "lanconfig"
+	depends on LIBXML2 && GTK22
+
+config LANCONFIG_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on LANCONFIG

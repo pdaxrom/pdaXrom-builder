@@ -1,0 +1,9 @@
+config X11ROM-SETTINGS
+	bool
+	prompt "Compile X11/Qt config tools"
+	depends on XFREE430 && QT-X11-FREE
+
+config X11ROM-SETTINGS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on X11ROM-SETTINGS

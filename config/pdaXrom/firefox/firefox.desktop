@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Firefox
+Comment=Web browser
+Exec=firefox
+Terminal=0
+Type=Application
+Icon=firefox.png
+Categories=Network
+StartupNotify=True
+SingleInstance=False

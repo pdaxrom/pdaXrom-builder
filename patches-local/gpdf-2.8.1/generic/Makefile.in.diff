@@ -1,0 +1,11 @@
+--- gpdf-2.8.1/Makefile.in~	2004-12-12 11:45:14.000000000 +0000
++++ gpdf-2.8.1/Makefile.in	2004-12-06 21:59:09.000000000 +0000
+@@ -187,7 +187,7 @@
+ sharedstatedir = @sharedstatedir@
+ sysconfdir = @sysconfdir@
+ target_alias = @target_alias@
+-SUBDIRS = goo lib test-files fofi splash xpdf shell po help
++SUBDIRS = goo lib test-files fofi splash xpdf shell
+ 
+ WIN32_EXTRA = 
+ 

@@ -1,0 +1,13 @@
+diff -Nur xpdf-3.00/splash/SplashFTFont.h xpdf-3.00.new/splash/SplashFTFont.h
+--- xpdf-3.00/splash/SplashFTFont.h	2004-01-22 01:26:44.000000000 +0000
++++ xpdf-3.00.new/splash/SplashFTFont.h	2004-08-24 09:14:20.000000000 +0000
+@@ -15,7 +15,8 @@
+ #pragma interface
+ #endif
+ 
+-#include <freetype/freetype.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ #include "SplashFont.h"
+ 
+ class SplashFTFontFile;

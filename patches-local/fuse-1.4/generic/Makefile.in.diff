@@ -1,0 +1,42 @@
+--- fuse/kernel/Makefile.in~	2005-01-23 15:37:50.000000000 +0000
++++ fuse/kernel/Makefile.in	2005-01-23 15:38:35.000000000 +0000
+@@ -20,11 +20,9 @@
+ install: all
+ 	@$(mkinstalldirs) $(DESTDIR)$(fusemoduledir)
+ 	$(INSTALL) -m 644 $(fusemodule) $(DESTDIR)$(fusemoduledir)/$(fusemodule)
+-	-/sbin/depmod -a
+ 
+ uninstall:
+ 	rm -f $(DESTDIR)$(fusemoduledir)/$(fusemodule)
+-	-/sbin/depmod -a
+ 
+ clean:
+ 	-rm -f $(fusemodule) *.o .*.cmd *.mod.c *.ko *.s
+@@ -40,10 +38,10 @@
+ 
+ ifeq ($(majver), 2.4)
+ 
+-CC = @CC@
+-LD = @LD@
+-CFLAGS = -O2 -Wall -Wstrict-prototypes -fno-strict-aliasing -pipe
+-CPPFLAGS = -I@kernelsrc@/include -I../include -D__KERNEL__ -DMODULE -D_LOOSE_KERNEL_NAMES -DFUSE_VERSION=\"@VERSION@\"
++KERNEL_CC := @CC@
++KERNEL_LD := @LD@
++KERNEL_CFLAGS := -O2 -Wall -Wstrict-prototypes -fno-strict-aliasing -pipe
++KERNEL_CPPFLAGS := -I@kernelsrc@/include -I../include -D__KERNEL__ -DMODULE -D_LOOSE_KERNEL_NAMES -DFUSE_VERSION=\"@VERSION@\"
+ 
+ fuse_objs = dev.o dir.o file.o inode.o util.o
+ 
+@@ -52,10 +50,10 @@
+ all-spec: fuse.o
+ 
+ .c.o:
+-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
++	$(KERNEL_CC) $(KERNEL_CFLAGS) $(KERNEL_CPPFLAGS) -c $<
+ 
+ fuse.o: $(fuse_objs)
+-	$(LD) -r -o fuse.o $(fuse_objs)
++	$(KERNEL_LD) -r -o fuse.o $(fuse_objs)
+ 
+ fuse_headers = fuse_i.h ../include/linux/fuse.h
+ 

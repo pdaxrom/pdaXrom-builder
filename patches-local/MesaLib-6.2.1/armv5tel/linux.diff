@@ -1,0 +1,26 @@
+--- mesa/configs/linux~	2005-01-19 22:48:11.000000000 +0000
++++ mesa/configs/linux	2005-01-19 22:48:29.000000000 +0000
+@@ -5,16 +5,16 @@
+ CONFIG_NAME = linux
+ 
+ # Compiler and flags
+-CC = gcc
+-CXX = g++
++CC := gcc
++CXX := g++
+ 
+-CFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE -DUSE_XSHM -DPTHREADS -I/usr/X11R6/include
+-CXXFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE
++CFLAGS = -Os -ansi -pedantic -fPIC -ffast-math -fomit-frame-pointer -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE -DUSE_XSHM -DPTHREADS -I$(X11_INC)
++CXXFLAGS = -Os -ansi -pedantic -fPIC -ffast-math -fomit-frame-pointer -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE -I$(X11_INC)
+ GLUT_CFLAGS = -fexceptions
+ 
+ 
+ # Library/program dependencies
+ # Need to have -L/usr/X11R6/lib in these:
+-GL_LIB_DEPS = -L/usr/X11R6/lib -lX11 -lXext -lm -lpthread
+-GLUT_LIB_DEPS = -L$(LIB_DIR) -l$(GLU_LIB) -l$(GL_LIB) -L/usr/X11R6/lib -lX11 -lXmu -lXt -lXi -lm
+-GLW_LIB_DEPS = -L$(LIB_DIR) -l$(GL_LIB) -L/usr/X11R6/lib -lXt -lX11
++GL_LIB_DEPS = -L$(X11_LIB) -lX11 -lXext -lm -lpthread -Wl,-rpath-link,$(X11_LIB)
++GLUT_LIB_DEPS = -L$(LIB_DIR) -l$(GLU_LIB) -l$(GL_LIB) -L$(X11_LIB) -lX11 -lXmu -lXt -lXi -lm -Wl,-rpath-link,$(X11_LIB)
++GLW_LIB_DEPS = -L$(LIB_DIR) -l$(GL_LIB) -L$(X11_LIB) -lXt -lX11 -Wl,-rpath-link,$(X11_LIB)

@@ -1,0 +1,12 @@
+diff -urNd -urNd bash-2.05b/builtins/Makefile.in bash-2.05b.new/builtins/Makefile.in
+--- bash-2.05b/builtins/Makefile.in	Fri Oct  3 15:54:40 2003
++++ bash-2.05b.new/builtins/Makefile.in	Fri Oct  3 15:52:06 2003
+@@ -54,7 +54,7 @@
+ 
+ LIBS = @LIBS@
+ LDFLAGS = @LDFLAGS@ $(LOCAL_LDFLAGS) $(CFLAGS)
+-LDFLAGS_FOR_BUILD = $(LDFLAGS)
++LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@ $(CCFLAGS_FOR_BUILD)
+ LOCAL_LDFLAGS = @LOCAL_LDFLAGS@
+ #LIBS_FOR_BUILD = @LIBS_FOR_BUILD@
+ LIBS_FOR_BUILD = $(LIBS)

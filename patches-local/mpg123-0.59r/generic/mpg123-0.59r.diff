@@ -1,0 +1,2499 @@
+diff -Nur mpg123-0.59r.orig/Makefile mpg123-0.59r/Makefile
+--- mpg123-0.59r.orig/Makefile	1999-06-15 20:39:06.000000000 +0000
++++ mpg123-0.59r/Makefile	2004-12-19 02:36:18.000000000 +0000
+@@ -9,6 +9,21 @@
+ MANDIR=$(PREFIX)/man
+ SECTION=1
+ 
++# Enable the below line If your plathome support IPv6
++#CFLAGS+= -DINET6
++# Additional LIBDIR and libraries if exist
++IPV6LIBDIR=
++IPV6LIB=
++### KAME stack
++#IPV6LIBDIR=-L/usr/local/v6/lib
++#IPV6LIB=-linet6
++### BSD/OS 4.0 (NRL) stack
++#IPV6LIBDIR=
++#IPV6LIB=
++### Linux stack
++#IPV6LIBDIR= #/usr/inet6/lib
++#IPV6LIB= #-linet6
++
+ ###################################################
+ ######                                       ######
+ ######   End of user-configurable settings   ######
+@@ -39,6 +54,23 @@
+ 	@echo "make aix-tk3play    IBM AIX"
+ 	@echo "make os2            IBM OS/2"
+ 	@echo "make netbsd         NetBSD"
++	@echo "make netbsd-arm     NetBSD for strongarm (32bit fixedpoint)"
++	@echo "make netbsd-arm-64  NetBSD for strongarm (64bit fixedpoint)"
++	@echo "make netbsd-i386    NetBSD optimized for i386"
++	@echo "make netbsd-i386-elf NetBSD optimized for i386, ELF format"
++	@echo "make netbsd-m68k    NetBSD optimized for m68k"
++	@echo "make netbsd-esd     NetBSD with EsounD"
++	@echo "make netbsd-arm-esd NetBSD for strongarm (32bit fixedpoint) with EsounD"
++	@echo "make netbsd-arm-64-esd NetBSD for strongarm (64bit fixedpoint) with EsounD"
++	@echo "make netbsd-i386-esd NetBSD optimized for i386 with EsounD"
++	@echo "make netbsd-i386-elf-esd NetBSD optimized for i386, ELF format with EsounD"
++	@echo "make netbsd-m68k-esd NetBSD optimized for m68k with EsounD"
++	@echo "make netbsd-nas     NetBSD with NAS"
++	@echo "make netbsd-arm-nas NetBSD for strongarm (32bit fixedpoint) with NAS"
++	@echo "make netbsd-arm-64-nas NetBSD for strongarm (64bit fixedpoint) with NAS"
++	@echo "make netbsd-i386-nas NetBSD optimized for i386 with NAS"
++	@echo "make netbsd-i386-elf-nas NetBSD optimized for i386, ELF format with NAS"
++	@echo "make netbsd-m68k-nas NetBSD optimized for m68k with NAS"
+ 	@echo "make bsdos          BSDI BSD/OS"
+ 	@echo "make bsdos4         BSDI BSD/OS 4.0"
+ 	@echo "make bsdos-nas      BSDI BSD/OS with NAS support"
+@@ -53,6 +85,8 @@
+ 	@echo "There are several Linux flavours. Choose one:"
+ 	@echo ""
+ 	@echo "make linux          Linux (i386, Pentium or unlisted platform)"
++	@echo "make linux-arm      Linux for strongarm (32bit fixedpoint)"
++	@echo "make linux-arm-64   Linux for strongarm (64bit fixedpoint)"
+ 	@echo "make linux-i486     Linux (optimized for i486 ONLY)"
+ 	@echo "make linux-3dnow    Linux, output 3DNow!(TM) optimized code"
+ 	@echo "                    (ie with 'as' from binutils-2.9.1.0.19a or later)"
+@@ -66,6 +100,8 @@
+ 	@echo "make linux-mips-alsa Linux/MIPS with ALSA sound driver"
+ 	@echo ""
+ 	@echo "make linux-esd      Linux, output to EsounD"
++	@echo "make linux-arm-esd  Linux for strongarm (32bit fixedpoint) with EsounD"
++	@echo "make linux-arm-64-esd Linux for strongarm (64bit fixedpoint) with EsounD"
+ 	@echo "make linux-alpha-esd Linux/Alpha, output to EsounD"
+ 	@echo "make linux-ppc-esd  Linux/PPC, output to EsounD"
+ 	@echo "    NOTE: esd flavours require libaudiofile, available from: "
+@@ -88,36 +124,54 @@
+ 
+ linux-devel:
+ 	$(MAKE) OBJECTS='decode_i386.o dct64_i386.o audio_oss.o' \
+-        CC=gcc LDFLAGS= \
+-        CFLAGS='-DREAL_IS_FLOAT -DLINUX -Wall -g -m486 \
++        CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -DLINUX -Wall -g -m486 \
+ 		-DREAD_MMAP -DOSS -funroll-all-loops \
+ 		-finline-functions -ffast-math' \
+         mpg123-make
+ 
+ linux-profile:
+ 	$(MAKE) OBJECTS='decode_i386.o dct64_i386.o audio_oss.o' \
+-        CC=gcc LDFLAGS='-pg' \
+-        CFLAGS='-DREAL_IS_FLOAT -DLINUX -Wall -pg -m486 \
++        CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -DLINUX -Wall -pg -m486 \
+ 		-DREAD_MMAP -DOSS -funroll-all-loops \
+ 		-finline-functions -ffast-math' \
+         mpg123-make
+ 
+ linux:
+-	$(MAKE) CC=gcc LDFLAGS= \
++	$(MAKE) \
+ 		OBJECTS='decode_i386.o dct64_i386.o decode_i586.o \
+ 			audio_oss.o term.o' \
+-		CFLAGS='-DI386_ASSEM -DPENTIUM_OPT -DREAL_IS_FLOAT -DLINUX \
++		CFLAGS='$(CFLAGS) -DI386_ASSEM -DPENTIUM_OPT -DREAL_IS_FLOAT -DLINUX \
+ 			-DREAD_MMAP -DOSS -DTERM_CONTROL\
+ 			-Wall -O2 -m486 \
+ 			-fomit-frame-pointer -funroll-all-loops \
+ 			-finline-functions -ffast-math' \
+ 		mpg123-make
+ 
++linux-arm:
++	$(MAKE) \
++		OBJECTS='decode.o dct64.o \
++			audio_oss.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -Os -fomit-frame-pointer \
++			-funroll-all-loops -finline-functions -ffast-math \
++			-DREAL_IS_FIXED -DREAD_MMAP -DTERM_CONTROL \
++			-DLINUX' \
++		mpg123-make
++
++linux-arm-64:
++	$(MAKE) \
++		OBJECTS='decode.o dct64.o \
++			audio_oss.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -Os -fomit-frame-pointer \
++			-funroll-all-loops -finline-functions -ffast-math \
++			-DREAL_IS_FIXED_ARMV4 -DREAD_MMAP -DTERM_CONTROL \
++			-DLINUX' \
++		mpg123-make
++
+ linux-3dnow:
+-	$(MAKE) CC=gcc LDFLAGS= \
++	$(MAKE) \
+ 		OBJECTS='decode_i386.o dct64_3dnow.o \
+ 			decode_3dnow.o audio_oss.o term.o' \
+-		CFLAGS='-DI386_ASSEM -DREAL_IS_FLOAT -DPENTIUM_OPT -DLINUX \
++		CFLAGS='$(CFLAGS) -DI386_ASSEM -DREAL_IS_FLOAT -DPENTIUM_OPT -DLINUX \
+ 			-DUSE_3DNOW -DREAD_MMAP -DOSS -DTERM_CONTROL\
+ 			-Wall -O2 -m486 \
+ 			-fomit-frame-pointer -funroll-all-loops \
+@@ -125,10 +179,10 @@
+ 		mpg123-make
+ 
+ linux-i486:
+-	$(MAKE) CC=gcc LDFLAGS= \
++	$(MAKE) \
+ 		OBJECTS='decode_i386.o dct64_i386.o decode_i586.o \
+ 			decode_i486.o dct64_i486.o audio_oss.o term.o' \
+-		CFLAGS='-DI386_ASSEM -DREAL_IS_FLOAT -DI486_OPT -DLINUX \
++		CFLAGS='$(CFLAGS) -DI386_ASSEM -DREAL_IS_FLOAT -DI486_OPT -DLINUX \
+ 			-DREAD_MMAP -DOSS -DTERM_CONTROL\
+ 			-Wall -O2 -m486 \
+ 			-fomit-frame-pointer -funroll-all-loops \
+@@ -136,11 +190,11 @@
+ 		mpg123-make
+ 
+ linux-esd:
+-	$(MAKE) CC=gcc LDFLAGS= \
++	$(MAKE) \
+ 		AUDIO_LIB='-lesd -laudiofile' \
+ 		OBJECTS='decode_i386.o dct64_i386.o decode_i586.o \
+ 			audio_esd.o' \
+-		CFLAGS='-DI386_ASSEM -DREAL_IS_FLOAT -DPENTIUM_OPT -DLINUX \
++		CFLAGS='$(CFLAGS) -DI386_ASSEM -DREAL_IS_FLOAT -DPENTIUM_OPT -DLINUX \
+ 			-DREAD_MMAP -DOSS -DUSE_ESD \
+ 			-Wall  -O2 -m486 \
+ 			-fomit-frame-pointer -funroll-all-loops \
+@@ -148,12 +202,33 @@
+ 			$(RPM_OPT_FLAGS)' \
+ 		mpg123-make
+ 
++linux-arm-esd:
++	$(MAKE) \
++		AUDIO_LIB='-lesd -laudiofile' \
++		OBJECTS='decode.o dct64.o \
++			audio_esd.o' \
++		CFLAGS='$(CFLAGS) -Wall -Os -fomit-frame-pointer \
++			-funroll-all-loops -finline-functions -ffast-math \
++			-DREAL_IS_FIXED -DREAD_MMAP -DTERM_CONTROL \
++			-DLINUX' \
++		mpg123-make
++
++linux-arm-64-esd:
++	$(MAKE) \
++		OBJECTS='decode.o dct64.o \
++			audio_esd.o' \
++		CFLAGS='$(CFLAGS) -Wall -Os -fomit-frame-pointer \
++			-funroll-all-loops -finline-functions -ffast-math \
++			-DREAL_IS_FIXED_ARMV4 -DREAD_MMAP -DTERM_CONTROL \
++			-DLINUX' \
++		mpg123-make
++
+ linux-alsa:
+-	$(MAKE) CC=gcc LDFLAGS= \
++	$(MAKE) \
+ 		AUDIO_LIB='-lasound' \
+ 		OBJECTS='decode_i386.o dct64_i386.o decode_i586.o \
+ 			audio_alsa.o term.o' \
+-		CFLAGS='-DI386_ASSEM -DREAL_IS_FLOAT -DPENTIUM_OPT -DLINUX \
++		CFLAGS='$(CFLAGS) -DI386_ASSEM -DREAL_IS_FLOAT -DPENTIUM_OPT -DLINUX \
+ 			-DREAD_MMAP -DALSA -DTERM_CONTROL\
+ 			-Wall  -O2 -m486 \
+ 			-fomit-frame-pointer -funroll-all-loops \
+@@ -162,10 +237,10 @@
+ 		mpg123-make
+ 
+ linux-mips-alsa:
+-	$(MAKE) CC=gcc LDFLAGS= \
++	$(MAKE) \
+ 		AUDIO_LIB='-lasound' \
+ 		OBJECTS='decode.o dct64.o audio_alsa.o term.o' \
+-		CFLAGS='-DREAL_IS_FLOAT -DLINUX -DREAD_MMAP -DALSA \
++		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -DLINUX -DREAD_MMAP -DALSA \
+ 			-DTERM_CONTROL -Wall  -O2 \
+ 			-fomit-frame-pointer -funroll-all-loops \
+ 			-finline-functions -ffast-math \
+@@ -174,7 +249,7 @@
+ 
+ linux-alpha:
+ 	$(MAKE) CC=gcc LDFLAGS= OBJECTS='decode.o dct64.o audio_oss.o' \
+-		CFLAGS='-DLINUX -DOSS -Wall -O2 \
++		CFLAGS='$(CFLAGS) -DLINUX -DOSS -Wall -O2 \
+ 			-fomit-frame-pointer -funroll-all-loops \
+ 			-finline-functions -ffast-math \
+ 			-Wall -O6 -DUSE_MMAP \
+@@ -182,10 +257,10 @@
+ 		mpg123-make
+ 
+ linux-alpha-esd:
+-	$(MAKE) CC=gcc LDFLAGS= \
++	$(MAKE) \
+ 		AUDIO_LIB='-lesd -laudiofile' \
+ 		OBJECTS='decode.o dct64.o audio_esd.o' \
+-		CFLAGS='-DLINUX -DOSS -Wall -O2 \
++		CFLAGS='$(CFLAGS) -DLINUX -DOSS -Wall -O2 \
+ 			-fomit-frame-pointer -funroll-all-loops \
+ 			-finline-functions -ffast-math \
+ 			-Wall -O6 -DUSE_MMAP \
+@@ -195,7 +270,7 @@
+ #linux-ppc:
+ #	$(MAKE) CC=gcc  LDFLAGS= \
+ #		OBJECTS='decode.o dct64.o audio_oss.o' \
+-#		CFLAGS='-DREAL_IS_FLOAT -DLINUX -Wall -O2 -mcpu=ppc \
++#		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -DLINUX -Wall -O2 -mcpu=ppc \
+ #			-DOSS -DPPC_ENDIAN \
+ #			-fomit-frame-pointer -funroll-all-loops \
+ #			-finline-functions -ffast-math' \
+@@ -205,42 +280,42 @@
+ #	$(MAKE) CC=gcc  LDFLAGS= \
+ #		AUDIO_LIB='-lesd -laudiofile' \
+ #		OBJECTS='decode.o dct64.o audio_esd.o' \
+-#		CFLAGS='-DREAL_IS_FLOAT -DLINUX -Wall -O2 -mcpu=ppc \
++#		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -DLINUX -Wall -O2 -mcpu=ppc \
+ #			-DOSS -DPPC_ENDIAN \
+ #			-fomit-frame-pointer -funroll-all-loops \
+ #			-finline-functions -ffast-math' \
+ #		mpg123-make
+ 
+ linux-ppc:
+-	$(MAKE) CC=gcc  LDFLAGS= \
++	$(MAKE) \
+ 		OBJECTS='decode.o dct64.o audio_oss.o' \
+-		CFLAGS='-DREAL_IS_FLOAT -DLINUX -Wall -O2 -mcpu=ppc \
++		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -DLINUX -Wall -O2 -mcpu=ppc \
+ 			-DOSS \
+ 			-fomit-frame-pointer -funroll-all-loops \
+ 			-finline-functions -ffast-math' \
+ 		mpg123-make
+ 
+ linux-ppc-esd:
+-	$(MAKE) CC=gcc  LDFLAGS= \
++	$(MAKE) \
+ 		AUDIO_LIB='-lesd -laudiofile' \
+ 		OBJECTS='decode.o dct64.o audio_esd.o' \
+-		CFLAGS='-DREAL_IS_FLOAT -DLINUX -Wall -O2 -mcpu=ppc \
++		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -DLINUX -Wall -O2 -mcpu=ppc \
+ 			-DOSS  \
+ 			-fomit-frame-pointer -funroll-all-loops \
+ 			-finline-functions -ffast-math' \
+ 		mpg123-make
+ 
+ linux-sparc:
+-	$(MAKE) CC=gcc  LDFLAGS= \
++	$(MAKE) \
+ 		OBJECTS='decode.o dct64.o audio_sun.o' \
+-		CFLAGS='-DREAL_IS_FLOAT -DUSE_MMAP -DSPARCLINUX -Wall -O2 \
++		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -DUSE_MMAP -DSPARCLINUX -Wall -O2 \
+ 			-fomit-frame-pointer -funroll-all-loops \
+ 			-finline-functions -ffast-math' \
+ 		mpg123-make
+ 
+ linux-m68k:
+-	$(MAKE) CC=gcc LDFLAGS= OBJECTS='decode.o dct64.o audio_oss.o' \
+-		CFLAGS='-DREAL_IS_FLOAT -DLINUX -DREAD_MMAP \
++	$(MAKE) OBJECTS='decode.o dct64.o audio_oss.o' \
++		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -DLINUX -DREAD_MMAP \
+ 			-DOSS -DOSS_BIG_ENDIAN -Wall -O2 -m68040 \
+ 			-fomit-frame-pointer -funroll-loops \
+ 			-finline-functions -ffast-math' \
+@@ -259,20 +334,20 @@
+ 	@ $(MAKE) FRONTEND=mpg123m-make freebsd-frontend
+ 
+ linux-frontend:
+-	$(MAKE) CC=gcc LDFLAGS= \
++	$(MAKE) \
+ 		OBJECTS='decode_i386.o dct64_i386.o decode_i586.o \
+ 			control_sajber.o control_tk3play.o audio_oss.o' \
+-		CFLAGS='-DFRONTEND -DOSS -DI386_ASSEM -DREAL_IS_FLOAT \
++		CFLAGS='$(CFLAGS) -DFRONTEND -DOSS -DI386_ASSEM -DREAL_IS_FLOAT \
+ 			-DPENTIUM_OPT -DLINUX -Wall -O2 -m486 \
+ 			-fomit-frame-pointer -funroll-all-loops \
+ 			-finline-functions -ffast-math' \
+ 		$(FRONTEND)
+ 
+ linux-nas:
+-	$(MAKE) CC=gcc LDFLAGS='-L/usr/X11R6/lib' \
++	$(MAKE) LDFLAGS='-L/usr/X11R6/lib' \
+ 		AUDIO_LIB='-laudio -lXau' \
+ 		OBJECTS='decode_i386.o dct64_i386.o audio_nas.o' \
+-		CFLAGS='-I/usr/X11R6/include \
++		CFLAGS='$(CFLAGS) -I/usr/X11R6/include \
+ 			-DI386_ASSEM -DREAL_IS_FLOAT -DLINUX -DNAS \
+ 			-Wall -O2 -m486 \
+ 			-fomit-frame-pointer -funroll-all-loops \
+@@ -281,14 +356,14 @@
+ 
+ #### the following defines are for experimental use ... 
+ #
+-#CFLAGS='-pg -DI386_ASSEM -DREAL_IS_FLOAT -DLINUX -Wall -O2 -m486 -funroll-all-loops -finline-functions -ffast-math' mpg123
+-#CFLAGS='-DI386_ASSEM -O2 -DREAL_IS_FLOAT -DLINUX -Wall -g'
+-#CFLAGS='-DI386_ASSEM -DREAL_IS_FLOAT -DLINUX -Wall -O2 -m486 -fomit-frame-pointer -funroll-all-loops -finline-functions -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2'
++#CFLAGS='$(CFLAGS) -pg -DI386_ASSEM -DREAL_IS_FLOAT -DLINUX -Wall -O2 -m486 -funroll-all-loops -finline-functions -ffast-math' mpg123
++#CFLAGS='$(CFLAGS) -DI386_ASSEM -O2 -DREAL_IS_FLOAT -DLINUX -Wall -g'
++#CFLAGS='$(CFLAGS) -DI386_ASSEM -DREAL_IS_FLOAT -DLINUX -Wall -O2 -m486 -fomit-frame-pointer -funroll-all-loops -finline-functions -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2'
+ 
+ freebsd:
+ 	$(MAKE) CC=cc LDFLAGS= \
+ 		OBJECTS='decode_i386.o dct64_i386.o audio_oss.o' \
+-		CFLAGS='-Wall -ansi -pedantic -O4 -m486 -fomit-frame-pointer \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O4 -m486 -fomit-frame-pointer \
+ 			-funroll-all-loops -ffast-math -DROT_I386 \
+ 			-DREAD_MMAP \
+ 			-DI386_ASSEM -DREAL_IS_FLOAT -DUSE_MMAP -DOSS' \
+@@ -298,7 +373,7 @@
+ 	$(MAKE) CC=cc LDFLAGS= \
+ 		AUDIO_LIB='-lesd -laudiofile' \
+ 		OBJECTS='decode_i386.o dct64_i386.o $(GETBITS) audio_esd.o' \
+-		CFLAGS='-Wall -ansi -pedantic -O4 -m486 -fomit-frame-pointer \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O4 -m486 -fomit-frame-pointer \
+ 			-funroll-all-loops -ffast-math -DROT_I386 \
+ 			-DREAD_MMAP \
+ 			-DI386_ASSEM -DREAL_IS_FLOAT -DUSE_MMAP -DOSS \
+@@ -310,7 +385,7 @@
+ 	$(MAKE) CC=cc LDFLAGS= \
+ 		OBJECTS='decode_i386.o dct64_i386.o audio_oss.o \
+ 			control_sajber.o control_tk3play.o' \
+-		CFLAGS='-Wall -ansi -pedantic -O4 -m486 -fomit-frame-pointer \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O4 -m486 -fomit-frame-pointer \
+ 			-funroll-all-loops -ffast-math -DROT_I386 \
+ 			-DFRONTEND \
+ 			-DI386_ASSEM -DREAL_IS_FLOAT -DUSE_MMAP -DOSS' \
+@@ -325,14 +400,14 @@
+ 	$(MAKE) CC='purify -cache-dir=/tmp cc' \
+ 		LDFLAGS='-lsocket -lnsl' \
+ 		OBJECTS='decode.o dct64.o audio_sun.o term.o' \
+-		CFLAGS='-fast -native -xO4 -DSOLARIS -DTERM_CONTROL \
++		CFLAGS='$(CFLAGS) -fast -native -xO4 -DSOLARIS -DTERM_CONTROL \
+ 			-DUSE_MMAP ' \
+ 		mpg123-make
+ 
+ solaris-ccscc:
+ 	$(MAKE) CC=/usr/ccs/bin/ucbcc LDFLAGS='-lsocket -lnsl' \
+ 		OBJECTS='decode.o dct64.o audio_sun.o term.o' \
+-		CFLAGS='-fast -native -xO4 -DSOLARIS \
++		CFLAGS='$(CFLAGS) -fast -native -xO4 -DSOLARIS \
+ 			-DUSE_MMAP ' \
+ 		mpg123-make
+ 
+@@ -340,7 +415,7 @@
+ solaris:
+ 	$(MAKE) CC=cc LDFLAGS='-lsocket -lnsl' \
+ 		OBJECTS='decode.o dct64.o audio_sun.o term.o' \
+-		CFLAGS='-fast -native -xO4 -DSOLARIS \
++		CFLAGS='$(CFLAGS) -fast -native -xO4 -DSOLARIS \
+ 			-DUSE_MMAP -DTERM_CONTROL' \
+ 		mpg123-make
+ 
+@@ -348,7 +423,7 @@
+ 	$(MAKE) CC='gcc' \
+ 		LDFLAGS='-lsocket -lnsl -pg' \
+ 		OBJECTS='decode.o dct64.o audio_sun.o' \
+-		CFLAGS='-g -pg -O2 -Wall -DSOLARIS -DREAL_IS_FLOAT -DUSE_MMAP \
++		CFLAGS='$(CFLAGS) -g -pg -O2 -Wall -DSOLARIS -DREAL_IS_FLOAT -DUSE_MMAP \
+ 			-DREAD_MMAP \
+ 			-funroll-all-loops -finline-functions' \
+ 		mpg123-make
+@@ -357,7 +432,7 @@
+ 	$(MAKE) CC=gcc \
+ 		LDFLAGS='-lsocket -lnsl' \
+ 		OBJECTS='decode.o dct64.o audio_sun.o term.o' \
+-		CFLAGS='-O2 -Wall -pedantic -DSOLARIS -DREAL_IS_FLOAT -DUSE_MMAP \
++		CFLAGS='$(CFLAGS) -O2 -Wall -pedantic -DSOLARIS -DREAL_IS_FLOAT -DUSE_MMAP \
+ 			-DREAD_MMAP -DTERM_CONTROL \
+ 			-funroll-all-loops  -finline-functions' \
+ 		mpg123-make
+@@ -366,7 +441,7 @@
+ 	$(MAKE) CC=gcc LDFLAGS='-lsocket -lnsl' \
+ 		AUDIO_LIB='-lesd -lresolv' \
+ 		OBJECTS='decode.o dct64.o audio_esd.o' \
+-		CFLAGS='-O2 -Wall -DSOLARIS -DREAL_IS_FLOAT -DUSE_MMAP \
++		CFLAGS='$(CFLAGS) -O2 -Wall -DSOLARIS -DREAL_IS_FLOAT -DUSE_MMAP \
+ 			-DREAD_MMAP \
+ 			-funroll-all-loops -finline-functions' \
+ 		mpg123-make
+@@ -375,7 +450,7 @@
+ 	$(MAKE) CC=gcc LDFLAGS='-lsocket -lnsl' \
+ 		OBJECTS='decode_i386.o dct64_i386.o decode_i586.o \
+ 			audio_oss.o' \
+-		CFLAGS='-DI386_ASSEM -DREAL_IS_FLOAT -DPENTIUM_OPT -DUSE_MMAP \
++		CFLAGS='$(CFLAGS) -DI386_ASSEM -DREAL_IS_FLOAT -DPENTIUM_OPT -DUSE_MMAP \
+ 			-DREAD_MMAP -DOSS \
+ 			-Wall -O2 -m486 \
+ 			-funroll-all-loops -finline-functions' \
+@@ -383,9 +458,9 @@
+ 
+ solaris-gcc-nas:
+ 	$(MAKE) CC=gcc LDFLAGS='-lsocket -lnsl' \
+-		AUDIO_LIB='-L/usr/openwin/lib -laudio -lXau'\
++		AUDIO_LIB='-L${PREFIX}/lib -Wl,-R${PREFIX}/lib -L${X11BASE}/lib -Wl,-R${X11BASE}/lib -laudio -lXt -lXau'\
+ 		OBJECTS='decode.o dct64.o audio_nas.o' \
+-		CFLAGS='-O2 -I/usr/openwin/include -Wall \
++		CFLAGS='$(CFLAGS) -O2 -I/usr/openwin/include -Wall \
+ 			-DSOLARIS -DREAL_IS_FLOAT -DUSE_MMAP \
+ 			-DREAD_MMAP -DNAS \
+ 			-funroll-all-loops -finline-functions' \
+@@ -394,68 +469,68 @@
+ sunos:
+ 	$(MAKE) CC=gcc LDFLAGS= \
+ 		OBJECTS='decode.o dct64.o audio_sun.o' \
+-		CFLAGS='-O2 -DSUNOS -DREAL_IS_FLOAT -DUSE_MMAP \
++		CFLAGS='$(CFLAGS) -O2 -DSUNOS -DREAL_IS_FLOAT -DUSE_MMAP \
+ 			-funroll-loops' \
+ 		mpg123-make
+ 
+-#		CFLAGS='-DREAL_IS_FLOAT -Aa +O3 -D_HPUX_SOURCE -DHPUX'
++#		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -Aa +O3 -D_HPUX_SOURCE -DHPUX'
+ hpux:
+ 	$(MAKE) CC=cc LDFLAGS= \
+ 		OBJECTS='decode.o dct64.o audio_hp.o' \
+-		CFLAGS='-DREAL_IS_FLOAT -Ae +O3 -D_HPUX_SOURCE -DHPUX' \
++		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -Ae +O3 -D_HPUX_SOURCE -DHPUX' \
+ 		mpg123-make
+ 
+ hpux-alib:
+ 	$(MAKE) CC=cc LDFLAGS='-L/opt/audio/lib' \
+ 		OBJECTS='decode.o dct64.o audio_alib.o' \
+ 		AUDIO_LIB=-lAlib \
+-		CFLAGS='-DREAL_IS_FLOAT -Ae +O3 -D_HPUX_SOURCE -DHPUX \
++		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -Ae +O3 -D_HPUX_SOURCE -DHPUX \
+ 			-I/opt/audio/include' \
+ 		mpg123-make
+ 
+ hpux-gcc:
+ 	$(MAKE) CC=gcc LDFLAGS= OBJECTS='decode.o dct64.o audio_hp.o' \
+-		CFLAGS='-DREAL_IS_FLOAT -O3 -D_HPUX_SOURCE -DHPUX' \
++		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -O3 -D_HPUX_SOURCE -DHPUX' \
+ 		mpg123-make
+ sgi:
+ 	$(MAKE) CC=cc LDFLAGS= \
+ 		OBJECTS='decode.o dct64.o audio_sgi.o' AUDIO_LIB=-laudio \
+-		CFLAGS='-O2 -DSGI -DREAL_IS_FLOAT -DUSE_MMAP' \
++		CFLAGS='$(CFLAGS) -O2 -DSGI -DREAL_IS_FLOAT -DUSE_MMAP' \
+ 		mpg123-make
+ 
+ sgi-gcc:
+ 	$(MAKE) CC=gcc LDFLAGS= \
+ 		OBJECTS='decode.o dct64.o audio_sgi.o' AUDIO_LIB=-laudio \
+-		CFLAGS='-O2 -DSGI -DREAL_IS_FLOAT -DUSE_MMAP' \
++		CFLAGS='$(CFLAGS) -O2 -DSGI -DREAL_IS_FLOAT -DUSE_MMAP' \
+ 		mpg123-make
+ 
+ dec:
+ 	$(MAKE) CC=cc LDFLAGS= OBJECTS='decode.o dct64.o audio_dummy.o' \
+-		CFLAGS='-std1 -warnprotos -O4 -DUSE_MMAP' \
++		CFLAGS='$(CFLAGS) -std1 -warnprotos -O4 -DUSE_MMAP' \
+ 		mpg123-make
+ 
+ dec-nas:
+ 	$(MAKE) CC=cc LDFLAGS='-L/usr/X11R6/lib' \
+ 		AUDIO_LIB='-laudio -lXau -ldnet_stub'\
+ 		OBJECTS='decode.o dct64.o  audio_nas.o' \
+-		CFLAGS='-I/usr/X11R6/include -std1 -warnprotos -O4 -DUSE_MMAP' \
++		CFLAGS='$(CFLAGS) -I/usr/X11R6/include -std1 -warnprotos -O4 -DUSE_MMAP' \
+ 		mpg123-make
+ 
+ ultrix:
+ 	$(MAKE) CC=cc LDFLAGS= OBJECTS='decode.o dct64.o audio_dummy.o' \
+-		CFLAGS='-std1 -O2 -DULTRIX' \
++		CFLAGS='$(CFLAGS) -std1 -O2 -DULTRIX' \
+ 		mpg123-make
+ 
+ aix-gcc:
+ 	$(MAKE) CC=gcc LDFLAGS= OBJECTS='decode.o dct64.o audio_aix.o' \
+-		CFLAGS='-DAIX -Wall -O6 -DUSE_MMAP -DREAD_MMAP -DREAL_IS_FLOAT \
++		CFLAGS='$(CFLAGS) -DAIX -Wall -O6 -DUSE_MMAP -DREAD_MMAP -DREAL_IS_FLOAT \
+ 			-fomit-frame-pointer -funroll-all-loops \
+ 			-finline-functions -ffast-math' \
+ 		mpg123-make
+ 
+ aix-xlc:
+ 	$(MAKE) LDFLAGS= OBJECTS='decode.o dct64.o audio_aix.o' \
+-		CFLAGS="$(CFLAGS) -O3 -qstrict -qcpluscmt -DAIX -DUSE_MMAP \
++		CFLAGS="$(CFLAGS) $(CFLAGS) -O3 -qstrict -qcpluscmt -DAIX -DUSE_MMAP \
+ 			-DREAD_MMAP " \
+ 		mpg123-make
+ 
+@@ -465,7 +540,7 @@
+ aix-frontend:
+ 	$(MAKE) LDFLAGS= OBJECTS='decode.o dct64.o audio_aix.o \
+ 			control_sajber.o control_tk3play.o' \
+-		CFLAGS='-DAIX -Wall -O6 -DUSE_MMAP -DFRONTEND \
++		CFLAGS='$(CFLAGS) -DAIX -Wall -O6 -DUSE_MMAP -DFRONTEND \
+ 			-fomit-frame-pointer -funroll-all-loops \
+ 			-finline-functions -ffast-math' \
+ 		$(FRONTEND)
+@@ -473,7 +548,7 @@
+ os2:
+ 	$(MAKE) CC=gcc LDFLAGS= \
+ 		OBJECTS='decode_i386.o dct64_i386.o audio_os2.o' \
+-		CFLAGS='-DREAL_IS_FLOAT -DNOXFERMEM -DOS2 -Wall -O2 -m486 \
++		CFLAGS='$(CFLAGS) -DREAL_IS_FLOAT -DNOXFERMEM -DOS2 -Wall -O2 -m486 \
+ 		-fomit-frame-pointer -funroll-all-loops \
+ 		-finline-functions -ffast-math' \
+ 		LIBS='-los2me -lsocket' \
+@@ -481,25 +556,191 @@
+ 
+ netbsd:
+ 	$(MAKE) CC=cc LDFLAGS= \
+-		OBJECTS='decode.o dct64.o audio_sun.o' \
+-		CFLAGS='-Wall -ansi -pedantic -O3 -fomit-frame-pointer \
+-			-funroll-all-loops -ffast-math \
+-			-DREAL_IS_FLOAT -DUSE_MMAP -DNETBSD' \
++		OBJECTS='decode.o dct64.o audio_sun.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O3 -fomit-frame-pointer \
++			-funroll-all-loops -ffast-math -DREAD_MMAP \
++			-DREAL_IS_FLOAT -DUSE_MMAP -DTERM_CONTROL -DNETBSD' \
+ 		mpg123-make
+ 
+ netbsd-i386:
+ 	$(MAKE) CC=cc LDFLAGS= \
+-		OBJECTS='decode_i386.o dct64_i386.o audio_sun.o' \
+-		CFLAGS='-Wall -ansi -pedantic -O4 -m486 -fomit-frame-pointer \
++		OBJECTS='decode_i386.o dct64_i386.o audio_sun.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O4 -fomit-frame-pointer \
++			-funroll-all-loops -ffast-math -DROT_I386 -DREAD_MMAP \
++			-DI386_ASSEM -DREAL_IS_FLOAT -DUSE_MMAP -DTERM_CONTROL -DNETBSD' \
++		mpg123-make
++
++netbsd-i386-elf:
++	$(MAKE) CC=cc LDFLAGS= \
++		OBJECTS='decode_i386.o dct64_i386.o decode_i586.o \
++			audio_sun.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O4 -fomit-frame-pointer \
++			-funroll-all-loops -ffast-math -DROT_I386 \
++			-DI386_ASSEM -DPENTIUM_OPT -DREAL_IS_FLOAT -DUSE_MMAP \
++			-DREAD_MMAP -DNETBSD -DTERM_CONTROL' \
++		mpg123-make
++
++netbsd-m68k:
++	$(MAKE) CC=cc LDFLAGS= \
++		OBJECTS='decode.o dct64.o audio_sun.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O3 -fomit-frame-pointer \
++			-ffast-math -DREAL_IS_FLOAT -DREAD_MMAP \
++			-DUSE_MMAP -DNETBSD -DM68K_ASSEM -DTERM_CONTROL' \
++		mpg123-make
++
++netbsd-arm:
++	$(MAKE) CC=cc LDFLAGS= \
++		OBJECTS='decode.o dct64.o audio_sun.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -O6 -fomit-frame-pointer \
++			-funroll-all-loops -finline-functions -ffast-math \
++			-march=armv4 -mtune=strongarm -mcpu=strongarm \
++			-DREAL_IS_FIXED -DUSE_MMAP -DREAD_MMAP -DTERM_CONTROL \
++			-DNETBSD' \
++		mpg123-make
++
++netbsd-arm-64:
++	$(MAKE) CC=cc LDFLAGS= \
++		OBJECTS='decode.o dct64.o audio_sun.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -O6 -fomit-frame-pointer \
++			-funroll-all-loops -finline-functions -ffast-math \
++			-march=armv4 -mtune=strongarm110 -mcpu=strongarm110 \
++			-DREAL_IS_FIXED_ARMV4 -DUSE_MMAP -DREAD_MMAP \
++			-DTERM_CONTROL -DNETBSD' \
++		mpg123-make
++
++netbsd-esd:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="`esd-config --libs`" \
++		OBJECTS='decode.o dct64.o audio_esd.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O3 -fomit-frame-pointer \
++			-funroll-all-loops -ffast-math -DREAD_MMAP \
++			-DREAL_IS_FLOAT -DUSE_MMAP -DTERM_CONTROL -DNETBSD \
++			`esd-config --cflags`' \
++		mpg123-make
++
++netbsd-i386-esd:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="`esd-config --libs`" \
++		OBJECTS='decode_i386.o dct64_i386.o audio_esd.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O4 -fomit-frame-pointer \
++			-funroll-all-loops -ffast-math -DROT_I386 -DREAD_MMAP \
++			-DI386_ASSEM -DREAL_IS_FLOAT -DUSE_MMAP -DTERM_CONTROL -DNETBSD \
++			`esd-config --cflags`' \
++		mpg123-make
++
++netbsd-i386-elf-esd:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="`esd-config --libs`" \
++		OBJECTS='decode_i386.o dct64_i386.o decode_i586.o \
++			audio_esd.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O4 -fomit-frame-pointer \
+ 			-funroll-all-loops -ffast-math -DROT_I386 \
+-			-DI386_ASSEM -DREAL_IS_FLOAT -DUSE_MMAP -DNETBSD' \
++			-DI386_ASSEM -DPENTIUM_OPT -DREAL_IS_FLOAT -DUSE_MMAP \
++			-DREAD_MMAP -DNETBSD -DTERM_CONTROL \
++			`esd-config --cflags`' \
++		mpg123-make
++
++netbsd-m68k-esd:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="`esd-config --libs`" \
++		OBJECTS='decode.o dct64.o audio_esd.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O3 -fomit-frame-pointer \
++			-ffast-math -DREAL_IS_FLOAT -DREAD_MMAP \
++			-DUSE_MMAP -DNETBSD -DM68K_ASSEM -DTERM_CONTROL \
++			`esd-config --cflags`' \
++		mpg123-make
++
++netbsd-arm-esd:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="`esd-config --libs`" \
++		OBJECTS='decode.o dct64.o audio_esd.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -O6 -fomit-frame-pointer \
++			-funroll-all-loops -finline-functions -ffast-math \
++			-march=armv4 -mtune=strongarm -mcpu=strongarm \
++			-DREAL_IS_FIXED -DUSE_MMAP -DREAD_MMAP -DTERM_CONTROL \
++			-DNETBSD `esd-config --cflags`' \
++		mpg123-make
++
++netbsd-arm-64-esd:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="`esd-config --libs`" \
++		OBJECTS='decode.o dct64.o audio_esd.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -O6 -fomit-frame-pointer \
++			-funroll-all-loops -finline-functions -ffast-math \
++			-march=armv4 -mtune=strongarm110 -mcpu=strongarm110 \
++			-DREAL_IS_FIXED_ARMV4 -DUSE_MMAP -DREAD_MMAP \
++			-DTERM_CONTROL -DNETBSD `esd-config --cflags`' \
++		mpg123-make
++
++netbsd-nas:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="-L${PREFIX}/lib -Wl,-R${PREFIX}/lib -laudio -L${X11BASE}/lib -Wl,-R${X11BASE}/lib -lXt -lXau" \
++		OBJECTS='decode.o dct64.o audio_nas.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O3 -fomit-frame-pointer \
++			-funroll-all-loops -ffast-math -DREAD_MMAP \
++			-DREAL_IS_FLOAT -DUSE_MMAP -DTERM_CONTROL -DNETBSD \
++			-DNAS' \
++		mpg123-make
++
++netbsd-i386-nas:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="-L${PREFIX}/lib -Wl,-R${PREFIX}/lib -laudio -L${X11BASE}/lib -Wl,-R${X11BASE}/lib -lXt -lXau" \
++		OBJECTS='decode_i386.o dct64_i386.o audio_nas.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O4 -fomit-frame-pointer \
++			-funroll-all-loops -ffast-math -DROT_I386 -DREAD_MMAP \
++			-DI386_ASSEM -DREAL_IS_FLOAT -DUSE_MMAP -DTERM_CONTROL -DNETBSD \
++			-DNAS' \
++		mpg123-make
++
++netbsd-i386-elf-nas:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="-L${PREFIX}/lib -Wl,-R${PREFIX}/lib -laudio -L${X11BASE}/lib -Wl,-R${X11BASE}/lib -lXt -lXau" \
++		OBJECTS='decode_i386.o dct64_i386.o decode_i586.o \
++			audio_nas.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O4 -fomit-frame-pointer \
++			-funroll-all-loops -ffast-math -DROT_I386 \
++			-DI386_ASSEM -DPENTIUM_OPT -DREAL_IS_FLOAT -DUSE_MMAP \
++			-DREAD_MMAP -DNETBSD -DTERM_CONTROL \
++			-DNAS' \
++		mpg123-make
++
++netbsd-m68k-nas:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="-L${PREFIX}/lib -Wl,-R${PREFIX}/lib -laudio -L${X11BASE}/lib -Wl,-R${X11BASE}/lib -lXt -lXau" \
++		OBJECTS='decode.o dct64.o audio_nas.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O3 -fomit-frame-pointer \
++			-ffast-math -DREAL_IS_FLOAT -DREAD_MMAP \
++			-DUSE_MMAP -DNETBSD -DM68K_ASSEM -DTERM_CONTROL \
++			-DNAS' \
++		mpg123-make
++
++netbsd-arm-nas:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="-L${PREFIX}/lib -Wl,-R${PREFIX}/lib -laudio -L${X11BASE}/lib -Wl,-R${X11BASE}/lib -lXt -lXau" \
++		OBJECTS='decode.o dct64.o audio_nas.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -O6 -fomit-frame-pointer \
++			-funroll-all-loops -finline-functions -ffast-math \
++			-march=armv4 -mtune=strongarm -mcpu=strongarm \
++			-DREAL_IS_FIXED -DUSE_MMAP -DREAD_MMAP -DTERM_CONTROL \
++			-DNETBSD -DNAS' \
++		mpg123-make
++
++netbsd-arm-64-nas:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="-L${PREFIX}/lib -Wl,-R${PREFIX}/lib -laudio -L${X11BASE}/lib -Wl,-R${X11BASE}/lib -lXt -lXau" \
++		OBJECTS='decode.o dct64.o audio_nas.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -O6 -fomit-frame-pointer \
++			-funroll-all-loops -finline-functions -ffast-math \
++			-march=armv4 -mtune=strongarm110 -mcpu=strongarm110 \
++			-DREAL_IS_FIXED_ARMV4 -DUSE_MMAP -DREAD_MMAP \
++			-DTERM_CONTROL -DNETBSD -DNAS' \
+ 		mpg123-make
+ 
+ bsdos:
+ 	$(MAKE) CC=shlicc2 LDFLAGS= \
+ 		OBJECTS='decode_i386.o dct64_i386.o \
+ 			 audio_oss.o' \
+-		CFLAGS='-Wall -O4 -m486 -fomit-frame-pointer \
++		CFLAGS='$(CFLAGS) -Wall -O4 -m486 -fomit-frame-pointer \
+ 			-funroll-all-loops -ffast-math -DROT_I386 \
+ 			-DI386_ASSEM -DREAL_IS_FLOAT -DUSE_MMAP -DOSS \
+ 			-DDONT_CATCH_SIGNALS' \
+@@ -508,7 +749,7 @@
+ bsdos4:
+ 	$(MAKE) CC=gcc LDFLAGS= \
+ 		OBJECTS='decode_i386.o dct64_i386.o audio_oss.o' \
+-		CFLAGS='-Wall -O4 -m486 -fomit-frame-pointer \
++		CFLAGS='$(CFLAGS) -Wall -O4 -m486 -fomit-frame-pointer \
+ 			-funroll-all-loops -ffast-math -DROT_I386 \
+ 			-DI386_ASSEM -DREAL_IS_FLOAT -DUSE_MMAP -DOSS \
+ 			-DREAD_MMAP -DDONT_CATCH_SIGNALS' \
+@@ -519,7 +760,7 @@
+ 		AUDIO_LIB='-laudio -lXau -L/usr/X11R6/lib' \
+ 		OBJECTS='decode_i386.o dct64_i386.o \
+ 			audio_nas.o' \
+-		CFLAGS='-Wall -O4 -m486 -fomit-frame-pointer \
++		CFLAGS='$(CFLAGS) -Wall -O4 -m486 -fomit-frame-pointer \
+ 			-funroll-all-loops -ffast-math -DROT_I386 \
+ 			-DI386_ASSEM -DREAL_IS_FLOAT -DUSE_MMAP -DOSS \
+ 			-DDONT_CATCH_SIGNALS -DNAS' \
+@@ -528,7 +769,7 @@
+ mint:
+ 	$(MAKE) CC=gcc LDFLAGS= \
+ 		OBJECTS='decode.o dct64.o audio_mint.o' \
+-		CFLAGS='-Wall -O2 -m68020-40 -m68881 \
++		CFLAGS='$(CFLAGS) -Wall -O2 -m68020-40 -m68881 \
+ 		-fomit-frame-pointer -funroll-all-loops \
+ 		-finline-functions -ffast-math \
+ 		-DREAL_IS_FLOAT -DMINT -DNOXFERMEM' \
+@@ -538,7 +779,17 @@
+ # maybe you need the additonal options LDFLAGS='-lnsl -lsocket' when linking (see solaris:)
+ generic:
+ 	$(MAKE) LDFLAGS= OBJECTS='decode.o dct64.o audio_dummy.o' \
+-		CFLAGS='-O -DGENERIC -DNOXFERMEM' \
++		CFLAGS='$(CFLAGS) -O -DGENERIC -DNOXFERMEM' \
++		mpg123-make
++
++darwin-esd:
++	$(MAKE) CC=cc LDFLAGS= \
++		AUDIO_LIB="`esd-config --libs`" \
++		OBJECTS='decode.o dct64.o audio_esd.o term.o' \
++		CFLAGS='$(CFLAGS) -Wall -ansi -pedantic -O3 -fomit-frame-pointer \
++			-funroll-all-loops -ffast-math -DREAD_MMAP \
++			-DREAL_IS_FLOAT -DUSE_MMAP -DTERM_CONTROL \
++			`esd-config --cflags`' \
+ 		mpg123-make
+ 
+ ###########################################################################
+@@ -563,7 +814,7 @@
+ 		layer2.o layer3.o audio.o buffer.o decode_2to1.o equalizer.o \
+ 		decode_4to1.o getlopt.o httpget.o xfermem.o decode_ntom.o \
+ 		wav.o readers.o getbits.o control_generic.o \
+-		$(OBJECTS) -o $(BINNAME) -lm $(AUDIO_LIB)
++		$(OBJECTS) -o $(BINNAME) -lm $(AUDIO_LIB) $(IPV6LIBDIR) $(IPV6LIB)
+ 
+ mpg123.exe: mpg123.o common.o $(OBJECTS) decode_2to1.o decode_4to1.o \
+ 		tabinit.o audio.o layer1.o layer2.o layer3.o buffer.o \
+@@ -644,5 +895,3 @@
+ 	rm -f "$$DISTNAME".tar.gz "$$DISTNAME".tar ; \
+ 	tar cvf "$$DISTNAME".tar "$$DISTNAME" ; \
+ 	gzip -9 "$$DISTNAME".tar
+-
+-
+diff -Nur mpg123-0.59r.orig/audio.c mpg123-0.59r/audio.c
+--- mpg123-0.59r.orig/audio.c	1999-04-06 15:53:05.000000000 +0000
++++ mpg123-0.59r/audio.c	2004-12-19 00:13:45.000000000 +0000
+@@ -81,10 +81,14 @@
+ 		k1 = NUM_RATES;
+ 	}
+ 
++#ifndef NETBSD
+ 	if(audio_open(&ai1) < 0) {
+ 		perror("audio");
+ 		exit(1);
+ 	}
++#else
++	audio_open(&ai1);
++#endif
+ 
+ 	for(i=0;i<NUM_CHANNELS;i++) {
+ 		for(j=0;j<NUM_RATES;j++) {
+diff -Nur mpg123-0.59r.orig/audio_esd.c mpg123-0.59r/audio_esd.c
+--- mpg123-0.59r.orig/audio_esd.c	1999-05-28 15:06:29.000000000 +0000
++++ mpg123-0.59r/audio_esd.c	2004-12-19 00:13:53.000000000 +0000
+@@ -8,6 +8,10 @@
+ #include <stropts.h>
+ #include <sys/conf.h>
+ #endif
++#ifdef NETBSD
++#include <sys/ioctl.h>
++#include <sys/audioio.h>
++#endif
+ 
+ static unsigned esd_rate = 0, esd_format = 0, esd_channels = 0;
+ 
+@@ -75,7 +79,7 @@
+   else if (ai->rate > esd_rate)
+     return -1;
+ 
+-  ai->fn = esd_play_stream_fallback(format, ai->rate, esdserver, "mpg123");
++  ai->fn = esd_play_stream_fallback(format, ai->rate, NULL/*esdserver*/, "mpg123");
+   return (ai->fn);
+ }
+ 
+diff -Nur mpg123-0.59r.orig/audio_oss.c mpg123-0.59r/audio_oss.c
+--- mpg123-0.59r.orig/audio_oss.c	1998-01-31 14:14:08.000000000 +0000
++++ mpg123-0.59r/audio_oss.c	2004-12-19 00:13:58.000000000 +0000
+@@ -28,7 +28,7 @@
+ #include <sys/ioctl.h>
+ #ifdef LINUX
+ #include <linux/soundcard.h>
+-#elif defined(__bsdi__)
++#elif defined(__bsdi__) || defined(__FreeBSD__)
+ #include <sys/soundcard.h>
+ #else
+ #include <machine/soundcard.h>
+diff -Nur mpg123-0.59r.orig/audio_sun.c mpg123-0.59r/audio_sun.c
+--- mpg123-0.59r.orig/audio_sun.c	1999-02-04 13:22:34.000000000 +0000
++++ mpg123-0.59r/audio_sun.c	2004-12-19 00:13:42.000000000 +0000
+@@ -17,6 +17,8 @@
+ 
+ #include "mpg123.h"
+ 
++extern int outburst;
++
+ #ifndef SPARCLINUX
+ #include <sys/filio.h>
+ #ifdef SUNOS
+@@ -79,6 +81,17 @@
+ 
+ #ifndef NETBSD
+   AUDIO_INITINFO(&ainfo);
++  if(ioctl(ai->fn, AUDIO_GETINFO, &ainfo) == -1)
++    return -1;
++#ifdef SOLARIS
++    outburst = MAXOUTBURST;
++#else
++  outburst = ainfo.blocksize;
++#endif
++  if(outburst > MAXOUTBURST)
++    outburst = MAXOUTBURST;
++
++  AUDIO_INITINFO(&ainfo);
+ 
+   if(ai->output > 0)
+     ainfo.play.port = 0;
+diff -Nur mpg123-0.59r.orig/dct64.c mpg123-0.59r/dct64.c
+--- mpg123-0.59r.orig/dct64.c	1997-09-20 11:16:04.000000000 +0000
++++ mpg123-0.59r/dct64.c	2004-12-19 00:10:36.000000000 +0000
+@@ -29,7 +29,7 @@
+   for(i=15;i>=0;i--)
+     *bs++ = (*b1++ + *--b2); 
+   for(i=15;i>=0;i--)
+-    *bs++ = (*--b2 - *b1++) * *--costab;
++    *bs++ = REAL_MUL((*--b2 - *b1++), *--costab);
+ 
+   b1 = bufs;
+   costab = pnts[1]+8;
+@@ -39,13 +39,13 @@
+     for(i=7;i>=0;i--)
+       *bs++ = (*b1++ + *--b2); 
+     for(i=7;i>=0;i--)
+-      *bs++ = (*--b2 - *b1++) * *--costab; 
++      *bs++ = REAL_MUL((*--b2 - *b1++), *--costab);
+     b2 += 32;
+     costab += 8;
+     for(i=7;i>=0;i--)
+       *bs++ = (*b1++ + *--b2); 
+     for(i=7;i>=0;i--)
+-      *bs++ = (*b1++ - *--b2) * *--costab; 
++      *bs++ = REAL_MUL((*b1++ - *--b2), *--costab);
+     b2 += 32;
+   }
+ 
+@@ -58,12 +58,12 @@
+     for(i=3;i>=0;i--)
+       *bs++ = (*b1++ + *--b2); 
+     for(i=3;i>=0;i--)
+-      *bs++ = (*--b2 - *b1++) * costab[i]; 
++      *bs++ = REAL_MUL((*--b2 - *b1++), costab[i]);
+     b2 += 16;
+     for(i=3;i>=0;i--)
+       *bs++ = (*b1++ + *--b2); 
+     for(i=3;i>=0;i--)
+-      *bs++ = (*b1++ - *--b2) * costab[i]; 
++      *bs++ = REAL_MUL((*b1++ - *--b2), costab[i]);
+     b2 += 16;
+   }
+ 
+@@ -75,13 +75,13 @@
+   {
+     *bs++ = (*b1++ + *--b2); 
+     *bs++ = (*b1++ + *--b2);
+-    *bs++ = (*--b2 - *b1++) * costab[1]; 
+-    *bs++ = (*--b2 - *b1++) * costab[0];
++    *bs++ = REAL_MUL((*--b2 - *b1++), costab[1]); 
++    *bs++ = REAL_MUL((*--b2 - *b1++), costab[0]);
+     b2 += 8;
+     *bs++ = (*b1++ + *--b2); 
+     *bs++ = (*b1++ + *--b2);
+-    *bs++ = (*b1++ - *--b2) * costab[1]; 
+-    *bs++ = (*b1++ - *--b2) * costab[0];
++    *bs++ = REAL_MUL((*b1++ - *--b2), costab[1]);
++    *bs++ = REAL_MUL((*b1++ - *--b2), costab[0]);
+     b2 += 8;
+   }
+   bs = bufs;
+@@ -92,10 +92,10 @@
+     real v0,v1;
+     v0=*b1++; v1 = *b1++;
+     *bs++ = (v0 + v1);
+-    *bs++ = (v0 - v1) * (*costab);
++    *bs++ = REAL_MUL((v0 - v1), (*costab));
+     v0=*b1++; v1 = *b1++;
+     *bs++ = (v0 + v1);
+-    *bs++ = (v1 - v0) * (*costab);
++    *bs++ = REAL_MUL((v1 - v0), (*costab));
+   }
+ 
+  }
+diff -Nur mpg123-0.59r.orig/dct64_i486.c mpg123-0.59r/dct64_i486.c
+--- mpg123-0.59r.orig/dct64_i486.c	1998-11-19 10:42:36.000000000 +0000
++++ mpg123-0.59r/dct64_i486.c	2004-12-19 00:10:43.000000000 +0000
+@@ -47,7 +47,11 @@
+ #define SETOUT(out,n,expr) out[FIR_BUFFER_SIZE*(n)]=(expr)
+ #define MUL(a,b) (((a)*(b)) >> 15)
+ #define MULL(a,b) (((long long)(a)*(long long)(b)) >> 15)
++#ifdef REAL_IS_FIXED
++#define TOINT(a) ((a) * 32768 / (int)REAL_FACTOR)
++#else
+ #define TOINT(a) ((int)((a)*32768.0))
++#endif
+ 
+ void dct64_1_486(int *out0,int *out1,int *b1,int *b2)
+ {
+diff -Nur mpg123-0.59r.orig/decode.c mpg123-0.59r/decode.c
+--- mpg123-0.59r.orig/decode.c	1999-01-26 12:47:05.000000000 +0000
++++ mpg123-0.59r/decode.c	2004-12-19 00:11:03.000000000 +0000
+@@ -13,9 +13,9 @@
+ #include "mpg123.h"
+ 
+ #define WRITE_SAMPLE(samples,sum,clip) \
+-  if( (sum) > 32767.0) { *(samples) = 0x7fff; (clip)++; } \
+-  else if( (sum) < -32768.0) { *(samples) = -0x8000; (clip)++; } \
+-  else { *(samples) = sum; }
++  if( (sum) > REAL_PLUS_32767) { *(samples) = 0x7fff; (clip)++; } \
++  else if( (sum) < REAL_MINUS_32768) { *(samples) = -0x8000; (clip)++; } \
++  else { *(samples) = REAL_TO_SHORT(sum); }
+ 
+ int synth_1to1_8bit(real *bandPtr,int channel,unsigned char *samples,int *pnt)
+ {
+@@ -156,36 +156,36 @@
+     for (j=16;j;j--,window+=0x10,samples+=step)
+     {
+       real sum;
+-      sum  = *window++ * *b0++;
+-      sum -= *window++ * *b0++;
+-      sum += *window++ * *b0++;
+-      sum -= *window++ * *b0++;
+-      sum += *window++ * *b0++;
+-      sum -= *window++ * *b0++;
+-      sum += *window++ * *b0++;
+-      sum -= *window++ * *b0++;
+-      sum += *window++ * *b0++;
+-      sum -= *window++ * *b0++;
+-      sum += *window++ * *b0++;
+-      sum -= *window++ * *b0++;
+-      sum += *window++ * *b0++;
+-      sum -= *window++ * *b0++;
+-      sum += *window++ * *b0++;
+-      sum -= *window++ * *b0++;
++      sum  = REAL_MUL(*window++, *b0++);
++      sum -= REAL_MUL(*window++, *b0++);
++      sum += REAL_MUL(*window++, *b0++);
++      sum -= REAL_MUL(*window++, *b0++);
++      sum += REAL_MUL(*window++, *b0++);
++      sum -= REAL_MUL(*window++, *b0++);
++      sum += REAL_MUL(*window++, *b0++);
++      sum -= REAL_MUL(*window++, *b0++);
++      sum += REAL_MUL(*window++, *b0++);
++      sum -= REAL_MUL(*window++, *b0++);
++      sum += REAL_MUL(*window++, *b0++);
++      sum -= REAL_MUL(*window++, *b0++);
++      sum += REAL_MUL(*window++, *b0++);
++      sum -= REAL_MUL(*window++, *b0++);
++      sum += REAL_MUL(*window++, *b0++);
++      sum -= REAL_MUL(*window++, *b0++);
+ 
+       WRITE_SAMPLE(samples,sum,clip);
+     }
+ 
+     {
+       real sum;
+-      sum  = window[0x0] * b0[0x0];
+-      sum += window[0x2] * b0[0x2];
+-      sum += window[0x4] * b0[0x4];
+-      sum += window[0x6] * b0[0x6];
+-      sum += window[0x8] * b0[0x8];
+-      sum += window[0xA] * b0[0xA];
+-      sum += window[0xC] * b0[0xC];
+-      sum += window[0xE] * b0[0xE];
++      sum  = REAL_MUL(window[0x0], b0[0x0]);
++      sum += REAL_MUL(window[0x2], b0[0x2]);
++      sum += REAL_MUL(window[0x4], b0[0x4]);
++      sum += REAL_MUL(window[0x6], b0[0x6]);
++      sum += REAL_MUL(window[0x8], b0[0x8]);
++      sum += REAL_MUL(window[0xA], b0[0xA]);
++      sum += REAL_MUL(window[0xC], b0[0xC]);
++      sum += REAL_MUL(window[0xE], b0[0xE]);
+       WRITE_SAMPLE(samples,sum,clip);
+       b0-=0x10,window-=0x20,samples+=step;
+     }
+@@ -194,22 +194,22 @@
+     for (j=15;j;j--,b0-=0x20,window-=0x10,samples+=step)
+     {
+       real sum;
+-      sum = -*(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
+-      sum -= *(--window) * *b0++;
++      sum = -REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
++      sum -= REAL_MUL(*(--window), *b0++);
+ 
+       WRITE_SAMPLE(samples,sum,clip);
+     }
+@@ -219,5 +219,3 @@
+ 
+   return clip;
+ }
+-
+-
+diff -Nur mpg123-0.59r.orig/equalizer.c mpg123-0.59r/equalizer.c
+--- mpg123-0.59r.orig/equalizer.c	1999-02-01 16:47:35.000000000 +0000
++++ mpg123-0.59r/equalizer.c	2004-12-19 00:11:07.000000000 +0000
+@@ -13,7 +13,7 @@
+ 
+ 	if(equalfile) {
+ 		for(i=0;i<32;i++)
+-			bandPtr[i] *= equalizer[channel][i];
++			bandPtr[i] = REAL_MUL(bandPtr[i], equalizer[channel][i]);
+ 	}
+ 
+ /*	if(param.equalizer & 0x2) {
+@@ -28,7 +28,7 @@
+ {
+   int i;
+   for(i=0;i<576;i++) {
+-    bandPtr[i] *= equalizerband[channel][i];
++    bandPtr[i] = REAL_MUL(bandPtr[i], equalizerband[channel][i]);
+   }
+ }
+ 
+diff -Nur mpg123-0.59r.orig/getlopt.c mpg123-0.59r/getlopt.c
+--- mpg123-0.59r.orig/getlopt.c	1998-12-08 09:41:11.000000000 +0000
++++ mpg123-0.59r/getlopt.c	2004-12-19 00:11:26.000000000 +0000
+@@ -45,10 +45,12 @@
+ 
+ 	if (!(opt->flags & 1)) { /* doesn't take argument */
+ 		if (opt->var) {
+-			if (opt->flags & 2) /* var is *char */
++			if (opt->flags & GLO_CHAR) /* var is *char */
+ 				*((char *) opt->var) = (char) opt->value;
+-			else
++			else if (opt->flags & GLO_LONG)	/* var is *long */
+ 				*((long *) opt->var) = opt->value;
++			else	/* var is *int */
++				*((int *) opt->var) = opt->value;
+ 		}
+ 		else
+ 			result = opt->value ? opt->value : opt->sname;
+diff -Nur mpg123-0.59r.orig/getlopt.h mpg123-0.59r/getlopt.h
+--- mpg123-0.59r.orig/getlopt.h	1998-11-02 22:58:54.000000000 +0000
++++ mpg123-0.59r/getlopt.h	2004-12-19 00:11:22.000000000 +0000
+@@ -24,7 +24,7 @@
+ #define GLO_ARG  1
+ #define GLO_CHAR 2
+ #define GLO_NUM  0
+-#define GLO_LONG GLO_NUM
++#define GLO_LONG 4	/* int != long !!! */
+ 
+ /* flags:
+  *	bit 0 = 0 - no argument
+diff -Nur mpg123-0.59r.orig/httpget.c mpg123-0.59r/httpget.c
+--- mpg123-0.59r.orig/httpget.c	1999-05-28 11:10:44.000000000 +0000
++++ mpg123-0.59r/httpget.c	2004-12-19 00:11:30.000000000 +0000
+@@ -55,11 +55,10 @@
+ #endif
+ 	int pos = 0;
+ 
+-	while(1) {
++	while(pos < (maxlen - 1)) {
+ 		if( read(fileno(f),string+pos,1) == 1) {
+ 			pos++;
+ 			if(string[pos-1] == '\n') {
+-				string[pos] = 0;
+ 				break;
+ 			}
+ 		}
+@@ -78,6 +77,7 @@
+ 	}
+ #endif
+ 
++	string[pos] = '\0';
+ }
+ 
+ void encode64 (char *source,char *destination)
+@@ -111,7 +111,7 @@
+ }
+ 
+ /* VERY  simple auth-from-URL grabber */
+-int getauthfromURL(char *url,char *auth)
++int getauthfromURL(char *url,char *auth,unsigned long authlen)
+ {
+   char *pos;
+ 
+@@ -126,57 +126,94 @@
+       if( url[i] == '/' )
+          return 0;
+     }
++    if (pos-url >= authlen) {
++      fprintf (stderr, "Error: authentication data exceeds max. length.\n");
++      return -1;
++    }
+     strncpy(auth,url,pos-url);
+     auth[pos-url] = 0;
+-    strcpy(url,pos+1);
++    memmove(url,pos+1,strlen(pos+1)+1);
+     return 1;
+   }
+   return 0;
+ }
+ 
+-char *url2hostport (char *url, char **hname, unsigned long *hip, unsigned int *port)
++static const char *defaultportstr = "80";
++
++char *url2hostport (char *url, char **hname, unsigned long *hip, char **port)
+ {
+-	char *cptr;
+-	struct hostent *myhostent;
+-	struct in_addr myaddr;
+-	int isip = 1;
+-
+-	if (!(strncmp(url, "http://", 7)))
+-		url += 7;
+-	cptr = url;
+-	while (*cptr && *cptr != ':' && *cptr != '/') {
+-		if ((*cptr < '0' || *cptr > '9') && *cptr != '.')
+-			isip = 0;
+-		cptr++;
++	char *h, *p;
++	char *hostptr;
++	char *r_hostptr;
++	char *pathptr;
++	const char *portptr;
++	char *p0;
++	size_t stringlength;
++
++	p = url;
++	if (strncmp(p, "http://", 7) == 0)
++		p += 7;
++	hostptr = p;
++	while (*p && *p != '/')
++		p++;
++	pathptr = p;
++
++	r_hostptr = --p;
++	while (*p && hostptr < p && *p != ':' && *p != ']')
++		p--;
++
++	if (!*p || p < hostptr || *p != ':') {
++		portptr = NULL;
++	}
++	else{
++		portptr = p + 1;
++		r_hostptr = p - 1;
++	}
++	if (*hostptr == '[' && *r_hostptr == ']') {
++		hostptr++;
++		r_hostptr--;
++	}
++
++	stringlength = r_hostptr - hostptr + 1;
++	h = malloc(stringlength + 1); /* removed the strndup for better portability */
++	if (h == NULL) {
++		*hname = NULL;
++		*port = NULL;
++		return NULL;
++	}
++	strncpy(h, hostptr, stringlength);
++	*(h+stringlength) = '\0';
++	*hname = h;
++
++	if (portptr) {
++		stringlength = (pathptr - portptr);
++		if(!stringlength) portptr = NULL;
+ 	}
+-	*hname = strdup(url); /* removed the strndup for better portability */
+-	if (!(*hname)) {
++	if (portptr == NULL) {
++		portptr = (char *)defaultportstr;
++		stringlength = strlen(defaultportstr);
++	}
++	p0 = malloc(stringlength + 1);
++	if (p0 == NULL) {
++		free(h);
+ 		*hname = NULL;
+-		return (NULL);
++		*port = NULL;
++		return NULL;
+ 	}
+-	(*hname)[cptr - url] = 0;
+-	if (!isip) {
+-		if (!(myhostent = gethostbyname(*hname)))
+-			return (NULL);
+-		memcpy (&myaddr, myhostent->h_addr, sizeof(myaddr));
+-		*hip = myaddr.s_addr;
+-	}
+-	else
+-		if ((*hip = inet_addr(*hname)) == INADDR_NONE)
+-			return (NULL);
+-	if (!*cptr || *cptr == '/') {
+-		*port = 80;
+-		return (cptr);
+-	}
+-	*port = atoi(++cptr);
+-	while (*cptr && *cptr != '/')
+-		cptr++;
+-	return (cptr);
++	strncpy(p0, portptr, stringlength);
++	*(p0 + stringlength) = '\0';
++
++	for (p = p0; *p && isdigit(*p); p++)
++		;
++	*p = '\0';
++	*port = (char *)p0;
++
++	return pathptr;
+ }
+ 
+ char *proxyurl = NULL;
+ unsigned long proxyip = 0;
+-unsigned int proxyport;
++char *proxyport;
+ 
+ #define ACCEPT_HEAD "Accept: audio/mpeg, audio/x-mpegurl, */*\r\n"
+ 
+@@ -188,26 +225,36 @@
+ 	char *purl, *host, *request, *sptr;
+ 	int linelength;
+ 	unsigned long myip;
+-	unsigned int myport;
++	char *myport;
+ 	int sock;
+ 	int relocate, numrelocs = 0;
+-	struct sockaddr_in server;
+ 	FILE *myfile;
++#ifdef INET6
++	struct addrinfo hints, *res, *res0;
++	int error;
++#else
++	struct hostent *hp;
++	struct sockaddr_in sin;
++#endif
+ 
++	host = NULL;
++	proxyport = NULL;
++	myport = NULL;
+ 	if (!proxyip) {
+ 		if (!proxyurl)
+ 			if (!(proxyurl = getenv("MP3_HTTP_PROXY")))
+ 				if (!(proxyurl = getenv("http_proxy")))
+ 					proxyurl = getenv("HTTP_PROXY");
+ 		if (proxyurl && proxyurl[0] && strcmp(proxyurl, "none")) {
+-			host = NULL;
+ 			if (!(url2hostport(proxyurl, &host, &proxyip, &proxyport))) {
+ 				fprintf (stderr, "Unknown proxy host \"%s\".\n",
+ 					host ? host : "");
+ 				exit (1);
+ 			}
++#if 0
+ 			if (host)
+ 				free (host);
++#endif
+ 		}
+ 		else
+ 			proxyip = INADDR_NONE;
+@@ -222,7 +269,10 @@
+ 	strncpy (purl, url, 1023);
+ 	purl[1023] = '\0';
+ 
+-        getauthfromURL(purl,httpauth1);
++        if (getauthfromURL(purl,httpauth1,sizeof(httpauth1)) < 0) {
++		sock = -1;
++		goto exit;
++	}
+ 
+ 	do {
+ 		strcpy (request, "GET ");
+@@ -234,7 +284,14 @@
+ 			myip = proxyip;
+ 		}
+ 		else {
+-			host = NULL;
++			if (host) {
++				free(host);
++				host=NULL;
++			}
++			if (proxyport) {
++				free(proxyport);
++				proxyport=NULL;
++			}
+ 			if (!(sptr = url2hostport(purl, &host, &myip, &myport))) {
+ 				fprintf (stderr, "Unknown host \"%s\".\n",
+ 					host ? host : "");
+@@ -247,21 +304,64 @@
+ 			prgName, prgVersion);
+ 		if (host) {
+ 			sprintf(request + strlen(request),
+-				"Host: %s:%u\r\n", host, myport);
++				"Host: %s:%s\r\n", host, myport);
++#if 0
+ 			free (host);
++#endif
+ 		}
+-
+ 		strcat (request, ACCEPT_HEAD);
+-		server.sin_family = AF_INET;
+-		server.sin_port = htons(myport);
+-		server.sin_addr.s_addr = myip;
+-		if ((sock = socket(PF_INET, SOCK_STREAM, 6)) < 0) {
+-			perror ("socket");
+-			exit (1);
++
++#ifdef INET6
++		memset(&hints, 0, sizeof(hints));
++		hints.ai_socktype = SOCK_STREAM;
++		error = getaddrinfo(host, (char *)myport, &hints, &res0);
++		if (error) {
++			fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(error));
++			exit(1);
+ 		}
+-		if (connect(sock, (struct sockaddr *)&server, sizeof(server))) {
+-			perror ("connect");
+-			exit (1);
++
++		sock = -1;
++		for (res = res0; res; res = res->ai_next) {
++			if ((sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0) {
++				continue;
++			}
++			if (connect(sock, res->ai_addr, res->ai_addrlen)) {
++				close(sock);
++				sock = -1;
++				continue;
++			}
++			break;
++		}
++
++		freeaddrinfo(res0);
++#else
++		sock = -1;
++		hp = gethostbyname(host);
++		if (!hp)
++			goto fail;
++		if (hp->h_length != sizeof(sin.sin_addr))
++			goto fail;
++		sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
++		if (sock < 0)
++			goto fail;
++		memset(&sin, 0, sizeof(sin));
++		sin.sin_family = AF_INET;
++		sin.sin_port = htons(atoi(myport));
++#ifdef SIN6_LEN
++		sin.sin_len = sizeof(struct sockaddr_in);
++#endif
++		memcpy(&sin.sin_addr, hp->h_addr, hp->h_length);
++		if (connect(sock, (struct sockaddr *)&sin, 
++				sizeof(struct sockaddr_in) ) < 0) {
++			close(sock);
++			sock = -1;
++		}
++fail:
++#endif
++
++		if (sock < 0) {
++			perror("socket");
++			exit(1);
+ 		}
+ 
+ 		if (strlen(httpauth1) || httpauth) {
+@@ -306,8 +406,12 @@
+ 		fprintf (stderr, "Too many HTTP relocations.\n");
+ 		exit (1);
+ 	}
++exit:
+ 	free (purl);
+ 	free (request);
++	free(host);
++	free(proxyport);
++	free(myport);
+ 
+ 	return sock;
+ }
+diff -Nur mpg123-0.59r.orig/layer2.c mpg123-0.59r/layer2.c
+--- mpg123-0.59r.orig/layer2.c	1999-02-10 12:13:06.000000000 +0000
++++ mpg123-0.59r/layer2.c	2004-12-19 00:14:02.000000000 +0000
+@@ -265,6 +265,12 @@
+   fr->jsbound = (fr->mode == MPG_MD_JOINT_STEREO) ?
+      (fr->mode_ext<<2)+4 : fr->II_sblimit;
+ 
++  if (fr->jsbound > fr->II_sblimit)
++  {
++    fprintf(stderr, "Truncating stereo boundary to sideband limit.\n");
++    fr->jsbound=fr->II_sblimit;
++  }
++
+   if(stereo == 1 || single == 3)
+     single = 0;
+ 
+diff -Nur mpg123-0.59r.orig/layer3.c mpg123-0.59r/layer3.c
+--- mpg123-0.59r.orig/layer3.c	1999-04-21 15:25:18.000000000 +0000
++++ mpg123-0.59r/layer3.c	2004-12-19 00:11:11.000000000 +0000
+@@ -109,54 +109,54 @@
+   int i,j,k,l;
+ 
+   for(i=-256;i<118+4;i++)
+-    gainpow2[i+256] = pow((double)2.0,-0.25 * (double) (i+210) );
++    gainpow2[i+256] = DOUBLE_TO_REAL(pow((double)2.0,-0.25 * (double) (i+210) ));
+ 
+   for(i=0;i<8207;i++)
+-    ispow[i] = pow((double)i,(double)4.0/3.0);
++    ispow[i] = DOUBLE_TO_REAL(pow((double)i,(double)4.0/3.0));
+ 
+   for (i=0;i<8;i++) {
+     static double Ci[8]={-0.6,-0.535,-0.33,-0.185,-0.095,-0.041,-0.0142,-0.0037};
+     double sq=sqrt(1.0+Ci[i]*Ci[i]);
+-    aa_cs[i] = 1.0/sq;
+-    aa_ca[i] = Ci[i]/sq;
++    aa_cs[i] = DOUBLE_TO_REAL(1.0/sq);
++    aa_ca[i] = DOUBLE_TO_REAL(Ci[i]/sq);
+   }
+ 
+   for(i=0;i<18;i++) {
+-    win[0][i]    = win[1][i]    = 0.5 * sin( M_PI / 72.0 * (double) (2*(i+0) +1) ) / cos ( M_PI * (double) (2*(i+0) +19) / 72.0 );
+-    win[0][i+18] = win[3][i+18] = 0.5 * sin( M_PI / 72.0 * (double) (2*(i+18)+1) ) / cos ( M_PI * (double) (2*(i+18)+19) / 72.0 );
++    win[0][i]    = win[1][i]    = DOUBLE_TO_REAL(0.5 * sin( M_PI / 72.0 * (double) (2*(i+0) +1) ) / cos ( M_PI * (double) (2*(i+0) +19) / 72.0 ));
++    win[0][i+18] = win[3][i+18] = DOUBLE_TO_REAL(0.5 * sin( M_PI / 72.0 * (double) (2*(i+18)+1) ) / cos ( M_PI * (double) (2*(i+18)+19) / 72.0 ));
+   }
+   for(i=0;i<6;i++) {
+-    win[1][i+18] = 0.5 / cos ( M_PI * (double) (2*(i+18)+19) / 72.0 );
+-    win[3][i+12] = 0.5 / cos ( M_PI * (double) (2*(i+12)+19) / 72.0 );
+-    win[1][i+24] = 0.5 * sin( M_PI / 24.0 * (double) (2*i+13) ) / cos ( M_PI * (double) (2*(i+24)+19) / 72.0 );
+-    win[1][i+30] = win[3][i] = 0.0;
+-    win[3][i+6 ] = 0.5 * sin( M_PI / 24.0 * (double) (2*i+1) )  / cos ( M_PI * (double) (2*(i+6 )+19) / 72.0 );
++    win[1][i+18] = DOUBLE_TO_REAL(0.5 / cos ( M_PI * (double) (2*(i+18)+19) / 72.0 ));
++    win[3][i+12] = DOUBLE_TO_REAL(0.5 / cos ( M_PI * (double) (2*(i+12)+19) / 72.0 ));
++    win[1][i+24] = DOUBLE_TO_REAL(0.5 * sin( M_PI / 24.0 * (double) (2*i+13) ) / cos ( M_PI * (double) (2*(i+24)+19) / 72.0 ));
++    win[1][i+30] = win[3][i] = DOUBLE_TO_REAL(0.0);
++    win[3][i+6 ] = DOUBLE_TO_REAL(0.5 * sin( M_PI / 24.0 * (double) (2*i+1) )  / cos ( M_PI * (double) (2*(i+6 )+19) / 72.0 ));
+   }
+ 
+   for(i=0;i<9;i++)
+-    COS9[i] = cos( M_PI / 18.0 * (double) i);
++    COS9[i] = DOUBLE_TO_REAL(cos( M_PI / 18.0 * (double) i));
+ 
+   for(i=0;i<9;i++)
+-    tfcos36[i] = 0.5 / cos ( M_PI * (double) (i*2+1) / 36.0 );
++    tfcos36[i] = DOUBLE_TO_REAL(0.5 / cos ( M_PI * (double) (i*2+1) / 36.0 ));
+   for(i=0;i<3;i++)
+-    tfcos12[i] = 0.5 / cos ( M_PI * (double) (i*2+1) / 12.0 );
++    tfcos12[i] = DOUBLE_TO_REAL(0.5 / cos ( M_PI * (double) (i*2+1) / 12.0 ));
+ 
+-  COS6_1 = cos( M_PI / 6.0 * (double) 1);
+-  COS6_2 = cos( M_PI / 6.0 * (double) 2);
++  COS6_1 = DOUBLE_TO_REAL(cos( M_PI / 6.0 * (double) 1));
++  COS6_2 = DOUBLE_TO_REAL(cos( M_PI / 6.0 * (double) 2));
+ 
+ #ifdef NEW_DCT9
+-  cos9[0]  = cos(1.0*M_PI/9.0);
+-  cos9[1]  = cos(5.0*M_PI/9.0);
+-  cos9[2]  = cos(7.0*M_PI/9.0);
+-  cos18[0] = cos(1.0*M_PI/18.0);
+-  cos18[1] = cos(11.0*M_PI/18.0);
+-  cos18[2] = cos(13.0*M_PI/18.0);
++  cos9[0]  = DOUBLE_TO_REAL(cos(1.0*M_PI/9.0));
++  cos9[1]  = DOUBLE_TO_REAL(cos(5.0*M_PI/9.0));
++  cos9[2]  = DOUBLE_TO_REAL(cos(7.0*M_PI/9.0));
++  cos18[0] = DOUBLE_TO_REAL(cos(1.0*M_PI/18.0));
++  cos18[1] = DOUBLE_TO_REAL(cos(11.0*M_PI/18.0));
++  cos18[2] = DOUBLE_TO_REAL(cos(13.0*M_PI/18.0));
+ #endif
+ 
+   for(i=0;i<12;i++) {
+-    win[2][i]  = 0.5 * sin( M_PI / 24.0 * (double) (2*i+1) ) / cos ( M_PI * (double) (2*i+7) / 24.0 );
++    win[2][i]  = DOUBLE_TO_REAL(0.5 * sin( M_PI / 24.0 * (double) (2*i+1) ) / cos ( M_PI * (double) (2*i+7) / 24.0 ));
+     for(j=0;j<6;j++)
+-      COS1[i][j] = cos( M_PI / 24.0 * (double) ((2*i+7)*(2*j+1)) );
++      COS1[i][j] = DOUBLE_TO_REAL(cos( M_PI / 24.0 * (double) ((2*i+7)*(2*j+1)) ));
+   }
+ 
+   for(j=0;j<4;j++) {
+@@ -169,10 +169,10 @@
+ 
+   for(i=0;i<16;i++) {
+     double t = tan( (double) i * M_PI / 12.0 );
+-    tan1_1[i] = t / (1.0+t);
+-    tan2_1[i] = 1.0 / (1.0 + t);
+-    tan1_2[i] = M_SQRT2 * t / (1.0+t);
+-    tan2_2[i] = M_SQRT2 / (1.0 + t);
++    tan1_1[i] = DOUBLE_TO_REAL(t / (1.0+t));
++    tan2_1[i] = DOUBLE_TO_REAL(1.0 / (1.0 + t));
++    tan1_2[i] = DOUBLE_TO_REAL(M_SQRT2 * t / (1.0+t));
++    tan2_2[i] = DOUBLE_TO_REAL(M_SQRT2 / (1.0 + t));
+ 
+     for(j=0;j<2;j++) {
+       double base = pow(2.0,-0.25*(j+1.0));
+@@ -183,10 +183,10 @@
+         else
+           p2 = pow(base,i*0.5);
+       }
+-      pow1_1[j][i] = p1;
+-      pow2_1[j][i] = p2;
+-      pow1_2[j][i] = M_SQRT2 * p1;
+-      pow2_2[j][i] = M_SQRT2 * p2;
++      pow1_1[j][i] = DOUBLE_TO_REAL(p1);
++      pow2_1[j][i] = DOUBLE_TO_REAL(p2);
++      pow1_2[j][i] = DOUBLE_TO_REAL(M_SQRT2 * p1);
++      pow2_2[j][i] = DOUBLE_TO_REAL(M_SQRT2 * p2);
+     }
+   }
+ 
+@@ -608,7 +608,7 @@
+  * Dequantize samples (includes huffman decoding)
+  */
+ /* 24 is enough because tab13 has max. a 19 bit huffvector */
+-#define BITSHIFT ((sizeof(long)-1)*8)
++#define BITSHIFT ((sizeof(int)-1)*8)
+ #define REFRESH_MASK \
+   while(num < BITSHIFT) { \
+     mask |= getbyte()<<(BITSHIFT-num); \
+@@ -625,7 +625,7 @@
+   int *me;
+ 
+   int num=getbitoffset();
+-  long mask = (long) getbits(num)<<(BITSHIFT+8-num);
++  int mask = (int) getbits(num)<<(BITSHIFT+8-num);
+   part2remain -= num;
+ 
+   {
+@@ -709,50 +709,50 @@
+         if(x == 15 && h->linbits) {
+           max[lwin] = cb;
+           REFRESH_MASK;
+-          x += ((unsigned long) mask) >> (BITSHIFT+8-h->linbits);
++          x += ((unsigned int) mask) >> (BITSHIFT+8-h->linbits);
+           num -= h->linbits+1;
+           mask <<= h->linbits;
+           if(mask < 0)
+-            *xrpnt = -ispow[x] * v;
++            *xrpnt = REAL_MUL(-ispow[x], v);
+           else
+-            *xrpnt =  ispow[x] * v;
++            *xrpnt = REAL_MUL(ispow[x], v);
+           mask <<= 1;
+         }
+         else if(x) {
+           max[lwin] = cb;
+           if(mask < 0)
+-            *xrpnt = -ispow[x] * v;
++            *xrpnt = REAL_MUL(-ispow[x], v);
+           else
+-            *xrpnt =  ispow[x] * v;
++            *xrpnt = REAL_MUL(ispow[x], v);
+           num--;
+           mask <<= 1;
+         }
+         else
+-          *xrpnt = 0.0;
++          *xrpnt = DOUBLE_TO_REAL(0.0);
+         xrpnt += step;
+         if(y == 15 && h->linbits) {
+           max[lwin] = cb;
+           REFRESH_MASK;
+-          y += ((unsigned long) mask) >> (BITSHIFT+8-h->linbits);
++          y += ((unsigned int) mask) >> (BITSHIFT+8-h->linbits);
+           num -= h->linbits+1;
+           mask <<= h->linbits;
+           if(mask < 0)
+-            *xrpnt = -ispow[y] * v;
++            *xrpnt = REAL_MUL(-ispow[y], v);
+           else
+-            *xrpnt =  ispow[y] * v;
++            *xrpnt = REAL_MUL(ispow[y], v);
+           mask <<= 1;
+         }
+         else if(y) {
+           max[lwin] = cb;
+           if(mask < 0)
+-            *xrpnt = -ispow[y] * v;
++            *xrpnt = REAL_MUL(-ispow[y], v);
+           else
+-            *xrpnt =  ispow[y] * v;
++            *xrpnt = REAL_MUL(ispow[y], v);
+           num--;
+           mask <<= 1;
+         }
+         else
+-          *xrpnt = 0.0;
++          *xrpnt = DOUBLE_TO_REAL(0.0);
+         xrpnt += step;
+       }
+     }
+@@ -804,7 +804,7 @@
+           mask <<= 1;
+         }
+         else
+-          *xrpnt = 0.0;
++          *xrpnt = DOUBLE_TO_REAL(0.0);
+         xrpnt += step;
+       }
+     }
+@@ -812,8 +812,8 @@
+     if(lwin < 3) { /* short band? */
+       while(1) {
+         for(;mc > 0;mc--) {
+-          *xrpnt = 0.0; xrpnt += 3; /* short band -> step=3 */
+-          *xrpnt = 0.0; xrpnt += 3;
++          *xrpnt = DOUBLE_TO_REAL(0.0); xrpnt += 3; /* short band -> step=3 */
++          *xrpnt = DOUBLE_TO_REAL(0.0); xrpnt += 3;
+         }
+         if(m >= me)
+           break;
+@@ -883,50 +883,50 @@
+         if (x == 15 && h->linbits) {
+           max = cb;
+ 	  REFRESH_MASK;
+-          x += ((unsigned long) mask) >> (BITSHIFT+8-h->linbits);
++          x += ((unsigned int) mask) >> (BITSHIFT+8-h->linbits);
+           num -= h->linbits+1;
+           mask <<= h->linbits;
+           if(mask < 0)
+-            *xrpnt++ = -ispow[x] * v;
++            *xrpnt++ = REAL_MUL(-ispow[x], v);
+           else
+-            *xrpnt++ =  ispow[x] * v;
++            *xrpnt++ = REAL_MUL(ispow[x], v);
+           mask <<= 1;
+         }
+         else if(x) {
+           max = cb;
+           if(mask < 0)
+-            *xrpnt++ = -ispow[x] * v;
++            *xrpnt++ = REAL_MUL(-ispow[x], v);
+           else
+-            *xrpnt++ =  ispow[x] * v;
++            *xrpnt++ = REAL_MUL(ispow[x], v);
+           num--;
+           mask <<= 1;
+         }
+         else
+-          *xrpnt++ = 0.0;
++          *xrpnt++ = DOUBLE_TO_REAL(0.0);
+ 
+         if (y == 15 && h->linbits) {
+           max = cb;
+ 	  REFRESH_MASK;
+-          y += ((unsigned long) mask) >> (BITSHIFT+8-h->linbits);
++          y += ((unsigned int) mask) >> (BITSHIFT+8-h->linbits);
+           num -= h->linbits+1;
+           mask <<= h->linbits;
+           if(mask < 0)
+-            *xrpnt++ = -ispow[y] * v;
++            *xrpnt++ = REAL_MUL(-ispow[y], v);
+           else
+-            *xrpnt++ =  ispow[y] * v;
++            *xrpnt++ = REAL_MUL(ispow[y], v);
+           mask <<= 1;
+         }
+         else if(y) {
+           max = cb;
+           if(mask < 0)
+-            *xrpnt++ = -ispow[y] * v;
++            *xrpnt++ = REAL_MUL(-ispow[y], v);
+           else
+-            *xrpnt++ =  ispow[y] * v;
++            *xrpnt++ = REAL_MUL(ispow[y], v);
+           num--;
+           mask <<= 1;
+         }
+         else
+-          *xrpnt++ = 0.0;
++          *xrpnt++ = DOUBLE_TO_REAL(0.0);
+       }
+     }
+ 
+@@ -974,7 +974,7 @@
+           mask <<= 1;
+         }
+         else
+-          *xrpnt++ = 0.0;
++          *xrpnt++ = DOUBLE_TO_REAL(0.0);
+       }
+     }
+ 
+@@ -987,7 +987,7 @@
+   num = 0;
+ 
+   while(xrpnt < &xr[SBLIMIT][0]) 
+-    *xrpnt++ = 0.0;
++    *xrpnt++ = DOUBLE_TO_REAL(0.0);
+ 
+   while( part2remain > 16 ) {
+     getbits(16); /* Dismiss stuffing Bits */
+@@ -1065,8 +1065,8 @@
+                t1  = tab1[is_p]; t2 = tab2[is_p];
+                for (; sb > 0; sb--,idx+=3) {
+                  real v = xr[0][idx];
+-                 xr[0][idx] = v * t1;
+-                 xr[1][idx] = v * t2;
++                 xr[0][idx] = REAL_MUL(v, t1);
++                 xr[1][idx] = REAL_MUL(v, t2);
+                }
+              }
+            }
+@@ -1087,8 +1087,8 @@
+              t1 = tab1[is_p]; t2 = tab2[is_p];
+              for ( ; sb > 0; sb--,idx+=3 ) {  
+                real v = xr[0][idx];
+-               xr[0][idx] = v * t1;
+-               xr[1][idx] = v * t2;
++               xr[0][idx] = REAL_MUL(v, t1);
++               xr[1][idx] = REAL_MUL(v, t2);
+              }
+            }
+          } /* end for(lwin; .. ; . ) */
+@@ -1108,8 +1108,8 @@
+                t1 = tab1[is_p]; t2 = tab2[is_p];
+                for ( ; sb > 0; sb--,idx++) {
+                  real v = xr[0][idx];
+-                 xr[0][idx] = v * t1;
+-                 xr[1][idx] = v * t2;
++                 xr[0][idx] = REAL_MUL(v, t1);
++                 xr[1][idx] = REAL_MUL(v, t2);
+                }
+              }
+              else 
+@@ -1128,8 +1128,8 @@
+             t1 = tab1[is_p]; t2 = tab2[is_p];
+             for ( ; sb > 0; sb--,idx++) {
+                real v = xr[0][idx];
+-               xr[0][idx] = v * t1;
+-               xr[1][idx] = v * t2;
++               xr[0][idx] = REAL_MUL(v, t1);
++               xr[1][idx] = REAL_MUL(v, t2);
+             }
+           }
+           else
+@@ -1143,8 +1143,8 @@
+ 
+           for ( sb = bi->longDiff[21]; sb > 0; sb--,idx++ ) {
+             real v = xr[0][idx];
+-            xr[0][idx] = v * t1;
+-            xr[1][idx] = v * t2;
++            xr[0][idx] = REAL_MUL(v, t1);
++            xr[1][idx] = REAL_MUL(v, t2);
+           }
+         }
+       } /* ... */
+@@ -1177,8 +1177,8 @@
+        for(ss=7;ss>=0;ss--)
+        {       /* upper and lower butterfly inputs */
+          register real bu = *--xr2,bd = *xr1;
+-         *xr2   = (bu * (*cs)   ) - (bd * (*ca)   );
+-         *xr1++ = (bd * (*cs++) ) + (bu * (*ca++) );
++	 *xr2   = REAL_MUL(bu, *cs) - REAL_MUL(bd, *ca);
++	 *xr1++ = REAL_MUL(bd, *cs++) + REAL_MUL(bu, *ca++);
+        }
+      }
+   }
+@@ -1252,8 +1252,8 @@
+      { 
+       real t0, t1, t2;
+ 
+-      t0 = COS6_2 * (in[8] + in[16] - in[4]);
+-      t1 = COS6_2 * in[12];
++      t0 = REAL_MUL(COS6_2, (in[8] + in[16] - in[4]));
++      t1 = REAL_MUL(COS6_2, in[12]);
+ 
+       t3 = in[0];
+       t2 = t3 - t1 - t1;
+@@ -1261,16 +1261,16 @@
+       tmp[4]          = t2 + t0 + t0;
+       t3 += t1;
+ 
+-      t2 = COS6_1 * (in[10] + in[14] - in[2]);
++      t2 = REAL_MUL(COS6_1, (in[10] + in[14] - in[2]));
+       tmp[1] -= t2;
+       tmp[7] += t2;
+      }
+      {
+       real t0, t1, t2;
+ 
+-      t0 = cos9[0] * (in[4] + in[8] );
+-      t1 = cos9[1] * (in[8] - in[16]);
+-      t2 = cos9[2] * (in[4] + in[16]);
++      t0 = REAL_MUL(cos9[0], (in[4] + in[8] ));
++      t1 = REAL_MUL(cos9[1], (in[8] - in[16]));
++      t2 = REAL_MUL(cos9[2], (in[4] + in[16]));
+ 
+       tmp[2] = tmp[6] = t3 - t0      - t2;
+       tmp[0] = tmp[8] = t3 + t0 + t1;
+@@ -1280,9 +1280,9 @@
+     {
+       real t1, t2, t3;
+ 
+-      t1 = cos18[0] * (in[2]  + in[10]);
+-      t2 = cos18[1] * (in[10] - in[14]);
+-      t3 = COS6_1   * in[6];
++      t1 = REAL_MUL(cos18[0], (in[2]  + in[10]));
++      t2 = REAL_MUL(cos18[1], (in[10] - in[14]));
++      t3 = REAL_MUL(COS6_1,    in[6]);
+ 
+       {
+         real t0 = t1 + t2 + t3;
+@@ -1293,7 +1293,7 @@
+       t2 -= t3;
+       t1 -= t3;
+ 
+-      t3 = cos18[2] * (in[2] + in[14]);
++      t3 = REAL_MUL(cos18[2], (in[2] + in[14]));
+ 
+       t1 += t3;
+       tmp[3] += t1;
+@@ -1308,35 +1308,35 @@
+     {
+       real t0, t1, t2, t3, t4, t5, t6, t7;
+ 
+-      t1 = COS6_2 * in[12];
+-      t2 = COS6_2 * (in[8] + in[16] - in[4]);
++      t1 = REAL_MUL(COS6_2, in[12]);
++      t2 = REAL_MUL(COS6_2, (in[8] + in[16] - in[4]));
+ 
+       t3 = in[0] + t1;
+       t4 = in[0] - t1 - t1;
+       t5     = t4 - t2;
+       tmp[4] = t4 + t2 + t2;
+ 
+-      t0 = cos9[0] * (in[4] + in[8]);
+-      t1 = cos9[1] * (in[8] - in[16]);
++      t0 = REAL_MUL(cos9[0], (in[4] + in[8]));
++      t1 = REAL_MUL(cos9[1], (in[8] - in[16]));
+ 
+-      t2 = cos9[2] * (in[4] + in[16]);
++      t2 = REAL_MUL(cos9[2], (in[4] + in[16]));
+ 
+       t6 = t3 - t0 - t2;
+       t0 += t3 + t1;
+       t3 += t2 - t1;
+ 
+-      t2 = cos18[0] * (in[2]  + in[10]);
+-      t4 = cos18[1] * (in[10] - in[14]);
+-      t7 = COS6_1 * in[6];
++      t2 = REAL_MUL(cos18[0], (in[2]  + in[10]));
++      t4 = REAL_MUL(cos18[1], (in[10] - in[14]));
++      t7 = REAL_MUL(COS6_1, in[6]);
+ 
+       t1 = t2 + t4 + t7;
+       tmp[0] = t0 + t1;
+       tmp[8] = t0 - t1;
+-      t1 = cos18[2] * (in[2] + in[14]);
++      t1 = REAL_MUL(cos18[2], (in[2] + in[14]));
+       t2 += t1 - t7;
+ 
+       tmp[3] = t3 + t2;
+-      t0 = COS6_1 * (in[10] + in[14] - in[2]);
++      t0 = REAL_MUL(COS6_1, (in[10] + in[14] - in[2]));
+       tmp[5] = t3 - t2;
+ 
+       t4 -= t1 + t7;
+@@ -1351,53 +1351,53 @@
+     {
+       real t0, t1, t2, t3, t4, t5, t6, t7;
+ 
+-      t1 = COS6_2 * in[13];
+-      t2 = COS6_2 * (in[9] + in[17] - in[5]);
++      t1 = REAL_MUL(COS6_2, in[13]);
++      t2 = REAL_MUL(COS6_2, (in[9] + in[17] - in[5]));
+ 
+       t3 = in[1] + t1;
+       t4 = in[1] - t1 - t1;
+       t5 = t4 - t2;
+ 
+-      t0 = cos9[0] * (in[5] + in[9]);
+-      t1 = cos9[1] * (in[9] - in[17]);
++      t0 = REAL_MUL(cos9[0], (in[5] + in[9]));
++      t1 = REAL_MUL(cos9[1], (in[9] - in[17]));
+ 
+-      tmp[13] = (t4 + t2 + t2) * tfcos36[17-13];
+-      t2 = cos9[2] * (in[5] + in[17]);
++      tmp[13] = REAL_MUL((t4 + t2 + t2), tfcos36[17-13]);
++      t2 = REAL_MUL(cos9[2], (in[5] + in[17]));
+ 
+       t6 = t3 - t0 - t2;
+       t0 += t3 + t1;
+       t3 += t2 - t1;
+ 
+-      t2 = cos18[0] * (in[3]  + in[11]);
+-      t4 = cos18[1] * (in[11] - in[15]);
+-      t7 = COS6_1 * in[7];
++      t2 = REAL_MUL(cos18[0], (in[3]  + in[11]));
++      t4 = REAL_MUL(cos18[1], (in[11] - in[15]));
++      t7 = REAL_MUL(COS6_1, in[7]);
+ 
+       t1 = t2 + t4 + t7;
+-      tmp[17] = (t0 + t1) * tfcos36[17-17];
+-      tmp[9]  = (t0 - t1) * tfcos36[17-9];
+-      t1 = cos18[2] * (in[3] + in[15]);
++      tmp[17] = REAL_MUL((t0 + t1), tfcos36[17-17]);
++      tmp[9]  = REAL_MUL((t0 - t1), tfcos36[17-9]);
++      t1 = REAL_MUL(cos18[2], (in[3] + in[15]));
+       t2 += t1 - t7;
+ 
+-      tmp[14] = (t3 + t2) * tfcos36[17-14];
+-      t0 = COS6_1 * (in[11] + in[15] - in[3]);
+-      tmp[12] = (t3 - t2) * tfcos36[17-12];
++      tmp[14] = REAL_MUL((t3 + t2), tfcos36[17-14]);
++      t0 = REAL_MUL(COS6_1, (in[11] + in[15] - in[3]));
++      tmp[12] = REAL_MUL((t3 - t2), tfcos36[17-12]);
+ 
+       t4 -= t1 + t7;
+ 
+-      tmp[16] = (t5 - t0) * tfcos36[17-16];
+-      tmp[10] = (t5 + t0) * tfcos36[17-10];
+-      tmp[15] = (t6 + t4) * tfcos36[17-15];
+-      tmp[11] = (t6 - t4) * tfcos36[17-11];
++      tmp[16] = REAL_MUL((t5 - t0), tfcos36[17-16]);
++      tmp[10] = REAL_MUL((t5 + t0), tfcos36[17-10]);
++      tmp[15] = REAL_MUL((t6 + t4), tfcos36[17-15]);
++      tmp[11] = REAL_MUL((t6 - t4), tfcos36[17-11]);
+    }
+ 
+ #define MACRO(v) { \
+     real tmpval; \
+     tmpval = tmp[(v)] + tmp[17-(v)]; \
+-    out2[9+(v)] = tmpval * w[27+(v)]; \
+-    out2[8-(v)] = tmpval * w[26-(v)]; \
++    out2[9+(v)] = REAL_MUL(tmpval, w[27+(v)]); \
++    out2[8-(v)] = REAL_MUL(tmpval, w[26-(v)]); \
+     tmpval = tmp[(v)] - tmp[17-(v)]; \
+-    ts[SBLIMIT*(8-(v))] = out1[8-(v)] + tmpval * w[8-(v)]; \
+-    ts[SBLIMIT*(9+(v))] = out1[9+(v)] + tmpval * w[9+(v)]; }
++    ts[SBLIMIT*(8-(v))] = out1[8-(v)] + REAL_MUL(tmpval, w[8-(v)]); \
++    ts[SBLIMIT*(9+(v))] = out1[9+(v)] + REAL_MUL(tmpval, w[9+(v)]); }
+ 
+ {
+    register real *out2 = o2;
+@@ -1422,20 +1422,20 @@
+ 
+ #define MACRO0(v) { \
+     real tmp; \
+-    out2[9+(v)] = (tmp = sum0 + sum1) * w[27+(v)]; \
+-    out2[8-(v)] = tmp * w[26-(v)];  } \
++    out2[9+(v)] = REAL_MUL((tmp = sum0 + sum1), w[27+(v)]); \
++    out2[8-(v)] = REAL_MUL(tmp, w[26-(v)]);   } \
+     sum0 -= sum1; \
+-    ts[SBLIMIT*(8-(v))] = out1[8-(v)] + sum0 * w[8-(v)]; \
+-    ts[SBLIMIT*(9+(v))] = out1[9+(v)] + sum0 * w[9+(v)]; 
++    ts[SBLIMIT*(8-(v))] = out1[8-(v)] + REAL_MUL(sum0, w[8-(v)]); \
++    ts[SBLIMIT*(9+(v))] = out1[9+(v)] + REAL_MUL(sum0, w[9+(v)]);
+ #define MACRO1(v) { \
+ 	real sum0,sum1; \
+     sum0 = tmp1a + tmp2a; \
+-	sum1 = (tmp1b + tmp2b) * tfcos36[(v)]; \
++	sum1 = REAL_MUL((tmp1b + tmp2b), tfcos36[(v)]); \
+ 	MACRO0(v); }
+ #define MACRO2(v) { \
+     real sum0,sum1; \
+     sum0 = tmp2a - tmp1a; \
+-    sum1 = (tmp2b - tmp1b) * tfcos36[(v)]; \
++    sum1 = REAL_MUL((tmp2b - tmp1b), tfcos36[(v)]); \
+ 	MACRO0(v); }
+ 
+     register const real *c = COS9;
+@@ -1446,17 +1446,17 @@
+ 
+     real ta33,ta66,tb33,tb66;
+ 
+-    ta33 = in[2*3+0] * c[3];
+-    ta66 = in[2*6+0] * c[6] + in[2*0+0];
+-    tb33 = in[2*3+1] * c[3];
+-    tb66 = in[2*6+1] * c[6] + in[2*0+1];
++    ta33 = REAL_MUL(in[2*3+0], c[3]);
++    ta66 = REAL_MUL(in[2*6+0], c[6]);
++    tb33 = REAL_MUL(in[2*3+1], c[3]);
++    tb66 = REAL_MUL(in[2*6+1], c[6]);
+ 
+     { 
+       real tmp1a,tmp2a,tmp1b,tmp2b;
+-      tmp1a = in[2*1+0] * c[1] + ta33 + in[2*5+0] * c[5] + in[2*7+0] * c[7];
+-      tmp1b = in[2*1+1] * c[1] + tb33 + in[2*5+1] * c[5] + in[2*7+1] * c[7];
+-      tmp2a = in[2*2+0] * c[2] + in[2*4+0] * c[4] + ta66 + in[2*8+0] * c[8];
+-      tmp2b = in[2*2+1] * c[2] + in[2*4+1] * c[4] + tb66 + in[2*8+1] * c[8];
++      tmp1a = REAL_MUL(in[2*1+0], c[1]) + ta33 + REAL_MUL(in[2*5+0], c[5]) + REAL_MUL(in[2*7+0], c[7]);
++      tmp1b = REAL_MUL(in[2*1+1], c[1]) + tb33 + REAL_MUL(in[2*5+1], c[5]) + REAL_MUL(in[2*7+1], c[7]);
++      tmp2a = REAL_MUL(in[2*2+0], c[2]) + REAL_MUL(in[2*4+0], c[4]) + ta66 + REAL_MUL(in[2*8+0], c[8]);
++      tmp2b = REAL_MUL(in[2*2+1], c[2]) + REAL_MUL(in[2*4+1], c[4]) + tb66 + REAL_MUL(in[2*8+1], c[8]);
+ 
+       MACRO1(0);
+       MACRO2(8);
+@@ -1464,10 +1464,10 @@
+ 
+     {
+       real tmp1a,tmp2a,tmp1b,tmp2b;
+-      tmp1a = ( in[2*1+0] - in[2*5+0] - in[2*7+0] ) * c[3];
+-      tmp1b = ( in[2*1+1] - in[2*5+1] - in[2*7+1] ) * c[3];
+-      tmp2a = ( in[2*2+0] - in[2*4+0] - in[2*8+0] ) * c[6] - in[2*6+0] + in[2*0+0];
+-      tmp2b = ( in[2*2+1] - in[2*4+1] - in[2*8+1] ) * c[6] - in[2*6+1] + in[2*0+1];
++      tmp1a = REAL_MUL(( in[2*1+0] - in[2*5+0] - in[2*7+0] ), c[3]);
++      tmp1b = REAL_MUL(( in[2*1+1] - in[2*5+1] - in[2*7+1] ), c[3]);
++      tmp2a = REAL_MUL(( in[2*2+0] - in[2*4+0] - in[2*8+0] ), c[6]) - in[2*6+0] + in[2*0+0];
++      tmp2b = REAL_MUL(( in[2*2+1] - in[2*4+1] - in[2*8+1] ), c[6]) - in[2*6+1] + in[2*0+1];
+ 
+       MACRO1(1);
+       MACRO2(7);
+@@ -1475,10 +1475,10 @@
+ 
+     {
+       real tmp1a,tmp2a,tmp1b,tmp2b;
+-      tmp1a =   in[2*1+0] * c[5] - ta33 - in[2*5+0] * c[7] + in[2*7+0] * c[1];
+-      tmp1b =   in[2*1+1] * c[5] - tb33 - in[2*5+1] * c[7] + in[2*7+1] * c[1];
+-      tmp2a = - in[2*2+0] * c[8] - in[2*4+0] * c[2] + ta66 + in[2*8+0] * c[4];
+-      tmp2b = - in[2*2+1] * c[8] - in[2*4+1] * c[2] + tb66 + in[2*8+1] * c[4];
++      tmp1a =   REAL_MUL(in[2*1+0], c[5]) - ta33 - REAL_MUL(in[2*5+0], c[7]) + REAL_MUL(in[2*7+0], c[1]);
++      tmp1b =   REAL_MUL(in[2*1+1], c[5]) - tb33 - REAL_MUL(in[2*5+1], c[7]) + REAL_MUL(in[2*7+1], c[1]);
++      tmp2a = - REAL_MUL(in[2*2+0], c[8]) - REAL_MUL(in[2*4+0], c[2]) + ta66 + REAL_MUL(in[2*8+0], c[4]);
++      tmp2b = - REAL_MUL(in[2*2+1], c[8]) - REAL_MUL(in[2*4+1], c[2]) + tb66 + REAL_MUL(in[2*8+1], c[4]);
+ 
+       MACRO1(2);
+       MACRO2(6);
+@@ -1486,10 +1486,10 @@
+ 
+     {
+       real tmp1a,tmp2a,tmp1b,tmp2b;
+-      tmp1a =   in[2*1+0] * c[7] - ta33 + in[2*5+0] * c[1] - in[2*7+0] * c[5];
+-      tmp1b =   in[2*1+1] * c[7] - tb33 + in[2*5+1] * c[1] - in[2*7+1] * c[5];
+-      tmp2a = - in[2*2+0] * c[4] + in[2*4+0] * c[8] + ta66 - in[2*8+0] * c[2];
+-      tmp2b = - in[2*2+1] * c[4] + in[2*4+1] * c[8] + tb66 - in[2*8+1] * c[2];
++      tmp1a =   REAL_MUL(in[2*1+0], c[7]) - ta33 + REAL_MUL(in[2*5+0], c[1]) - REAL_MUL(in[2*7+0], c[5]);
++      tmp1b =   REAL_MUL(in[2*1+1], c[7]) - tb33 + REAL_MUL(in[2*5+1], c[1]) - REAL_MUL(in[2*7+1], c[5]);
++      tmp2a = - REAL_MUL(in[2*2+0], c[4]) + REAL_MUL(in[2*4+0], c[8]) + ta66 - REAL_MUL(in[2*8+0], c[2]);
++      tmp2b = - REAL_MUL(in[2*2+1], c[4]) + REAL_MUL(in[2*4+1], c[8]) + tb66 - REAL_MUL(in[2*8+1], c[2]);
+ 
+       MACRO1(3);
+       MACRO2(5);
+@@ -1498,7 +1498,7 @@
+ 	{
+ 		real sum0,sum1;
+     	sum0 =  in[2*0+0] - in[2*2+0] + in[2*4+0] - in[2*6+0] + in[2*8+0];
+-    	sum1 = (in[2*0+1] - in[2*2+1] + in[2*4+1] - in[2*6+1] + in[2*8+1] ) * tfcos36[4];
++    	sum1 = REAL_MUL((in[2*0+1] - in[2*2+1] + in[2*4+1] - in[2*6+1] + in[2*8+1] ), tfcos36[4]);
+ 		MACRO0(4);
+ 	}
+   }
+@@ -1522,19 +1522,19 @@
+                              \
+      in5 += in3; in3 += in1; \
+                              \
+-     in2 *= COS6_1; \
+-     in3 *= COS6_1; \
++     in2 = REAL_MUL(in2, COS6_1); \
++     in3 = REAL_MUL(in3, COS6_1); \
+ 
+ #define DCT12_PART2 \
+-     in0 += in4 * COS6_2; \
++     in0 += REAL_MUL(in4, COS6_2); \
+                           \
+      in4 = in0 + in2;     \
+      in0 -= in2;          \
+                           \
+-     in1 += in5 * COS6_2; \
++     in1 += REAL_MUL(in5, COS6_2); \
+                           \
+-     in5 = (in1 + in3) * tfcos12[0]; \
+-     in1 = (in1 - in3) * tfcos12[2]; \
++     in5 = REAL_MUL((in1 + in3), tfcos12[0]); \
++     in1 = REAL_MUL((in1 - in3), tfcos12[2]); \
+                          \
+      in3 = in4 + in5;    \
+      in4 -= in5;         \
+@@ -1554,27 +1554,27 @@
+      {
+        real tmp0,tmp1 = (in0 - in4);
+        {
+-         real tmp2 = (in1 - in5) * tfcos12[1];
++         real tmp2 = REAL_MUL((in1 - in5), tfcos12[1]);
+          tmp0 = tmp1 + tmp2;
+          tmp1 -= tmp2;
+        }
+-       ts[(17-1)*SBLIMIT] = out1[17-1] + tmp0 * wi[11-1];
+-       ts[(12+1)*SBLIMIT] = out1[12+1] + tmp0 * wi[6+1];
+-       ts[(6 +1)*SBLIMIT] = out1[6 +1] + tmp1 * wi[1];
+-       ts[(11-1)*SBLIMIT] = out1[11-1] + tmp1 * wi[5-1];
++       ts[(17-1)*SBLIMIT] = out1[17-1] + REAL_MUL(tmp0, wi[11-1]);
++       ts[(12+1)*SBLIMIT] = out1[12+1] + REAL_MUL(tmp0, wi[6+1]);
++       ts[(6 +1)*SBLIMIT] = out1[6 +1] + REAL_MUL(tmp1, wi[1]);
++       ts[(11-1)*SBLIMIT] = out1[11-1] + REAL_MUL(tmp1, wi[5-1]);
+      }
+ 
+      DCT12_PART2
+ 
+-     ts[(17-0)*SBLIMIT] = out1[17-0] + in2 * wi[11-0];
+-     ts[(12+0)*SBLIMIT] = out1[12+0] + in2 * wi[6+0];
+-     ts[(12+2)*SBLIMIT] = out1[12+2] + in3 * wi[6+2];
+-     ts[(17-2)*SBLIMIT] = out1[17-2] + in3 * wi[11-2];
+-
+-     ts[(6+0)*SBLIMIT]  = out1[6+0] + in0 * wi[0];
+-     ts[(11-0)*SBLIMIT] = out1[11-0] + in0 * wi[5-0];
+-     ts[(6+2)*SBLIMIT]  = out1[6+2] + in4 * wi[2];
+-     ts[(11-2)*SBLIMIT] = out1[11-2] + in4 * wi[5-2];
++     ts[(17-0)*SBLIMIT] = out1[17-0] + REAL_MUL(in2, wi[11-0]);
++     ts[(12+0)*SBLIMIT] = out1[12+0] + REAL_MUL(in2, wi[6+0]);
++     ts[(12+2)*SBLIMIT] = out1[12+2] + REAL_MUL(in3, wi[6+2]);
++     ts[(17-2)*SBLIMIT] = out1[17-2] + REAL_MUL(in3, wi[11-2]);
++
++     ts[(6 +0)*SBLIMIT]  = out1[6+0] + REAL_MUL(in0, wi[0]);
++     ts[(11-0)*SBLIMIT] = out1[11-0] + REAL_MUL(in0, wi[5-0]);
++     ts[(6 +2)*SBLIMIT]  = out1[6+2] + REAL_MUL(in4, wi[2]);
++     ts[(11-2)*SBLIMIT] = out1[11-2] + REAL_MUL(in4, wi[5-2]);
+   }
+ 
+   in++;
+@@ -1588,27 +1588,27 @@
+      {
+        real tmp0,tmp1 = (in0 - in4);
+        {
+-         real tmp2 = (in1 - in5) * tfcos12[1];
++         real tmp2 = REAL_MUL((in1 - in5), tfcos12[1]);
+          tmp0 = tmp1 + tmp2;
+          tmp1 -= tmp2;
+        }
+-       out2[5-1] = tmp0 * wi[11-1];
+-       out2[0+1] = tmp0 * wi[6+1];
+-       ts[(12+1)*SBLIMIT] += tmp1 * wi[1];
+-       ts[(17-1)*SBLIMIT] += tmp1 * wi[5-1];
++       out2[5-1] = REAL_MUL(tmp0, wi[11-1]);
++       out2[0+1] = REAL_MUL(tmp0, wi[6+1]);
++       ts[(12+1)*SBLIMIT] += REAL_MUL(tmp1, wi[1]);
++       ts[(17-1)*SBLIMIT] += REAL_MUL(tmp1, wi[5-1]);
+      }
+ 
+      DCT12_PART2
+ 
+-     out2[5-0] = in2 * wi[11-0];
+-     out2[0+0] = in2 * wi[6+0];
+-     out2[0+2] = in3 * wi[6+2];
+-     out2[5-2] = in3 * wi[11-2];
+-
+-     ts[(12+0)*SBLIMIT] += in0 * wi[0];
+-     ts[(17-0)*SBLIMIT] += in0 * wi[5-0];
+-     ts[(12+2)*SBLIMIT] += in4 * wi[2];
+-     ts[(17-2)*SBLIMIT] += in4 * wi[5-2];
++     out2[5-0] = REAL_MUL(in2, wi[11-0]);
++     out2[0+0] = REAL_MUL(in2, wi[6+0]);
++     out2[0+2] = REAL_MUL(in3, wi[6+2]);
++     out2[5-2] = REAL_MUL(in3, wi[11-2]);
++
++     ts[(12+0)*SBLIMIT] += REAL_MUL(in0, wi[0]);
++     ts[(17-0)*SBLIMIT] += REAL_MUL(in0, wi[5-0]);
++     ts[(12+2)*SBLIMIT] += REAL_MUL(in4, wi[2]);
++     ts[(17-2)*SBLIMIT] += REAL_MUL(in4, wi[5-2]);
+   }
+ 
+   in++; 
+@@ -1623,27 +1623,27 @@
+      {
+        real tmp0,tmp1 = (in0 - in4);
+        {
+-         real tmp2 = (in1 - in5) * tfcos12[1];
++         real tmp2 = REAL_MUL((in1 - in5), tfcos12[1]);
+          tmp0 = tmp1 + tmp2;
+          tmp1 -= tmp2;
+        }
+-       out2[11-1] = tmp0 * wi[11-1];
+-       out2[6 +1] = tmp0 * wi[6+1];
+-       out2[0+1] += tmp1 * wi[1];
+-       out2[5-1] += tmp1 * wi[5-1];
++       out2[11-1] = REAL_MUL(tmp0, wi[11-1]);
++       out2[6 +1] = REAL_MUL(tmp0, wi[6+1]);
++       out2[0+1] += REAL_MUL(tmp1, wi[1]);
++       out2[5-1] += REAL_MUL(tmp1, wi[5-1]);
+      }
+ 
+      DCT12_PART2
+ 
+-     out2[11-0] = in2 * wi[11-0];
+-     out2[6 +0] = in2 * wi[6+0];
+-     out2[6 +2] = in3 * wi[6+2];
+-     out2[11-2] = in3 * wi[11-2];
+-
+-     out2[0+0] += in0 * wi[0];
+-     out2[5-0] += in0 * wi[5-0];
+-     out2[0+2] += in4 * wi[2];
+-     out2[5-2] += in4 * wi[5-2];
++     out2[11-0] = REAL_MUL(in2, wi[11-0]);
++     out2[6 +0] = REAL_MUL(in2, wi[6+0]);
++     out2[6 +2] = REAL_MUL(in3, wi[6+2]);
++     out2[11-2] = REAL_MUL(in3, wi[11-2]);
++
++     out2[0+0] += REAL_MUL(in0, wi[0]);
++     out2[5-0] += REAL_MUL(in0, wi[5-0]);
++     out2[0+2] += REAL_MUL(in4, wi[2]);
++     out2[5-2] += REAL_MUL(in4, wi[5-2]);
+   }
+ }
+ 
+@@ -1693,7 +1693,7 @@
+      int i;
+      for(i=0;i<SSLIMIT;i++) {
+        tspnt[i*SBLIMIT] = *rawout1++;
+-       *rawout2++ = 0.0;
++       *rawout2++ = DOUBLE_TO_REAL(0.0);
+      }
+    }
+ }
+@@ -1865,5 +1865,3 @@
+   
+   return clip;
+ }
+-
+-
+diff -Nur mpg123-0.59r.orig/mpg123.c mpg123-0.59r/mpg123.c
+--- mpg123-0.59r.orig/mpg123.c	1999-06-15 20:21:36.000000000 +0000
++++ mpg123-0.59r/mpg123.c	2004-12-19 00:13:36.000000000 +0000
+@@ -177,6 +177,9 @@
+         _exit(0);
+       default: /* parent */
+         xfermem_init_writer (buffermem);
++	if (xfermem_block(XF_WRITER, buffermem) == XF_CMD_TERMINATE) {
++	    intflag = TRUE;
++	}
+         param.outmode = DECODE_BUFFER;
+     }
+   }
+@@ -918,7 +921,7 @@
+ {
+      const char *term_type;
+          term_type = getenv("TERM");
+-         if (!strcmp(term_type,"xterm"))
++         if (term_type && !strcmp(term_type,"xterm"))
+          {
+            fprintf(stderr, "\033]0;%s\007", filename);
+          }
+diff -Nur mpg123-0.59r.orig/mpg123.h mpg123-0.59r/mpg123.h
+--- mpg123-0.59r.orig/mpg123.h	1999-05-28 14:51:58.000000000 +0000
++++ mpg123-0.59r/mpg123.h	2004-12-19 00:11:14.000000000 +0000
+@@ -56,10 +56,117 @@
+ #  define real float
+ #elif defined(REAL_IS_LONG_DOUBLE)
+ #  define real long double
++#elif defined(REAL_IS_FIXED)
++# define real long
++
++# define REAL_RADIX		15
++# define REAL_FACTOR		(32.0 * 1024.0)
++
++# define REAL_PLUS_32767	( 32767 << REAL_RADIX )
++# define REAL_MINUS_32768	( -32768 << REAL_RADIX )
++
++# define DOUBLE_TO_REAL(x)	((int)((x) * REAL_FACTOR))
++# define REAL_TO_SHORT(x)	((x) >> REAL_RADIX)
++# define REAL_MUL(x, y)		(((long long)(x) * (long long)(y)) >> REAL_RADIX)
++
++#elif defined(REAL_IS_FIXED_ARMV4)
++# define REAL_IS_FIXED
++# define real long long
++
++# define REAL_RADIX		32
++# define REAL_FACTOR		(4294967296.0)
++
++# define REAL_PLUS_32767	( 32767LL << REAL_RADIX )
++# define REAL_MINUS_32768	( -32768LL << REAL_RADIX )
++
++# define DOUBLE_TO_REAL(x)	((long long)((x) * REAL_FACTOR))
++# define REAL_TO_SHORT(x)	((x) >> REAL_RADIX)
++
++/*
++ * "Reals" are signed, 15 bits before the point, 32 bits after.
++ * Multiplication is done like so:
++ *
++ *   if |x| < 2^8, shift x >> 7, else shift x >>15
++ *   if |y| < 2^8, shift y >> 7, else shift y >>15
++ *   multiply x * y (just avoids clipping MSB)
++ *   shift the result >> 2, 10 or 18 bits, to make a total shift of 32 bits
++ *
++ * I'd do it in C, but gcc optimises it rather poorly (2K stack
++ * frames, anyone?).  Hence the bit of (ARMv4) asm magic below.
++ * (Unfortunately, the CLZ opcode, which would make for a much neater
++ * solution to this, doesn't appear until ARMv5)
++ *
++ * (tjd April 2002)
++ */
++
++# define REAL_MUL(x, y)		real_mul((x),(y))
++
++static __inline__ long long real_mul(long long x, long long y) {
++    const register long long _x asm("r0") = (x);
++    const register long long _y asm("r2") = (y);
++    register long long rv asm("r0");
++    __asm__ __volatile__ (
++"@ we'll need to shift the result at least >> 2\n"
++"	mov	r4, #2\n"
++"@ both args >> 7,\n"
++"	mov	r0, r0, lsr #7\n"
++"	mov	r2, r2, lsr #7\n"
++"	orr	r0, r0, r1, lsl #25\n"
++"	orr	r2, r2, r3, lsl #25\n"
++"	mov	r1, r1, asr #7\n"
++"	mov	r3, r3, asr #7\n"
++"@ check if x needs further shiftage\n"
++"	cmp	r1, #0\n"
++"	cmnne	r1, #1\n"
++"	addeq	r4, r4, #8\n"
++"@ shift x if needed\n"
++"	movne	r0, r0, lsr #8\n"
++"	orrne	r0, r0, r1, lsl #24\n"
++"	movne	r1, r1, asr #8\n"
++"@ check if y needs further shiftage\n"
++"	cmp	r3, #0\n"
++"	cmnne	r3, #1\n"
++"	addeq	r4, r4, #8\n"
++"@ shift y if needed\n"
++"	movne	r2, r2, lsr #8\n"
++"	orrne	r2, r2, r3, lsl #24\n"
++"	movne	r3, r3, asr #8\n"
++"@ multiply (ignoring overflow)\n"
++"	mul	r3, r0, r3\n"
++"	mla	r3, r1, r2, r3\n"
++"	umull	r0, r1, r2, r0\n"
++"	add	r1, r1, r3\n"
++"@ shift the result the appropriate amount\n"
++"	rsb	r3, r4, #32\n"
++"	mov	r0, r0, lsr r4\n"
++"	orr	r0, r0, r1, lsl r3\n"
++"	mov	r1, r1, asr r4\n"
++	: "=r" (rv)
++	: "0" (_x), "r" (_y)
++	: "r1", "r3", "r4", "cc");
++    return rv;
++}
++
+ #else
+ #  define real double
+ #endif
+ 
++#ifndef DOUBLE_TO_REAL
++# define DOUBLE_TO_REAL(x)	(x)
++#endif
++#ifndef REAL_TO_SHORT
++# define REAL_TO_SHORT(x)	(x)
++#endif
++#ifndef REAL_PLUS_32767
++# define REAL_PLUS_32767	32767.0
++#endif
++#ifndef REAL_MINUS_32768
++# define REAL_MINUS_32768	-32768.0
++#endif
++#ifndef REAL_MUL
++# define REAL_MUL(x, y)		((x) * (y))
++#endif
++
+ #ifdef __GNUC__
+ #define INLINE inline
+ #else
+diff -Nur mpg123-0.59r.orig/readers.c mpg123-0.59r/readers.c
+--- mpg123-0.59r.orig/readers.c	1999-03-04 11:03:49.000000000 +0000
++++ mpg123-0.59r/readers.c	2004-12-19 00:13:50.000000000 +0000
+@@ -1,5 +1,9 @@
+ #include <stdlib.h>
+ 
++#ifdef __NetBSD__
++#include <sys/param.h>
++#endif
++
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+@@ -251,7 +255,12 @@
+ 		return -1;
+ 
+ 	mapend = mapbuf + len;
+-	
++
++#if defined(__NetBSD__) && (__NetBSD_Version__ >= 104030000)
++	if(madvise(mapbuf, mapend-mapbuf, MADV_SEQUENTIAL) < 0)
++		fprintf(stderr,"madvise failed, continuing anyways..\n");
++#endif
++
+ 	if(param.verbose > 1)
+ 		fprintf(stderr,"Using memory mapped IO for this stream.\n");
+ 
+@@ -268,6 +277,11 @@
+ 
+ static void mapped_close(struct reader *rds)
+ {
++#if defined(__NetBSD__) && (__NetBSD_Version__ >= 104030000)
++	if(madvise(mapbuf, mapend-mapbuf, MADV_FREE) < 0)
++		fprintf(stderr,"madvise failed, continuing anyways..\n");
++#endif
++
+ 	munmap((void *)mapbuf,mapend-mapbuf);
+ 	if (rds->flags & READER_FD_OPENED)
+ 		close(rds->filept);
+diff -Nur mpg123-0.59r.orig/tabinit.c mpg123-0.59r/tabinit.c
+--- mpg123-0.59r.orig/tabinit.c	1999-02-15 12:55:11.000000000 +0000
++++ mpg123-0.59r/tabinit.c	2004-12-19 00:11:17.000000000 +0000
+@@ -56,7 +56,7 @@
+     kr=0x10>>i; divv=0x40>>i;
+     costab = pnts[i];
+     for(k=0;k<kr;k++)
+-      costab[k] = 1.0 / (2.0 * cos(M_PI * ((double) k * 2.0 + 1.0) / (double) divv));
++      costab[k] = DOUBLE_TO_REAL(1.0 / (2.0 * cos(M_PI * ((double) k * 2.0 + 1.0) / (double) divv)));
+ #ifdef USE_3DNOW
+     for(k=0;k<kr;k++)
+       costab[k+kr] = -costab[k];
+@@ -69,7 +69,7 @@
+   for(i=0,j=0;i<256;i++,j++,idx+=32)
+   {
+     if(idx < 512+16)
+-      decwin[idx+16] = decwin[idx] = (double) intwinbase[j] / 65536.0 * (double) scaleval;
++      decwin[idx+16] = decwin[idx] = DOUBLE_TO_REAL((double) intwinbase[j] / 65536.0 * (double) scaleval);
+ 
+     if(i % 32 == 31)
+       idx -= 1023;
+@@ -80,7 +80,7 @@
+   for( /* i=256 */ ;i<512;i++,j--,idx+=32)
+   {
+     if(idx < 512+16)
+-      decwin[idx+16] = decwin[idx] = (double) intwinbase[j] / 65536.0 * (double) scaleval;
++      decwin[idx+16] = decwin[idx] = DOUBLE_TO_REAL((double) intwinbase[j] / 65536.0 * (double) scaleval);
+ 
+     if(i % 32 == 31)
+       idx -= 1023;
+@@ -91,7 +91,7 @@
+ #ifdef USE_3DNOW
+   if(!param.down_sample) {
+     for(i=0;i<512+32;i++) {
+-      decwin[512+31-i] *= 65536.0; /* allows faster clipping in 3dnow code */
++      decwin[512+31-i] = REAL_MUL(decwin[512+31-i], 65536.0); /* allows faster clipping in 3dnow code */
+       decwin[512+32+i] = decwin[512+31-i];
+     }
+   }

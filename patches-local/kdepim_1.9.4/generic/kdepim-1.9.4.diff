@@ -1,0 +1,299 @@
+diff -Nur kdepim/gammu/emb/gammu/gammu.pro kdepim.new/gammu/emb/gammu/gammu.pro
+--- kdepim/gammu/emb/gammu/gammu.pro	2004-08-30 20:17:19.000000000 +0000
++++ kdepim.new/gammu/emb/gammu/gammu.pro	2004-09-10 15:46:02.000000000 +0000
+@@ -46,7 +46,7 @@
+            depend/nokia/dct3trac/wmx-util.c \
+            depend/nokia/dct3trac/wmx.c
+ 
+-LIBS +=      ../../../bin/libmicrogammu.so /usr/lib/libbluetooth.so  /usr/lib/libsdp.so  /usr/lib/libpthread.so
++LIBS +=      ../../../bin/libmicrogammu.so -lbluetooth  -lsdp  -lpthread
+ DESTDIR = ../../../bin
+ OBJECTS_DIR = obj/unix
+ TARGET = kammu
+\ В конце файла нет новой строки
+diff -Nur kdepim/kabc/addresseedialog.cpp kdepim.new/kabc/addresseedialog.cpp
+--- kdepim/kabc/addresseedialog.cpp	2004-09-03 19:58:07.000000000 +0000
++++ kdepim.new/kabc/addresseedialog.cpp	2004-09-10 15:52:39.000000000 +0000
+@@ -147,7 +147,7 @@
+           name = (*it).realName();
+       name += (*it).preferredEmail();
+ #if QT_VERSION >= 300
+-      if (re.search(name)) != -1)
++      if (re.search(name) != -1)
+ #else
+       if (re.match(name) != -1)
+ #endif
+diff -Nur kdepim/kaddressbook/kabcore.cpp kdepim.new/kaddressbook/kabcore.cpp
+--- kdepim/kaddressbook/kabcore.cpp	2004-09-08 15:11:12.000000000 +0000
++++ kdepim.new/kaddressbook/kabcore.cpp	2004-09-10 16:31:31.000000000 +0000
+@@ -78,6 +78,7 @@
+ //US
+ #include <libkdepim/addresseeview.h>
+ 
++#include <qregexp.h>
+ #include <qapp.h>
+ #include <qmenubar.h>
+ //#include <qtoolbar.h>
+diff -Nur kdepim/kaddressbook/kaddressbook.pro kdepim.new/kaddressbook/kaddressbook.pro
+--- kdepim/kaddressbook/kaddressbook.pro	2004-08-12 20:00:44.000000000 +0000
++++ kdepim.new/kaddressbook/kaddressbook.pro	2004-09-10 16:36:04.000000000 +0000
+@@ -17,7 +17,7 @@
+ LIBS += ../bin/libmicrogammu.so
+ LIBS += -lbluetooth
+ LIBS += -lsdp
+-LIBS += -lldap
++#LIBS += -lldap
+ OBJECTS_DIR = obj/unix
+ MOC_DIR = moc/unix
+ }
+diff -Nur kdepim/kmicromail/kmicromail.pro kdepim.new/kmicromail/kmicromail.pro
+--- kdepim/kmicromail/kmicromail.pro	1970-01-01 00:00:00.000000000 +0000
++++ kdepim.new/kmicromail/kmicromail.pro	2004-09-10 17:40:43.000000000 +0000
+@@ -0,0 +1,66 @@
++CONFIG        += qt warn_on 
++TEMPLATE	= app
++HEADERS         = defines.h \
++               editaccounts.h \
++               composemail.h \
++               accountview.h \
++               accountitem.h \
++               mainwindow.h \
++               viewmail.h \
++               viewmailbase.h \
++               opiemail.h \
++               mailistviewitem.h \
++               settingsdialog.h \
++               statuswidget.h \
++               newmaildir.h \
++               selectstore.h \
++               selectsmtp.h \
++               nntpgroups.h \
++               nntpgroupsdlg.h
++
++SOURCES         = main.cpp  \
++               opiemail.cpp \
++               mainwindow.cpp \
++               accountview.cpp \
++               accountitem.cpp \
++               composemail.cpp \
++               editaccounts.cpp \
++               viewmail.cpp \
++               viewmailbase.cpp \
++               mailistviewitem.cpp \
++               settingsdialog.cpp \
++               statuswidget.cpp \
++               newmaildir.cpp \
++               selectstore.cpp \
++               selectsmtp.cpp \
++               nntpgroups.cpp \
++               nntpgroupsdlg.cpp
++
++INTERFACES     = editaccountsui.ui \
++               selectmailtypeui.ui \
++               imapconfigui.ui \
++               pop3configui.ui \
++               nntpconfigui.ui \
++               smtpconfigui.ui \
++               composemailui.ui \
++               settingsdialogui.ui \
++               statuswidgetui.ui \
++               newmaildirui.ui \
++               selectstoreui.ui \
++               nntpgroupsui.ui
++
++
++INCLUDEPATH += . $(KDEPIMDIR)  $(KDEPIMDIR)/qtcompat $(KDEPIMDIR)/microkde $(KDEPIMDIR)/microkde/kdecore libetpan/include $(KDEPIMDIR)/microkde/kdeui
++LIBS        += -L$(QPEDIR)/lib -lkmicromailwrapper -lqpe -lkmicrolibetpan  -lmicrokde -lmicroqtcompat -lssl -lcrypto -ljpeg -lmicrokde -lmicroqtcompat -lmicrokabc -lmicrokcal -lmicrokdepim
++LIBS += $(QTOPIALIB)
++#LIBS += -lqtopia 
++#next line for Zaurus only
++#LIBS +=  -luuid
++
++#
++OBJECTS_DIR = obj/$(PLATFORM)
++MOC_DIR = moc/$(PLATFORM)
++DESTDIR=$(QPEDIR)/bin
++TARGET       = ompi
++
++
+Двоичные файлы kdepim/kopi.tar.gz и kdepim.new/kopi.tar.gz различаются
+diff -Nur kdepim/korganizer/calprintdayconfig_base.ui kdepim.new/korganizer/calprintdayconfig_base.ui
+--- kdepim/korganizer/calprintdayconfig_base.ui	2004-06-26 19:02:56.000000000 +0000
++++ kdepim.new/korganizer/calprintdayconfig_base.ui	2004-09-10 15:44:18.000000000 +0000
+@@ -1,4 +1,4 @@
+-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
++<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+ <class>CalPrintDayConfig_Base</class>
+ <comment>Configuration page for the print day mode.</comment>
+ <author>Reinhold Kainhofer &lt;reinhold@kainhofer.com&gt;</author>
+diff -Nur kdepim/korganizer/calprintmonthconfig_base.ui kdepim.new/korganizer/calprintmonthconfig_base.ui
+--- kdepim/korganizer/calprintmonthconfig_base.ui	2004-06-26 19:03:10.000000000 +0000
++++ kdepim.new/korganizer/calprintmonthconfig_base.ui	2004-09-10 15:44:26.000000000 +0000
+@@ -1,4 +1,4 @@
+-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
++<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+ <class>CalPrintMonthConfig_Base</class>
+ <comment>Configuration page for the print day mode.</comment>
+ <author>Reinhold Kainhofer &lt;reinhold@kainhofer.com&gt;</author>
+diff -Nur kdepim/korganizer/calprinttodoconfig_base.ui kdepim.new/korganizer/calprinttodoconfig_base.ui
+--- kdepim/korganizer/calprinttodoconfig_base.ui	2004-06-26 19:03:02.000000000 +0000
++++ kdepim.new/korganizer/calprinttodoconfig_base.ui	2004-09-10 15:44:30.000000000 +0000
+@@ -1,4 +1,4 @@
+-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
++<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+ <class>CalPrintTodoConfig_Base</class>
+ <comment>Configuration page for the print day mode.</comment>
+ <author>Reinhold Kainhofer &lt;reinhold@kainhofer.com&gt;</author>
+diff -Nur kdepim/korganizer/calprintweekconfig_base.ui kdepim.new/korganizer/calprintweekconfig_base.ui
+--- kdepim/korganizer/calprintweekconfig_base.ui	2004-06-26 19:03:07.000000000 +0000
++++ kdepim.new/korganizer/calprintweekconfig_base.ui	2004-09-10 15:44:33.000000000 +0000
+@@ -1,4 +1,4 @@
+-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
++<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+ <class>CalPrintWeekConfig_Base</class>
+ <comment>Configuration page for the print week mode.</comment>
+ <author>Reinhold Kainhofer &lt;reinhold@kainhofer.com&gt;</author>
+diff -Nur kdepim/korganizer/filteredit_base.ui kdepim.new/korganizer/filteredit_base.ui
+--- kdepim/korganizer/filteredit_base.ui	2004-06-26 19:03:13.000000000 +0000
++++ kdepim.new/korganizer/filteredit_base.ui	2004-09-10 15:44:36.000000000 +0000
+@@ -1,4 +1,4 @@
+-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
++<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+ <class>FilterEdit_base</class>
+ <widget class="QWidget">
+     <property name="name">
+diff -Nur kdepim/korganizer/kofilterview_base.cpp kdepim.new/korganizer/kofilterview_base.cpp
+--- kdepim/korganizer/kofilterview_base.cpp	2004-09-08 15:21:20.000000000 +0000
++++ kdepim.new/korganizer/kofilterview_base.cpp	1970-01-01 00:00:00.000000000 +0000
+@@ -1,62 +0,0 @@
+-/****************************************************************************
+-** Form implementation generated from reading ui file 'kofilterview_base.ui'
+-**
+-** Created: Wed Sep 8 17:21:19 2004
+-**      by:  The User Interface Compiler (uic)
+-**
+-** WARNING! All changes made in this file will be lost!
+-****************************************************************************/
+-#include "kofilterview_base.h"
+-
+-#include <qcheckbox.h>
+-#include <qcombobox.h>
+-#include <qframe.h>
+-#include <qpushbutton.h>
+-#include <qlayout.h>
+-#include <qvariant.h>
+-#include <qtooltip.h>
+-#include <qwhatsthis.h>
+-
+-/* 
+- *  Constructs a KOFilterView_base which is a child of 'parent', with the 
+- *  name 'name' and widget flags set to 'f' 
+- */
+-KOFilterView_base::KOFilterView_base( QWidget* parent,  const char* name, WFlags fl )
+-    : QWidget( parent, name, fl )
+-{
+-    if ( !name )
+-	setName( "KOFilterView_base" );
+-    resize( 100, 100 ); 
+-    setCaption( tr( "Form2" ) );
+-    KOFilterView_baseLayout = new QVBoxLayout( this ); 
+-    KOFilterView_baseLayout->setSpacing( 2 );
+-    KOFilterView_baseLayout->setMargin( 2 );
+-
+-    Frame11 = new QFrame( this, "Frame11" );
+-    Frame11->setFrameShadow( QFrame::Raised );
+-    Frame11->setFrameShape( QFrame::StyledPanel );
+-    Frame11Layout = new QVBoxLayout( Frame11 ); 
+-    Frame11Layout->setSpacing( 1 );
+-    Frame11Layout->setMargin( 2 );
+-
+-    mEnabledCheck = new QCheckBox( Frame11, "mEnabledCheck" );
+-    mEnabledCheck->setText( tr( "Filter enabled" ) );
+-    Frame11Layout->addWidget( mEnabledCheck );
+-
+-    mSelectionCombo = new QComboBox( FALSE, Frame11, "mSelectionCombo" );
+-    Frame11Layout->addWidget( mSelectionCombo );
+-    KOFilterView_baseLayout->addWidget( Frame11 );
+-
+-    mEditButton = new QPushButton( this, "mEditButton" );
+-    mEditButton->setText( tr( "Edit Filters" ) );
+-    KOFilterView_baseLayout->addWidget( mEditButton );
+-}
+-
+-/*  
+- *  Destroys the object and frees any allocated resources
+- */
+-KOFilterView_base::~KOFilterView_base()
+-{
+-    // no need to delete child widgets, Qt does it all for us
+-}
+-
+diff -Nur kdepim/korganizer/kofilterview_base.h kdepim.new/korganizer/kofilterview_base.h
+--- kdepim/korganizer/kofilterview_base.h	2004-09-08 15:20:07.000000000 +0000
++++ kdepim.new/korganizer/kofilterview_base.h	1970-01-01 00:00:00.000000000 +0000
+@@ -1,40 +0,0 @@
+-/****************************************************************************
+-** Form interface generated from reading ui file 'kofilterview_base.ui'
+-**
+-** Created: Wed Sep 8 17:20:07 2004
+-**      by:  The User Interface Compiler (uic)
+-**
+-** WARNING! All changes made in this file will be lost!
+-****************************************************************************/
+-#ifndef KOFILTERVIEW_BASE_H
+-#define KOFILTERVIEW_BASE_H
+-
+-#include <qvariant.h>
+-#include <qwidget.h>
+-class QVBoxLayout; 
+-class QHBoxLayout; 
+-class QGridLayout; 
+-class QCheckBox;
+-class QComboBox;
+-class QFrame;
+-class QPushButton;
+-
+-class KOFilterView_base : public QWidget
+-{ 
+-    Q_OBJECT
+-
+-public:
+-    KOFilterView_base( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
+-    ~KOFilterView_base();
+-
+-    QFrame* Frame11;
+-    QCheckBox* mEnabledCheck;
+-    QComboBox* mSelectionCombo;
+-    QPushButton* mEditButton;
+-
+-protected:
+-    QVBoxLayout* KOFilterView_baseLayout;
+-    QVBoxLayout* Frame11Layout;
+-};
+-
+-#endif // KOFILTERVIEW_BASE_H
+diff -Nur kdepim/korganizer/korganizer.pro kdepim.new/korganizer/korganizer.pro
+--- kdepim/korganizer/korganizer.pro	2004-08-30 09:07:43.000000000 +0000
++++ kdepim.new/korganizer/korganizer.pro	2004-09-10 16:00:52.000000000 +0000
+@@ -22,7 +22,7 @@
+ #LIBS += -lbluetooth
+ #LIBS += -lsdp
+ 
+-LIBS += -lldap
++#LIBS += -lldap
+ OBJECTS_DIR = obj/unix
+ MOC_DIR = moc/unix
+ }
+diff -Nur kdepim/variables.pri kdepim.new/variables.pri
+--- kdepim/variables.pri	2004-06-29 11:59:47.000000000 +0000
++++ kdepim.new/variables.pri	2004-09-10 16:06:15.000000000 +0000
+@@ -2,8 +2,7 @@
+ # variables settings for compilation for Linux desktop and Qt 3.x.x
+ 
+ unix {
+-CONFIG +=  debug
+-#release
++CONFIG +=  release
+ }
+ win32 {
+ CONFIG +=  release

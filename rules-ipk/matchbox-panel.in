@@ -1,0 +1,9 @@
+config MATCHBOX-PANEL
+	bool
+	prompt "Compile matchbox panel"
+	depends on XFREE430
+
+config MATCHBOX-PANEL_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MATCHBOX-PANEL

@@ -1,0 +1,13 @@
+#menu	"wget                "
+
+config WGETA
+	bool
+	prompt "wget"
+	depends on !BB_CONFIG_WGET
+
+config WGETA_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on WGETA
+
+#endmenu

@@ -1,0 +1,9 @@
+config XMMS-MAD
+	bool
+	prompt "xmms-mad"
+	depends on XMMS && LIBMAD && LIBID3TAG
+
+config XMMS-MAD_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XMMS-MAD

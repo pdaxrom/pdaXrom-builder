@@ -1,0 +1,1800 @@
+diff -Nur pcmcia-cs-3.2.8/etc/config pcmcia-cs-3.2.8.new/etc/config
+--- pcmcia-cs-3.2.8/etc/config	2004-07-16 16:38:25.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/config	2005-02-05 19:12:31.000000000 +0000
+@@ -1148,6 +1148,14 @@
+ #  manfid 0x0105, 0x010a
+ #  bind "xirc2ps_cs"
+ 
++card "Unknown NE2000 Compatible Ethernet"
++  manfid 0x0149, 0xc1ab
++  bind "pcnet_cs"
++    
++card "TRENDnet TE-CF100"
++  manfid 0x0149, 0xc1ab
++  bind "pcnet_cs"
++
+ #
+ # Wireless network adapters
+ #
+diff -Nur pcmcia-cs-3.2.8/etc/config.opts pcmcia-cs-3.2.8.new/etc/config.opts
+--- pcmcia-cs-3.2.8/etc/config.opts	2003-12-06 06:09:24.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/config.opts	2005-02-05 19:12:31.000000000 +0000
+@@ -2,38 +2,27 @@
+ # Local PCMCIA Configuration File
+ #
+ #----------------------------------------------------------------------
+-#
+-# System resources available for PCMCIA cards
+-#
+-# NOTE: these settings have no effect on resources assigned to a
+-# CardBus bridge device itself; this file only affects resources
+-# assigned to cards.  Also, interrupt settings here will only affect
+-# ISA bus interrupts assigned to 16-bit cards.  PCI interrupts
+-# generally can't be reconfigured.
+-#
+-# With the kernel PCMCIA subsystem, these settings also have no effect
+-# at all on resources used for 32-bit CardBus cards.  Those are set by
+-# the PCI hotplug subsystem.
+-#
+ 
+-include port 0x100-0x4ff, port 0x800-0x8ff, port 0xc00-0xcff
+-include memory 0xc0000-0xfffff
+-include memory 0xa0000000-0xa0ffffff, memory 0x60000000-0x60ffffff
++# System resources available for PCMCIA devices
++
++#include port 0x100-0x4ff, port 0x800-0x8ff, port 0xc00-0xcff
++#include memory 0x40000-0xfffff
++#include memory 0xa0000000-0xa0ffffff, memory 0x60000000-0x60ffffff
+ 
+ # High port numbers do not always work...
+ # include port 0x1000-0x17ff
+ 
+ # Extra port range for IBM Token Ring
+-include port 0xa00-0xaff
++#include port 0xa00-0xaff
+ 
+ # Resources we should not use, even if they appear to be available
+ 
+ # First built-in serial port
+-exclude irq 4
++#exclude irq 4
+ # Second built-in serial port
+ #exclude irq 3
+ # First built-in parallel port
+-exclude irq 7
++#exclude irq 7
+ 
+ #----------------------------------------------------------------------
+ 
+diff -Nur pcmcia-cs-3.2.8/etc/ftl pcmcia-cs-3.2.8.new/etc/ftl
+--- pcmcia-cs-3.2.8/etc/ftl	2001-01-01 21:13:39.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/ftl	2005-02-05 19:12:31.000000000 +0000
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ #
+-# ftl 1.26 2001/01/01 21:13:39 (David Hinds)
++# ftl 1.24 2000/06/06 21:02:09 (David Hinds)
+ #
+ # Initialize or shutdown an FTL memory device
+ #
+@@ -27,13 +27,12 @@
+ case "$ACTION" in
+ 
+ 'start')
+-    [ -n "$VERBOSE" -a -n "$INFO" ] && echo "$INFO"
+     rm -f /dev/$DEVICE
+-    log mknod /dev/$DEVICE b $MAJOR $MINOR
+-    log mknod /dev/${DEVICE}p1 b $MAJOR `expr $MINOR + 1`
+-    log mknod /dev/${DEVICE}p2 b $MAJOR `expr $MINOR + 2`
+-    log mknod /dev/${DEVICE}p3 b $MAJOR `expr $MINOR + 3`
+-    log mknod /dev/${DEVICE}p4 b $MAJOR `expr $MINOR + 4`
++    mknod /dev/$DEVICE b $MAJOR $MINOR
++    mknod /dev/${DEVICE}p1 b $MAJOR `expr $MINOR + 1`
++    mknod /dev/${DEVICE}p2 b $MAJOR `expr $MINOR + 2`
++    mknod /dev/${DEVICE}p3 b $MAJOR `expr $MINOR + 3`
++    mknod /dev/${DEVICE}p4 b $MAJOR `expr $MINOR + 4`
+     add_parts /dev/$DEVICE "$PARTS" || exit 1
+     ;;
+ 
+diff -Nur pcmcia-cs-3.2.8/etc/hermes pcmcia-cs-3.2.8.new/etc/hermes
+--- pcmcia-cs-3.2.8/etc/hermes	1970-01-01 00:00:00.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/hermes	2005-02-05 19:12:31.000000000 +0000
+@@ -0,0 +1,6 @@
++#!/bin/sh
++#
++export WIRELESS_USE=$0
++./network $*
++exit $?
++
+diff -Nur pcmcia-cs-3.2.8/etc/hermes.conf pcmcia-cs-3.2.8.new/etc/hermes.conf
+--- pcmcia-cs-3.2.8/etc/hermes.conf	1970-01-01 00:00:00.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/hermes.conf	2005-02-05 19:12:31.000000000 +0000
+@@ -0,0 +1,138 @@
++device "orinoco_cs"
++  class "hermes"
++  module "hermes", "orinoco", "orinoco_cs"
++#  module "hermes", "orinoco", "orinoco_cs" opts "pc_debug=3"
++
++#
++# Wireless network adapters
++#
++# We should use the manfid (which cover multiple cards), otherwise we will
++# go crazy listing all cards and their variations !!!
++
++# First class of device : Lucent & OEM
++card "Orinoco or Intersil Prism 2 Wireless"
++  manfid 0x0156,0x0002
++  bind "orinoco_cs"
++
++card "Lucent Technologies Wavelan/IEEE"
++  version "Lucent Technologies", "WaveLAN/IEEE"
++  bind "orinoco_cs"
++
++card "Avaya World Card"
++  version "Avaya Communication", "Avaya Wireless PC Card"
++  bind "orinoco_cs"
++
++card "Cabletron RoamAbout 802.11 DS"
++  version "Cabletron", "RoamAbout 802.11 DS"
++  bind "orinoco_cs"
++
++card "ELSA AirLancer MC-11"
++  version "ELSA", "AirLancer MC-11"
++  bind "orinoco_cs"
++
++card "MELCO WLI-PCM-L11"
++  version "MELCO", "WLI-PCM-L11"
++  bind "orinoco_cs"
++
++# Second class of device : Symbol & OEM
++card "LA4111 Spectrum24 Wireless LAN PC Card"
++  version "Symbol Technologies"
++  bind "orinoco_cs"
++
++card "3Com AirConnect"
++  version "3Com", "3CRWE737A AirConnect Wireless LAN PC Card"
++  bind "orinoco_cs"
++
++card "Intel PRO/Wireless 2011"
++  manfid 0x0089,0x0001
++  bind "orinoco_cs"
++
++card "Ericsson WLAN Card C11"
++  manfid 0x016b,0x0001
++  bind "orinoco_cs" 
++
++card "Nortel Networks e-mobility 802.11 Wireless LAN PC Card"
++  version "Nortel Networks", "emobility 802.11 Wireless LAN PC Card", "1.00"
++  bind "orinoco_cs"
++
++card "D-Link DWL-650H"
++  version "D-Link Corporation", "D-Link DWL-650H 11Mbps WLAN Adapter"
++  bind "orinoco_cs"
++
++# Third class of device : other Intersil clones
++card "Farallon SkyLINE"
++  version "INTERSIL", "HFA384x/IEEE"
++  bind "orinoco_cs"
++
++card "D-Link DWL-650"
++  version "D", "Link DWL-650 11Mbps WLAN Card"
++  bind "orinoco_cs"
++
++card "SAMSUNG 11Mbps WLAN Card"
++  version "SAMSUNG", "11Mbps WLAN Card"
++  bind "orinoco_cs"
++# Does this one cover Compaq as well ???
++
++card "HyperLink Wireless PC Card 11Mbps"
++  version "HyperLink","Wireless PC Card 11Mbps"
++  bind "orinoco_cs"
++
++card "PROXIM LAN PC CARD HARMONY 80211B"
++  version "PROXIM","LAN PC CARD HARMONY 80211B"
++  bind "orinoco_cs"
++
++card "Linksys WPC11 11Mbps 802.11b WLAN Card"
++  version "Instant Wireless ", " Network PC CARD", "Version 01.02"
++  bind "orinoco_cs"
++
++card "Linksys WPC11 11Mbps 802.11b WLAN Card"
++  version "The Linksys Group, Inc.", "Instant Wireless Network PC Card", "ISL37300P", "RevA"
++  bind "orinoco_cs"
++
++card "Linksys CompactFlash Wireless Card"
++  version "Linksys", "Wireless CompactFlash Card"
++  bind "orinoco_cs"
++
++card "Tekram PCF-200"
++  version "PCMCIA", "11M WLAN Card v2.5", "ISL37300P", "RevA"
++  bind "orinoco_cs"
++
++card "ACTIONTEC PRISM Wireless LAN PC Card"
++  version "ACTIONTEC", "PRISM Wireless LAN PC Card"
++  bind "orinoco_cs"
++
++card "Zcomax XI-325HP"
++  version " ", "IEEE 802.11 Wireless LAN/PC Card"
++  bind "orinoco_cs"
++
++card "Microsoft Wireless Notebook Adapter MN-520 1.0.3" 
++  version "Microsoft", "Wireless Notebook Adapter MN-520", "", "1.0.3"
++  bind "orinoco_cs"
++
++card "Linksys WPC11 Version 3"
++  manfid 0x0274,0x1613
++  bind "orinoco_cs"
++
++card "Netgear MA401RA"
++  version "NETGEAR MA401RA Wireless PC", "Card", "ISL37300P", "Eval-RevA"
++  bind "orinoco_cs"
++
++card "Pretec CompactWLAN Card 802.11b"
++  version "Pretec", "CompactWLAN Card 802.11b", "2.5"
++  bind "orinoco_cs"
++
++card "Ambicom WL1100C 11Mbs Card 802.11b"
++  manfid 0xd601,0x0002
++  bind "orinoco_cs"
++	
++card "Buffalo WLI2-CF-S11"
++  manfid 0x026f,0x030b
++  bind "orinoco_cs"
++
++card "Sandisk Connect SDWCFB-000"
++  manfid 0xd601,0x0005
++  bind "orinoco_cs"
++
++card "Zonet ZCF1100"
++  manfid 0x000b, 0x7100
++  bind "orinoco_cs"
+diff -Nur pcmcia-cs-3.2.8/etc/hostap pcmcia-cs-3.2.8.new/etc/hostap
+--- pcmcia-cs-3.2.8/etc/hostap	1970-01-01 00:00:00.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/hostap	2005-02-05 19:12:31.000000000 +0000
+@@ -0,0 +1,6 @@
++#!/bin/sh
++#
++export WIRELESS_USE=$0
++./network $*
++exit $?
++
+diff -Nur pcmcia-cs-3.2.8/etc/ide pcmcia-cs-3.2.8.new/etc/ide
+--- pcmcia-cs-3.2.8/etc/ide	2001-11-21 13:44:09.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/ide	2005-02-05 19:12:31.000000000 +0000
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ #
+-# ide 1.15 2001/11/21 13:44:09 (David Hinds)
++# ide 1.12 2000/06/06 21:02:09 (David Hinds)
+ #
+ # Initialize or shutdown a PCMCIA ATA/IDE adapter
+ #
+@@ -19,19 +19,41 @@
+ # list of partitions for which options should be read.
+ #
+ 
++SMB_MOUNT=/home/samba/CF_Card
++INSTALL_DIR=Documents/Install_Files
++STORAGE_PID_FILE=/var/run/usbdstorage.pid
++STORAGE_PID=""
++USB_STATUS=""
++STORAGE_DEV=""
++
++if [ -r $STORAGE_PID_FILE ]; then
++    STORAGE_PID=`cat $STORAGE_PID_FILE`
++    USB_STATUS=`cat /proc/usb-storage | grep "USB status" | cut -d : -f 2`
++    STORAGE_DEV=`cat /etc/hotplug/usbdstorage.conf`
++fi
++
+ if [ -r ./shared ] ; then . ./shared ; else . /etc/pcmcia/shared ; fi
+ 
+ # Get device attributes
+ get_info $DEVICE
+ 
+ if [ ! -b /dev/$DEVICE ] ; then
+-    log mknod /dev/$DEVICE b $MAJOR $MINOR
+-    for part in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 ; do
+-	minor=`expr $part + $MINOR`
+-	log mknod /dev/${DEVICE}$part b $MAJOR $minor
++    mknod /dev/$DEVICE b $MAJOR 0
++    for minor in 1 2 3 4 5 6 7 8 ; do
++	mknod /dev/${DEVICE}$minor b $MAJOR $minor
+     done
+ fi
+-eval `/sbin/ide_info /dev/$DEVICE` || usage
++
++case "$ACTION" in
++
++'suspend'|'resume'|'stop')
++    ;;
++
++*)
++    eval `/sbin/ide_info /dev/$DEVICE` || usage
++    ;;
++
++esac
+ 
+ # Load site-specific settings
+ ADDRESS="$SCHEME,$SOCKET,$SERIAL_NO"
+@@ -40,7 +62,6 @@
+ case "$ACTION" in
+ 
+ 'start')
+-    [ -n "$VERBOSE" -a -n "$INFO" ] && echo "$INFO"
+     add_parts "$ADDRESS" "$PARTS" || exit 1
+     ;;
+ 
+@@ -71,3 +92,4 @@
+ esac
+ 
+ exit 0
++
+diff -Nur pcmcia-cs-3.2.8/etc/ide.opts pcmcia-cs-3.2.8.new/etc/ide.opts
+--- pcmcia-cs-3.2.8/etc/ide.opts	2000-06-06 21:01:50.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/ide.opts	2005-02-05 19:12:31.000000000 +0000
+@@ -11,10 +11,14 @@
+     #DO_FSTAB="y" ; DO_FSCK="y" ; DO_MOUNT="y"
+     #FSTYPE="msdos"
+     #OPTS=""
++    FATOPTS="-o noatime,quiet,umask=000,iocharset=utf8"
+     #MOUNTPT="/mnt/ide"
++    DO_MOUNT="y"
++    #FSTYPE="vfat"
++    MOUNTPT="/mnt/cf"
+     ;;
+ *,*,*)
+-    #PARTS="1"
++    PARTS="1"
+     # Card eject policy options
+     NO_CHECK=n
+     NO_FUSER=n
+diff -Nur pcmcia-cs-3.2.8/etc/memory pcmcia-cs-3.2.8.new/etc/memory
+--- pcmcia-cs-3.2.8/etc/memory	2000-12-15 19:04:03.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/memory	2005-02-05 19:12:31.000000000 +0000
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ #
+-# memory 1.28 2000/12/15 19:04:03 (David Hinds)
++# memory 1.27 2000/06/06 21:02:09 (David Hinds)
+ #
+ # Initialize or shutdown a PCMCIA memory device
+ #
+@@ -40,18 +40,17 @@
+ case "$ACTION" in
+ 
+ 'start')
+-    [ "$VERBOSE" -a "$INFO" ] && echo "$INFO"
+     rm -f /dev/${DEVICE}*
+     if [ "$DRIVER" = "memory_cb" ] ; then
+ 	for N in 0 1 2 3 4 5 6 7 ; do
+-	    log mknod /dev/${DEVICE}s${N} c $MAJOR `expr $MINOR + $N`
++	    mknod /dev/${DEVICE}s${N} c $MAJOR `expr $MINOR + $N`
+ 	done
+     else
+-	log mknod /dev/${DEVICE}c0c c $MAJOR `expr $MINOR`
+-	log mknod /dev/${DEVICE}c0b b $MAJOR `expr $MINOR`
+-	log mknod /dev/${DEVICE}a0c c $MAJOR `expr $MINOR + 4`
+-	log mknod /dev/${DEVICE}c c $MAJOR `expr $MINOR + 8`
+-	log mknod /dev/${DEVICE}a c $MAJOR `expr $MINOR + 8 + 4`
++	mknod /dev/${DEVICE}c0c c $MAJOR `expr $MINOR`
++	mknod /dev/${DEVICE}c0b b $MAJOR `expr $MINOR`
++	mknod /dev/${DEVICE}a0c c $MAJOR `expr $MINOR + 4`
++	mknod /dev/${DEVICE}c c $MAJOR `expr $MINOR + 8`
++	mknod /dev/${DEVICE}a c $MAJOR `expr $MINOR + 8 + 4`
+ 	add_blkdev /dev/${DEVICE}c0b || exit 1
+     fi
+     ;;
+diff -Nur pcmcia-cs-3.2.8/etc/network pcmcia-cs-3.2.8.new/etc/network
+--- pcmcia-cs-3.2.8/etc/network	2004-07-17 04:48:37.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/network	2005-02-05 19:12:31.000000000 +0000
+@@ -1,6 +1,6 @@
+ #! /bin/sh
+ #
+-# network 1.87 2004/07/17 04:48:37 (David Hinds)
++# network 1.75 2000/07/07 23:37:10 (David Hinds)
+ #
+ # Initialize or shutdown a PCMCIA ethernet adapter
+ #
+@@ -21,15 +21,7 @@
+ 
+ # Get device attributes
+ get_info $DEVICE
+-if [ -d /var/lib/pcmcia ] ; then
+-    NAMEFILE=/var/lib/pcmcia/nameif.${SOCKET}.${INSTANCE}
+-else
+-    NAMEFILE=/var/run/nameif.${SOCKET}.${INSTANCE}
+-fi
+-if [ -r "$NAMEFILE" -a "$ACTION" != "start" ] ; then
+-    DEVICE=`cat $NAMEFILE`
+-fi
+-HWADDR=`/sbin/ifconfig $DEVICE | sed -ne 's/.*\(..:..:..:..:..:..\).*/\1/p'`
++HWADDR=`/sbin/ifconfig $DEVICE | sed -n -e 's/.*addr \([^ ]*\) */\1/p'`
+ 
+ # Load site-specific settings
+ ADDRESS="$SCHEME,$SOCKET,$INSTANCE,$HWADDR"
+@@ -37,115 +29,122 @@
+ stop_fn () { return; }
+ . $0.opts
+ 
+-if [ "$ACTION" = "start" ] ; then
+-    if [ -r "$NAMEFILE" ] ; then rm $NAMEFILE ; fi
+-    if [ -n "$NAMEIF" ] ; then
+-	log /sbin/nameif $NAMEIF $HWADDR || exit 1
+-	echo $NAMEIF > $NAMEFILE ; DEVICE=$NAMEIF
+-    fi
+-fi
+-
+ RESOLV=/etc/resolv.conf
+ 
+ # Now, run the specific script for Wireless LAN interfaces
+ # Note : we need the wireless parameters to be set up before IP parameters,
+ # so that we can perform DHCP over the Wireless link if needed. Jean II
+-O_INFO=$INFO ; INFO=
+ if [ -x ./wireless ] ; then
+     . ./wireless
+ else
+     . /etc/pcmcia/wireless
+ fi
+-INFO=$O_INFO
+ 
++match () { case $1 in $2) return 0; ;; *) return 1; ;; esac ; }
+ bootp_setup ()
+ {
+     if match `uname -r` "2.[2-9].*" ; then
+-	log /sbin/ifconfig $DEVICE up
++	/sbin/ifconfig $DEVICE up
+     else
+-	log /sbin/ifconfig $DEVICE up 0.0.0.0
+-	log /sbin/route add default dev $DEVICE netmask 0.0.0.0
++	/sbin/ifconfig $DEVICE up 0.0.0.0
++	/sbin/route add default dev $DEVICE netmask 0.0.0.0
+     fi
+ }
+ 
++# Suspend/Resume for no working.
++if [ "$SCHEME" = "CardResume" ] ; then
++    case "$ACTION" in ('start')
++	/sbin/cardctl resume
++	/sbin/ifconfig $DEVICE 0.0.0.0
++	/sbin/ifconfig $DEVICE down
++    ;; 'cksum') exit 1; ;; esac
++    exit 0
++fi
++if [ "$SCHEME" = "CardSuspend" -o "$CARDSUSPEND" = "y" ] ; then
++    case "$ACTION" in ('start'|'resume')
++	/sbin/ifconfig $DEVICE 0.0.0.0
++	/sbin/ifconfig $DEVICE down
++	/sbin/cardctl suspend
++    ;; 'cksum') exit 1; ;; esac
++    exit 0
++fi
++
+ case "$ACTION" in
+ 
+ 'start')
+-    [ -n "$VERBOSE" -a -n "$INFO" ] && echo "$INFO"
+ 
+-    [ -n "$IF_PORT" ] && /sbin/ifport $DEVICE $IF_PORT
++    test "$IF_PORT" && /sbin/ifport $DEVICE $IF_PORT
+ 
+     if is_true $PUMP ; then
+-	log "/sbin/pump -i $DEVICE > /dev/null" || exit 1
++	/sbin/pump -i $DEVICE
+     elif is_true $BOOTP ; then
+ 	bootp_setup
+ 	if [ -x /sbin/bootpc ] ; then
+ 	    eval `/sbin/bootpc --bootfile '' --returniffail \
+ 		--timeoutwait 10 --dev $DEVICE`
+-	    log /sbin/ifconfig $DEVICE down
+-	    if [ -n "$GATEWAYS" ] ; then
++	    /sbin/ifconfig $DEVICE down
++	    if [ "$GATEWAYS" ] ; then
+ 		set - $GATEWAYS ; GATEWAY=$1
+ 	    fi
+ 	elif [ -x /sbin/pump ] ; then
+-	    log "/sbin/pump -i $DEVICE > /dev/null" || exit 1
++	    /sbin/pump -i $DEVICE
+ 	else
+ 	    exit 1
+ 	fi
+     elif is_true $DHCP ; then
+ 	bootp_setup
+ 	HN=${DHCP_HOSTNAME:+-h $DHCP_HOSTNAME}
++	TO=${DHCP_TIMEOUT:+-t $DHCP_TIMEOUT}
+ 	if [ -x /sbin/dhcpcd ] ; then
+ 	    # This is a version check: I know it looks weird
+-	    if /sbin/dhcpcd -XYZZY 2>&1 | grep -q DHCP ; then
+-		log "/sbin/dhcpcd -d $HN $DEVICE >/dev/null 2>&1" || exit 1
++	    if /sbin/dhcpcd --help 2>&1 | grep -q DHCP ; then
++		/sbin/dhcpcd -N $HN $TO $DEVICE >/dev/null 2>&1 || exit 1
+ 	    else
+ 		# Jump through hoops for lame 0.70-era dhcpcd
+ 		L=/var/run/dhcp-lock-$DEVICE
+ 		/bin/echo "#!/bin/sh\nrm $L" > $L ; chmod +x $L
+-		log "/sbin/dhcpcd $HN -c $L $DEVICE >/dev/null 2>&1"
++		/sbin/dhcpcd -N $HN -c $L $DEVICE >/dev/null 2>&1
+ 		for t in 0 1 2 3 4 5 6 7 8 9 ; do
+ 		    sleep 2 ; if [ ! -e $L ] ; then break ; fi
+ 		done
+ 		rm -f $L
+ 		if [ -e /etc/dhcpc/resolv.conf ] ; then
+ 		    echo "# $DEVICE begin" > $RESOLV.N
+-		    chmod og+r $RESOLV.N
+ 		    cat /etc/dhcpc/resolv.conf >> $RESOLV.N
+ 		    echo "# $DEVICE end" >> $RESOLV.N
+ 		    cat $RESOLV >> $RESOLV.N ; mv $RESOLV.N $RESOLV
+ 		fi
+ 	    fi
+ 	elif [ -x /sbin/dhclient ] ; then
+-	    log "/sbin/dhclient $DEVICE >/dev/null 2>&1" || exit 1
++	    /sbin/dhclient $DEVICE >/dev/null 2>&1 || exit 1
+ 	elif [ -x /sbin/pump ] ; then
+-	    log "/sbin/pump $HN -i $DEVICE > /dev/null" || exit 1
++	    /sbin/pump $HN -i $DEVICE
+ 	else
+ 	    exit 1
+ 	fi
+     fi
+ 
+-    if [ -n "$IPADDR" ] ; then
++    if [ "$IPADDR" ] ; then
+ 	# Basic network setup
+ 	NM=${NETMASK:+netmask $NETMASK}
+ 	BC=${BROADCAST:+broadcast $BROADCAST}
+ 	MTU=${MTU:+mtu $MTU}
+-	log /sbin/ifconfig $DEVICE up $IPADDR $NM $BC $MTU
+-	if [ -n "$NETWORK" ] ; then
++	/sbin/ifconfig $DEVICE up $IPADDR $NM $BC $MTU
++	if [ "$NETWORK" ] ; then
+ 	    /sbin/ifuser $DEVICE $NETWORK || \
+-		log /sbin/route add -net $NETWORK $NM dev $DEVICE
+-	elif [ -n "$GATEWAY" ] ; then
++		/sbin/route add -net $NETWORK $NM dev $DEVICE
++	elif [ "$GATEWAY" ] ; then
+ 	    /sbin/ifuser $DEVICE $GATEWAY || \
+-		log /sbin/route add $GATEWAY $DEVICE
++		/sbin/route add $GATEWAY $DEVICE
+ 	fi
+-	[ -n "$GATEWAY" ] && /sbin/route add default gw $GATEWAY metric 1
++	test "$GATEWAY" && /sbin/route add default gw $GATEWAY metric 1
+     fi
+     
+     # Update DNS stuff
+-    if [ -n "$DOMAIN$SEARCH$DNSSRVS$DNS_1$DNS_2$DNS_3" ] ; then
++    if [ "$DOMAIN$SEARCH$DNSSRVS$DNS_1$DNS_2$DNS_3" ] ; then
+ 	echo "# $DEVICE begin" > $RESOLV.N
+-	chmod og+r $RESOLV.N
+-	[ -n "$DOMAIN" ] && echo "domain $DOMAIN" >> $RESOLV.N
+-	[ -n "$SEARCH" ] && echo "search $SEARCH" >> $RESOLV.N
++	test "$DOMAIN" && echo "domain $DOMAIN" >> $RESOLV.N
++	test "$SEARCH" && echo "search $SEARCH" >> $RESOLV.N
+ 	for DNS in $DNSSRVS $DNS_1 $DNS_2 $DNS_3 ; do
+ 	    echo "nameserver $DNS" >> $RESOLV.N
+ 	done
+@@ -155,12 +154,12 @@
+     fi
+ 
+     # Handle NFS mounts
+-    if [ -n "$MOUNTS" ] ; then
+-	for MT in $MOUNTS ; do log mount -v $MT ; done
++    if [ "$MOUNTS" ] ; then
++	for MT in $MOUNTS ; do mount -v $MT ; done
+     fi
+ 
+-    if [ -n "$IPX_NETNUM" ] ; then
+-	log ipx_interface add $DEVICE $IPX_FRAME $IPX_NETNUM
++    if [ "$IPX_NETNUM" ] ; then
++	ipx_interface add $DEVICE $IPX_FRAME $IPX_NETNUM
+     fi
+ 
+     start_fn $DEVICE
+@@ -168,12 +167,9 @@
+ 
+ 'stop')
+ 
+-    if [ -r "$NAMEFILE" ] ; then rm $NAMEFILE ; fi
+-
+     stop_fn $DEVICE
+ 
+-    if is_true $PUMP || is_true $BOOTP || is_true $DHCP || \
+-    	[ -n "$IPADDR" ] ; then
++    if is_true $PUMP || is_true $BOOTP || is_true $DHCP || [ "$IPADDR" ] ; then
+ 
+ 	# Shut down all NFS mounts on this interface
+ 	nfsstop ()
+@@ -183,41 +179,38 @@
+ 		nfsstop
+ 		if /sbin/ifuser $DEVICE $HOST ; then
+ 		    do_fuser -k -m $MT > /dev/null
+-		    log umount -f -v $MT
++		    umount -v $MT
+ 		fi
+ 	    fi
+ 	}
+-	mount -t nfs | sed -e 's/:.* on \(.*\) type .*/ \1/' | nfsstop
++	mount -t nfs | grep "type nfs" | sed -e 's/:.* on \(.*\) type .*/ \1/' | nfsstop
++
++	test "$IPX_NETNUM" && ipx_interface del $DEVICE $IPX_FRAME
+ 
+-	[ -n "$IPX_NETNUM" ] && ipx_interface del $DEVICE $IPX_FRAME
++	# Remove nameservers
++	if fgrep -q "# $DEVICE begin" $RESOLV ; then
++	    sed -e "/# $DEVICE begin/,/# $DEVICE end/d"	$RESOLV > $RESOLV.N
++	    mv $RESOLV.N $RESOLV
++	fi
+ 
+ 	if is_true $PUMP ; then
+-	    log pump -r -i $DEVICE
++	    pump -r -i $DEVICE
+ 	elif is_true $DHCP ; then
+ 	    if [ -x /sbin/dhcpcd ] ; then
+-		PID=`cat /var/run/dhcpcd-$DEVICE.pid 2>/dev/null`
+-		if [ -n "$PID" ] ; then
+-		    kill -TERM $PID
+-		    sleep 2
++		if [ -e /var/run/dhcpcd-$DEVICE.pid ] ; then
++		    kill -TERM `cat /var/run/dhcpcd-$DEVICE.pid`
+ 		fi
++		#sleep 2
+ 		/sbin/dhcpcd -XYZZY 2>&1 | grep -q DHCP || \
+ 		    rm -f /var/run/dhcpcd-$DEVICE.pid
+ 	    elif [ -x /sbin/dhclient ] ; then
+-		PID=`cat /var/run/dhclient.pid 2>/dev/null`
+-		if [ -n "$PID" ] ; then kill -TERM $PID ; fi
++		kill -TERM `cat /var/run/dhclient.pid`
+ 	    elif [ -x /sbin/pump ] ; then
+-		log /sbin/pump -r -i $DEVICE
++		/sbin/pump -r -i $DEVICE
+ 	    fi
+ 	fi
+     fi
+-
+-    # Remove nameservers
+-    if grep -q "# $DEVICE begin" $RESOLV ; then
+-	sed -e "/# $DEVICE begin/,/# $DEVICE end/d"	$RESOLV > $RESOLV.N
+-	mv $RESOLV.N $RESOLV
+-    fi
+-
+-    log /sbin/ifconfig $DEVICE down
++    /sbin/ifconfig $DEVICE down
+     ;;
+ 
+ 'check')
+@@ -231,7 +224,7 @@
+ 	    /sbin/ifuser $DEVICE $HOST && do_fuser -sm $MT && exit 1
+ 	done
+     }
+-    mount -t nfs | sed -e 's/:.* on \(.*\) type .*/ \1/' | nfscheck
++    mount -t nfs | grep "type nfs" | sed -e 's/:.* on \(.*\) type .*/ \1/' | nfscheck
+ 
+     # Check for active TCP or UDP connections
+     getdests ()
+@@ -247,7 +240,10 @@
+ 	done
+     }
+     DESTS=`netstat -ntuw | getdests`
+-    /sbin/ifuser $DEVICE $DESTS && exit 1
++
++    if [ ! "X$DEST" = "X" ]; then
++	/sbin/ifuser $DEVICE $DESTS && exit 1
++    fi
+     ;;
+ 
+ 'cksum')
+@@ -256,7 +252,7 @@
+     ;;
+ 
+ 'restart')
+-    [ -n "$IPADDR" ] && /sbin/ifconfig $DEVICE down up
++    test "$IPADDR" && /sbin/ifconfig $DEVICE down up
+     ;;
+ 
+ 'suspend'|'resume')
+diff -Nur pcmcia-cs-3.2.8/etc/network.opts pcmcia-cs-3.2.8.new/etc/network.opts
+--- pcmcia-cs-3.2.8/etc/network.opts	2004-07-17 04:47:54.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/network.opts	2005-02-05 19:15:50.000000000 +0000
+@@ -7,44 +7,11 @@
+ # address masked by the netmask.
+ #
+ case "$ADDRESS" in
+-*,*,*,*)
+-    INFO="Sample private network setup"
+-    # Use this to override the interface name -- see 'man nameif'
+-    NAMEIF=""
+-    # Transceiver selection, for some cards -- see 'man ifport'
+-    IF_PORT=""
+-    # Use BOOTP (via /sbin/bootpc, or /sbin/pump)? [y/n]
+-    BOOTP="n"
+-    # Use DHCP (via /sbin/dhcpcd, /sbin/dhclient, or /sbin/pump)? [y/n]
+-    DHCP="n"
+-    # If you need to explicitly specify a hostname for DHCP requests
+-    DHCP_HOSTNAME=""
+-    # Host's IP address, netmask, network address, broadcast address
+-    IPADDR=""
+-    NETMASK="255.255.255.0"
+-    NETWORK="10.0.1.0"
+-    BROADCAST="10.0.1.255"
+-    # Gateway address for static routing
+-    GATEWAY="10.0.1.1"
+-    # Things to add to /etc/resolv.conf for this interface
+-    DOMAIN=""
+-    SEARCH=""
+-    DNS_1=""
+-    DNS_2=""
+-    DNS_3=""
+-    # NFS mounts, should be listed in /etc/fstab
+-    MOUNTS=""
+-    # If you need to override the interface's MTU...
+-    MTU=""
+-    # For IPX interfaces, the frame type and network number
+-    IPX_FRAME=""
+-    IPX_NETNUM=""
+-    # Extra stuff to do after setting up the interface
++*,*,*,*|default,*,*,*)
++    BOOTP=n
++    DHCP=y
++    IPADDR=
+     start_fn () { return; }
+-    # Extra stuff to do before shutting down the interface
+     stop_fn () { return; }
+-    # Card eject policy options
+-    NO_CHECK=n
+-    NO_FUSER=n
+     ;;
+ esac
+diff -Nur pcmcia-cs-3.2.8/etc/parport pcmcia-cs-3.2.8.new/etc/parport
+--- pcmcia-cs-3.2.8/etc/parport	2001-01-01 21:13:55.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/parport	2005-02-05 19:12:31.000000000 +0000
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ #
+-# serial 1.7 2001/01/01 21:13:55 (David Hinds)
++# serial 1.4 2000/06/06 21:02:09 (David Hinds)
+ #
+ # Initialize or shutdown a PCMCIA parallel device
+ #
+@@ -28,16 +28,15 @@
+ case "$ACTION" in
+ 
+ 'start')
+-    [ -n "$VERBOSE" -a -n "$INFO" ] && echo "$INFO"
+     if [ ! -c /dev/$LP ] ; then
+-	log mknod /dev/$LP c $MAJOR $MINOR
++	mknod /dev/$LP c $MAJOR $MINOR
+     fi
+-    if [ -n "$LINK" ] ; then
+-	if [ -L $LINK ] ; then rm $LINK ; fi
+-	log ln -s /dev/$LP $LINK
++    if [ "$LINK" ] ; then
++	mv -f $LINK $LINK.O 2>/dev/null
++	ln -s /dev/$DIALOUT $LINK
+     fi
+-    if [ -n "$LP_OPTS" ] ; then
+-	log tunelp /dev/$LP $LP_OPTS
++    if [ "$LP_OPTS" ] ; then
++	tunelp /dev/$LP $LP_OPTS
+     fi
+     ;;
+ 
+@@ -52,7 +51,7 @@
+     
+ 'stop')
+     do_fuser -k /dev/$LP $LINK > /dev/null
+-    if [ -L "$LINK" ] ; then rm $LINK ; fi
++    rm -f $LINK ; mv -f $LINK.O $LINK 2>/dev/null
+     ;;
+ 
+ 'suspend')
+@@ -60,7 +59,7 @@
+     ;;
+ 
+ 'resume')
+-    if [ -n "$LP_OPTS" ] ; then
++    if [ "$LP_OPTS" ] ; then
+ 	tunelp /dev/$LP $LP_OPTS
+     fi
+     do_fuser -k -CONT /dev/$LP $LINK > /dev/null
+diff -Nur pcmcia-cs-3.2.8/etc/rc.pcmcia pcmcia-cs-3.2.8.new/etc/rc.pcmcia
+--- pcmcia-cs-3.2.8/etc/rc.pcmcia	2004-05-07 06:24:58.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/rc.pcmcia	2005-02-05 19:12:31.000000000 +0000
+@@ -1,6 +1,6 @@
+-#!/bin/sh
++#!/bin/bash
+ 
+-# rc.pcmcia 1.46 2004/05/07 06:24:58 (David Hinds)
++# rc.pcmcia 1.33 2000/07/06 08:57:44 (David Hinds)
+ #
+ # This is designed to work in BSD as well as SysV init setups.  See
+ # the HOWTO for customization instructions.
+@@ -17,8 +17,8 @@
+ #              configured so it is safe to have it installed on machines \
+ #              that don't need it.
+ 
+-# Exit if pcmcia-cs is not installed
+-test -x /sbin/cardmgr || exit 0
++# Source function library.
++. /etc/rc.d/init.d/functions
+ 
+ # Save option values passed in through the environment
+ for N in PCMCIA PCIC PCIC_OPTS CORE_OPTS CARDMGR_OPTS SCHEME ; do
+@@ -35,7 +35,7 @@
+ else
+     # Slackware startup options go right here:
+     # Should be either i82365 or tcic
+-    PCIC=i82365
++    PCIC=mrshpc
+     # Put socket driver timing parameters here
+     PCIC_OPTS=
+     # Put pcmcia_core options here
+@@ -68,7 +68,7 @@
+ for x in "1" ; do
+ 
+     if [ "$PCIC" = "" ] ; then
+-	echo "PCIC module not defined in startup options!"
++	msg "PCIC not defined in rc.pcmcia!"
+ 	break
+     fi
+ 
+@@ -78,8 +78,7 @@
+     case "$action" in
+ 
+     start)
+-	echo -n "Starting PCMCIA services: "
+-
++	msg -n "Start CF services:"
+ 	if [ -d /var/lib/pcmcia ] ; then
+ 	    SC=/var/lib/pcmcia/scheme
+ 	    RUN=/var/lib/pcmcia
+@@ -90,71 +89,55 @@
+ 	if [ -L $SC -o ! -O $SC ] ; then rm -f $SC ; fi
+ 	if [ ! -f $SC ] ; then umask 022 ; touch $SC ; fi
+ 	if [ "$SCHEME" ] ; then umask 022 ; echo $SCHEME > $SC ; fi
+-	    
+-	if ! grep -q pcmcia /proc/devices ; then
++	grep -q pcmcia /proc/devices
++	if [ $? -ne 0 ] ; then
+ 	    if [ -d /lib/modules/preferred ] ; then
+ 		PC=/lib/modules/preferred/pcmcia
+ 	    else
+ 		PC=/lib/modules/`uname -r`/pcmcia
+ 	    fi
+-	    KD=/lib/modules/`uname -r`/kernel/drivers/pcmcia
+-	    if [ -x /sbin/modprobe ] ; then
+-		/sbin/modprobe pcmcia_core $CORE_OPTS || break
+-		/sbin/modprobe $PCIC $PCIC_OPTS >/dev/null 2>&1 ||
+-		  (/sbin/modprobe yenta_socket >/dev/null 2>&1 &&
+-		   echo "using yenta_socket instead of $PCIC") ||
+-		  /sbin/modprobe $PCIC $PCIC_OPTS || break
+-		/sbin/modprobe ds || break
+-	    elif [ -d $PC ] ; then
++	    if [ -d $PC ] ; then
+ 		/sbin/insmod $PC/pcmcia_core.o $CORE_OPTS
+ 		/sbin/insmod $PC/$PCIC.o $PCIC_OPTS
+ 		/sbin/insmod $PC/ds.o
+ 	    else
+-		echo "module directory $PC not found."
++		msg " module directory $PC not found."
+ 		break
+ 	    fi
+ 	fi
+-
+ 	if [ -s /var/run/cardmgr.pid ] && \
+ 	    kill -0 `cat /var/run/cardmgr.pid` 2>/dev/null ; then
+-	    echo "cardmgr is already running."
++	    msg " running."
+ 	else
+ 	    if [ -r $RUN/stab ] ; then
+ 		cat $RUN/stab | cleanup
+ 	    fi
+-	    /sbin/cardmgr $CARDMGR_OPTS
++	    daemon --survive=5 /sbin/cardmgr $CARDMGR_OPTS
++	    msg
+ 	fi
+-
+-	echo "done."
+-	touch /var/lock/subsys/pcmcia 2>/dev/null
+-	EXITCODE=0
++	if [ -d /var/lock/subsys ] ; then
++	    touch /var/lock/subsys/pcmcia
++	fi
++	sleep 2
+ 	;;
+ 
+     stop)
+-	echo -n "Shutting down PCMCIA services: "
+-	if [ -s /var/run/cardmgr.pid ] ; then
+-	    PID=`cat /var/run/cardmgr.pid`
+-	    kill $PID
+-	    # Give cardmgr a few seconds to handle the signal
+-	    for N in 1 2 3 4 5 1 2 3 4 5 1 2 3 4 5 ; do
+-		kill -0 $PID 2>/dev/null || break
+-		sleep 2
+-	    done
+-	fi
+-	killall -q "CardBus Watcher"
+-	if grep -q "^ds " /proc/modules ; then
++	msg -n "Stop CF services:"
++	cardctl eject >/dev/null 2>&1
++	killproc /sbin/cardmgr
++	if grep -q "ds  " /proc/modules ; then
++	    echo -n " modules"
+ 	    /sbin/rmmod ds
+-	    /sbin/rmmod $PCIC 2>/dev/null || \
+-		/sbin/rmmod yenta_socket 2>/dev/null
++	    /sbin/rmmod $PCIC
+ 	    /sbin/rmmod pcmcia_core
+ 	fi
+-	echo "done."
++	msg
+ 	rm -f /var/lock/subsys/pcmcia
+ 	EXITCODE=0
+ 	;;
+ 
+     status)
+-	pid=`/sbin/pidof cardmgr`
++	pid=`pidof cardmgr`
+ 	if [ "$pid" != "" ] ; then
+ 	    echo "cardmgr (pid $pid) is running..."
+ 	    EXITCODE=0
+@@ -179,4 +162,4 @@
+ done
+ 
+ # Only exit if we're in our own subshell
+-case $0 in *rc.pcmcia) exit $EXITCODE ;; esac
++case $0 in *pcmcia) exit $EXITCODE ;; esac
+diff -Nur pcmcia-cs-3.2.8/etc/rlmod pcmcia-cs-3.2.8.new/etc/rlmod
+--- pcmcia-cs-3.2.8/etc/rlmod	1970-01-01 00:00:00.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/rlmod	2005-02-05 19:12:31.000000000 +0000
+@@ -0,0 +1,53 @@
++#! /bin/sh
++
++if [ -f /etc/pcmcia/shared ] ; then . /etc/pcmcia/shared ; fi
++
++# Get device attributes
++get_info $DEVICE
++HWADDR=`/sbin/ifconfig $DEVICE | sed -n -e 's/.*addr \(.*\)/\1/p'`
++
++# Set default settings
++PROXIMCFG="sta domain 0"
++if [ -f /etc/sq_proxcfg.conf ] ; then
++	PROXIMCFG=`cat /etc/sq_proxcfg.conf`
++fi
++
++# Load site-specific settings
++ADDRESS="$SCHEME,$SOCKET,$INSTANCE,$HWADDR"
++if [ -f $0.opts ] ; then
++	. $0.opts
++fi
++
++# Find the path where proxim tools are installed
++for PRXPATH in /usr/bin /usr/sbin /bin /sbin; do
++	if [ -x $PRXPATH/proxcfg ] ; then break ; fi
++done
++
++case "$ACTION" in
++
++'start'|'resume')
++	$PRXPATH/proxcfg $DEVICE $PROXIMCFG
++	#./network $*
++	;;
++
++'stop'|'suspend')
++	#./network $*
++	;;
++
++'check'|'cksum')
++	#./network $*
++	;;
++
++'restart')
++	#./network $*
++	;;
++*)
++	#./network $*
++	;;
++
++esac
++
++#exit 0
++./network $*
++exit $?
++
+diff -Nur pcmcia-cs-3.2.8/etc/rlmod.conf pcmcia-cs-3.2.8.new/etc/rlmod.conf
+--- pcmcia-cs-3.2.8/etc/rlmod.conf	1970-01-01 00:00:00.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/rlmod.conf	2005-02-05 19:12:31.000000000 +0000
+@@ -0,0 +1,48 @@
++# This driver should be plug and play.  Edit /etc/pcmcia/config to
++# ensure the pcmcia subsystem is "aware" of the driver and then
++# plug in your card.  You should be able to insert/remove and
++# suspend/resume.  When you plug in the card, you'll notice the
++# system hangs for a second.  I hope this is minor to you
++# as I've minimized it as much as I can.
++
++# Copy this file to /etc/pcmcia.  /etc/pcmcia/config will load
++# this file automatically.  If you have an older version of
++# pcmcia, you may need to add 'source ./rlmod.conf' to the end 
++# of /etc/pcmcia/config
++
++# ----------------
++
++device "rlmod"
++  class "rlmod" 
++  module "net/rlmod" opts "CardType=3"
++# declare your card type   ^^^^^^^^ here 
++# if not compiled into the driver by default
++
++card "Intel HomeRF PC Card"
++#  version "HomeRF", "LAN PC CARD", "RANGELAN2"
++  bind "rlmod"
++  manfid 0x0089, 0x1058
++
++card "Proxim Wireless FH PC Card"
++  version "HomeRF", "LAN PC CARD", "RANGELAN2"
++  bind "rlmod"
++#  manfid 0x0126, 0x1058
++
++card "Proxim Wireless FH 7630 PC Card"
++  version "Proxim", "Wireless PC Card", "    "
++  bind "rlmod"
++#  
++card "Proxim RangeLAN2 7400/7410/7420 PC Card"
++  version "PROXIM", "LAN PC CARD", "RANGELAN2"
++  bind "rlmod"
++#  manfid 0x0126, 0x1158
++
++card "Proxim Symphony 4400 PC Card"
++  version "PROXIM", "LAN PC CARD", "SYMPHONY"
++  bind "rlmod"
++#  manfid 0x0126, 0x1258
++
++card "Proxim RangeLAN2 7200 PC Card"
++  version "PROXIM", "LAN CARD", "RANGELAN2"
++  bind "rlmod"
++#  manfid 0x0126, 0x1058
+diff -Nur pcmcia-cs-3.2.8/etc/scsi pcmcia-cs-3.2.8.new/etc/scsi
+--- pcmcia-cs-3.2.8/etc/scsi	2001-01-01 21:14:09.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/scsi	2005-02-05 19:12:31.000000000 +0000
+@@ -40,7 +40,6 @@
+ case "$ACTION" in
+ 
+ 'start')
+-    [ -n "$VERBOSE" -a -n "$INFO" ] && echo "$INFO"
+     add_parts $ADDRESS "$PARTS" || exit 1
+     ;;
+ 
+diff -Nur pcmcia-cs-3.2.8/etc/serial pcmcia-cs-3.2.8.new/etc/serial
+--- pcmcia-cs-3.2.8/etc/serial	2004-07-01 17:26:26.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/serial	2005-02-05 19:12:31.000000000 +0000
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ #
+-# serial 1.43 2004/07/01 17:26:26 (David Hinds)
++# serial 1.35 2000/06/06 21:02:09 (David Hinds)
+ #
+ # Initialize or shutdown a PCMCIA serial device
+ #
+@@ -16,13 +16,23 @@
+ 
+ if [ -r ./shared ] ; then . ./shared ; else . /etc/pcmcia/shared ; fi
+ 
++UART_CONF="/etc/bluetooth/bt-uart.conf"
++ID=""
++UART_SET=""
++SERIAL_SET=""
++if [ -f $UART_CONF ]; then
++    ID=`/sbin/cardctl ident | grep info: | sed 's/^ *product info: *//' | sed 's/"/\\"/g'`
++    UART_SET=`grep "$ID" $UART_CONF | cut -f2 -d":"`
++    SERIAL_SET=`grep "$ID" $UART_CONF | cut -f3 -d":"`
++fi
++
++NO_CHECK="true"
++
+ # Get device attributes
+ get_info $DEVICE
+ 
+ # Load site-specific settings
+ ADDRESS="$SCHEME,$SOCKET,$INSTANCE"
+-start_fn () { return; }
+-stop_fn () { return; }
+ . $0.opts
+ 
+ # Newer kernels deprecate use of "cua" devices, but we need to
+@@ -37,40 +47,55 @@
+ case "$ACTION" in
+ 
+ 'start')
+-    [ -n "$VERBOSE" -a -n "$INFO" ] && echo "$INFO"
+     if [ ! -c /dev/$DEVICE ] ; then
+-	cd /dev ; log ./MAKEDEV $DEVICE
+-    fi
+-    if [ -n "$LINK" ] ; then
+-	if [ -L $LINK ] ; then rm $LINK ; fi
+-	if match `uname -r` "2.[2-9].*" ; then
+-	    ln -s /dev/$DEVICE $LINK
+-	else
+-	    ln -s /dev/$CALLOUT $LINK
++	if [ -x /sbin/MAKEDEV ]; then
++	    cd /dev ; /sbin/MAKEDEV $DEVICE
+ 	fi
+     fi
+-    if [ -x /bin/setserial ] ; then
+-	# Workaround for serial driver bug
+-	IRQ=`setserial /dev/$DEVICE | sed -e 's/.*IRQ: //'`
+-	setserial /dev/$DEVICE irq 0 ; setserial /dev/$DEVICE irq $IRQ
+-	if [ -n "$SERIAL_OPTS" ] ; then
+-	    log setserial /dev/$DEVICE $SERIAL_OPTS
++    # Workaround for serial driver bug
++    IRQ=`setserial /dev/$DEVICE | sed -e 's/.*IRQ: //'`
++    setserial /dev/$DEVICE irq 0 ; setserial /dev/$DEVICE irq $IRQ
++    if [ "$SERIAL_SET" != "" ] ; then
++	/sbin/setserial $SERIAL_SET
++    else
++	setserial /dev/$DEVICE $SERIAL_OPTS
++    fi
++    if [ "$SERIAL_SET" = "" -a "$UART_SET" = "" ]; then
++	if [ "$LINK" ] ; then
++	    mv -f $LINK $LINK.O 2>/dev/null
++	    if uname -r | grep -q '^2\.[2345]' ; then
++    		ln -s /dev/$DEVICE $LINK
++	    else
++    		ln -s /dev/$CALLOUT $LINK
++	    fi
++	fi
++	if [ "$INITTAB" ] ; then
++	    echo "S$NR:12345:respawn:$INITTAB $DEVICE" >> /etc/inittab
++	    telinit q
+ 	fi
+     fi
+-    if [ -n "$INITTAB" ] ; then
+-	echo "S$NR:12345:respawn:$INITTAB $DEVICE" >> /etc/inittab
+-	telinit q
++    #Bind Bluetooth CSR UART based CF cards if they are defined in $UART_CONF
++    if [ "$UART_SET" != "" ]; then
++	modprobe hci_uart > /dev/null 2>&1
++	/sbin/hciattach $UART_SET
++	hciconfig hci0 up
++	if [ -f /etc/bluetooth/rfcomm.conf ]; then
++	    rfcomm release all
++	    /bin/rfcomm -f /etc/bluetooth/rfcomm.conf bind all
++	fi
+     fi
+-    start_fn $DEVICE
+     ;;
+ 
+ 'check')
++    if [ "$UART_SET" != "" ] ; then 
++	exit 0 
++    fi
+     is_true $NO_CHECK && exit 0
+-    if [ -n "$INITTAB" ] ; then
+-	do_fuser -v /dev/$DEVICE /dev/$CALLOUT $LINK | grep -v getty \
+-	    | grep -q /dev/$DEVICE && exit 1
++    if [ "$INITTAB" ] ; then
++    do_fuser -v /dev/$DEVICE /dev/$CALLOUT $LINK | grep -v getty \
++        | grep -q /dev/$DEVICE && exit 1
+     else
+-	do_fuser -s /dev/$DEVICE /dev/$CALLOUT $LINK && exit 1
++    do_fuser -s /dev/$DEVICE /dev/$CALLOUT $LINK && exit 1
+     fi
+     ;;
+ 
+@@ -79,14 +104,23 @@
+     ;;
+     
+ 'stop')
+-    if [ -n "$INITTAB" ] ; then
+-	grep -v $DEVICE /etc/inittab > /etc/inittab.new
+-	mv /etc/inittab.new /etc/inittab
+-	telinit q
+-    fi
+-    do_fuser -k /dev/$DEVICE /dev/$CALLOUT $LINK > /dev/null
+-    if [ -L "$LINK" ] ; then rm $LINK ; fi
+-    stop_fn $DEVICE
++    #Shutdown Bluetooth CSR UART based CF cards if they are defined in $UART_CONF
++    if [ "$UART_SET" != "" ]; then
++	rfcomm release all
++	hciconfig hci0 down
++	killall hciattach
++	sleep 1
++        modprobe -r hci_uart > /dev/null 2>&1
++    fi
++    if [ "$SERIAL_SET" = "" -a "$UART_SET" = "" ]; then
++	if [ "$INITTAB" ] ; then
++	    fgrep -v $DEVICE /etc/inittab > /etc/inittab.new
++	    mv /etc/inittab.new /etc/inittab
++	    telinit q
++	fi
++	do_fuser -k /dev/$DEVICE /dev/$CALLOUT $LINK > /dev/null
++	rm -f $LINK ; mv -f $LINK.O $LINK 2>/dev/null
++    fi
+     ;;
+ 
+ 'suspend')
+@@ -94,13 +128,15 @@
+     ;;
+ 
+ 'resume')
+-    if [ -n "$SERIAL_OPTS" ] ; then
+-	setserial /dev/$DEVICE $SERIAL_OPTS
++    if [ "$SERIAL_OPTS" ] ; then
++    setserial /dev/$DEVICE $SERIAL_OPTS
+     fi
+     do_fuser -k -CONT /dev/$DEVICE /dev/$CALLOUT $LINK > /dev/null
++    #cardctl suspend
+     ;;
+ 
+ *)
++    echo "Unknown action: $ACTION."
+     usage
+     ;;
+ 
+diff -Nur pcmcia-cs-3.2.8/etc/serial.opts pcmcia-cs-3.2.8.new/etc/serial.opts
+--- pcmcia-cs-3.2.8/etc/serial.opts	2001-02-28 00:30:50.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/serial.opts	2005-02-05 19:12:31.000000000 +0000
+@@ -2,19 +2,27 @@
+ #
+ # The address format is "scheme,socket,instance".
+ #
++
++# Source any device-specific serial options
++for file in `ls /etc/pcmcia/*-serial.opts 2>/dev/null`
++do
++    . $file
++done
++
+ case "$ADDRESS" in
+ *,*,*)
+     INFO="Default modem setup"
+     # Symbolic link to dialout device
+     LINK="/dev/modem"
+-    # Options for 'setserial'
+-    SERIAL_OPTS=""
++    # Options for 'setserial'. Set default SERIAL_OPTS
++    # here, if none were set in the device-specific
++    # files above.
++    if [ "X$SERIAL_OPTS" = "X" ]
++    then
++        SERIAL_OPTS="baud_base 115200"
++    fi
+     # Should we create an inittab entry for this port?
+     #INITTAB="/sbin/mgetty"
+-    # Extra stuff to do after setting up the device
+-    start_fn () { return; }
+-    # Extra stuff to do before shutting down the device
+-    stop_fn () { return; }
+     # Card eject policy options
+     NO_CHECK=n
+     NO_FUSER=n
+diff -Nur pcmcia-cs-3.2.8/etc/shared pcmcia-cs-3.2.8.new/etc/shared
+--- pcmcia-cs-3.2.8/etc/shared	2004-02-28 16:49:45.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/shared	2005-02-05 19:12:31.000000000 +0000
+@@ -1,5 +1,5 @@
+ #
+-# shared 1.31 2002/08/19 03:21:11 (David Hinds)
++# shared 1.22 2000/08/22 04:20:48 (David Hinds)
+ #
+ 
+ usage ()
+@@ -20,42 +20,23 @@
+     fuser $*
+ }
+ 
+-do_eval () { eval $* ; }
+-
+-match () { case $1 in $2) return 0; ;; *) return 1; ;; esac ; }
+-
+-log ()
+-{
+-    if [ -n "$VERBOSE" ] ; then
+-	echo "$*" ; eval $*
+-    else
+-	# if command fails, print the command followed by its output
+-	RET=0
+-	LOG=/var/run/cardmgr.out
+-	do_eval $* >$LOG 2>&1
+-	if [ $? -ne 0 ] ; then RET=$? ; echo "$*" ; fi
+-	cat $LOG 1>&2 ; rm -f $LOG
+-	return $RET
+-    fi
+-}
+-
+ add_blkdev ()
+ {
+     # usage: add_blkdev [device]
+-    if [ -n "$LINK" ] ; then
+-	if [ -L $LINK ] ; then rm $LINK ; fi
+-	ln -s $1 $LINK || return 1
+-    fi
++    if [ "$LINK" ] ; then ln -s $1 $LINK || return 1 ; fi
+     if is_true $DO_FSTAB ; then
+ 	echo "$1 $MOUNTPT ${FSTYPE:-auto} ${OPTS:-defaults} 0 0" >> /etc/fstab
+     fi
+     if is_true $DO_FSCK ; then
+-	log /sbin/fsck -Ta $1
+-	if [ $? -gt 1 ] ; then return 1 ; fi
++	/sbin/fsck -Ta $1 || return 1
+     fi
+     if is_true $DO_MOUNT ; then
+ 	O=${OPTS:+-o $OPTS} ; FS=${FSTYPE:+-t $FSTYPE}
+-	log mount -v $O $FS $1 $MOUNTPT || return 1
++	mount $FATOPTS $FS $1 $MOUNTPT || mount $O $FS $1 $MOUNTPT || return 1
++	if [ -f /usr/bin/ipkg-link ]; then
++	    /usr/bin/ipkg-link mount $MOUNTPT 2>/dev/null >/dev/null
++	fi
++	#chkmntsh ${MOUNTPT}
+     fi
+     return 0
+ }
+@@ -66,11 +47,10 @@
+     RET=0
+     for PART in ${2:-""} ; do
+ 	# Get mount options for particular partitions
+-	if [ -n "$PART" ] ; then
++	if [ "$PART" ] ; then
+ 	    ADDRESS="$1,$PART"
+-	    unset INFO DO_FSTAB DO_FSCK DO_MOUNT LINK
++	    unset DO_FSTAB DO_FSCK DO_MOUNT LINK
+ 	    . $0.opts
+-	    [ -n "$VERBOSE" -a -n "$INFO" ] && echo "$INFO"
+ 	fi
+ 	add_blkdev /dev/$DEVICE$PART || RET=1
+     done
+@@ -82,14 +62,13 @@
+     # usage: rm_blkdev [device]
+     test -b $1 || return 1
+     do_fuser -k -m $1 > /dev/null
+-    if mount | grep -q "$1 on" ; then
+-	log umount -v $1 || return 1
++    if mount | fgrep -q "$1 on" ; then
++	umount $1 || return 1
+     fi
+     if is_true $DO_FSTAB ; then
+-	grep -v $1 /etc/fstab > /etc/fstab.N
++	fgrep -v $1 /etc/fstab > /etc/fstab.N
+ 	mv /etc/fstab.N /etc/fstab
+     fi
+-    if [ -L "$LINK" ] ; then rm $LINK ; fi
+ }
+ 
+ rm_parts ()
+@@ -98,21 +77,25 @@
+     BLK=/dev/$DEVICE
+     test -b $BLK || return 1
+     for PART in ${2:-""} ; do
+-	if [ -n "$PART" ] ; then
++	if [ "$PART" ] ; then
+ 	    ADDRESS="$1,$PART"
+ 	    unset DO_FSTAB DO_FSCK DO_MOUNT
+ 	    . $0.opts
+ 	fi
+ 	if is_true $DO_FSTAB ; then
+-	    grep -v "$BLK$PART " /etc/fstab > /etc/fstab.N
++	    fgrep -v "$BLK$PART " /etc/fstab > /etc/fstab.N
+ 	    mv /etc/fstab.N /etc/fstab
+ 	fi
+     done
+     do_fuser -k -m /dev/${DEVICE}* > /dev/null
+     LIST=`mount | sed -ne "s+^\($BLK[0-9]*\) .*+\1+p"`
+-    if [ -n "$LIST" ] ; then
++    if [ "$LIST" ] ; then
+ 	for MT in $LIST ; do
+-	    log umount -v $MT || return 1
++	    umount $MOUNTPT
++	    if [ $? != 0 ]; then
++		usleep 1000000
++	        umount $MOUNTPT || return 1
++	    fi
+ 	done
+     fi
+ }
+@@ -134,7 +117,7 @@
+     # usage: chk_parts [new-address]
+     OLD_ADDR="$ADDRESS"
+     chk_simple $1 || return 1
+-    if [ -z "$PARTS" ] ; then return 0 ; fi
++    if [ ! "$PARTS" ] ; then return 0 ; fi
+     for PART in $PARTS ; do
+ 	ADDRESS="$OLD_ADDR,$PART"
+ 	. $0.opts
+@@ -145,30 +128,27 @@
+ grep_stab ()
+ {
+     # this should be cheaper than invoking "grep"
+-    local DEV
++    local CLASS DEV
+     while read SOCKET CLASS DRIVER INSTANCE DEV MAJOR MINOR ; do
+-	if [ "$SOCKET" != "Socket" -a "$1" = "$DEV" ] ; then return 0 ; fi
++	if [ "$1" = "$DEV" ] ; then return 0 ; fi
+     done
+     return 1
+ }
+ 
+ get_info ()
+ {
++    if [ -d /var/lib/pcmcia ] ; then
++	STAB=/var/lib/pcmcia/stab
++    else
++	STAB=/var/run/stab
++    fi
+     if [ -f /var/lib/pcmcia/scheme ] ; then
+ 	SCHEME=`cat /var/lib/pcmcia/scheme`
+     elif [ -f /var/run/pcmcia-scheme ] ; then
+ 	SCHEME=`cat /var/run/pcmcia-scheme`
+     fi	
+-    if [ -z "$SCHEME" ] ; then SCHEME="default" ; fi
+-    if [ -z "$CLASS" -o -z "$MANFID" ] ; then
+-	if [ -d /var/lib/pcmcia ] ; then
+-	    STAB=/var/lib/pcmcia/stab
+-	else
+-	    STAB=/var/run/stab
+-	fi
+-	grep_stab $1 < $STAB || usage
+-	eval `/sbin/cardctl info $SOCKET`
+-    fi
++    if [ ! "$SCHEME" ] ; then SCHEME="default" ; fi
++    grep_stab $1 < $STAB || usage
+ }
+ 
+ # A bit of stuff to do right away...
+diff -Nur pcmcia-cs-3.2.8/etc/sharpzdc pcmcia-cs-3.2.8.new/etc/sharpzdc
+--- pcmcia-cs-3.2.8/etc/sharpzdc	1970-01-01 00:00:00.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/sharpzdc	2005-02-05 19:12:31.000000000 +0000
+@@ -0,0 +1,49 @@
++#!/bin/sh
++#
++# sharpzdc 1.00 2001/11/21 00:00:00 (Akio Tagami)
++#
++# Initialize or shutdown for SHARP Digital Camera Card
++#
++# The first argument should be either 'start' or 'stop'.  The second
++# argument is the base name for the device.
++
++if [ -r ./shared ] ; then . ./shared ; else . /etc/pcmcia/shared ; fi
++
++# Get device attributes
++get_info $DEVICE
++
++# Load site-specific settings
++ADDRESS="$SCHEME,$SOCKET,$SERIAL_NO"
++
++# cmd=$ACTION, dev=$DEVICE, id=$MAJOR, key=$ADDRESS
++
++case "$ACTION" in
++
++'start')
++    if [ -e /dev/$DEVICE ] ; then
++        rm -f /dev/$DEVICE
++    fi
++    mknod /dev/$DEVICE c $MAJOR 0
++    chmod a+rw /dev/$DEVICE
++    ;;
++
++'check')
++    ;;
++
++'stop')
++    ;;
++
++'cksum')
++    ;;
++    
++'suspend'|'resume')
++    ;;
++
++*)
++    usage
++    ;;
++
++esac
++
++exit 0
++
+diff -Nur pcmcia-cs-3.2.8/etc/sharpzdc.conf pcmcia-cs-3.2.8.new/etc/sharpzdc.conf
+--- pcmcia-cs-3.2.8/etc/sharpzdc.conf	1970-01-01 00:00:00.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/sharpzdc.conf	2005-02-05 19:12:31.000000000 +0000
+@@ -0,0 +1,12 @@
++# SHARP Digital Camera Card Configuration Database
++#
++# sharpzdc.conf 1.00 2001/11/19 00:00:00 (Sharp)
++
++device "sharpzdc_cs"
++  class "sharpzdc" module "sharpzdc_cs"
++
++card "SHARP CE-AG06 Digital Camera Card"
++  version "SHARP", "CEAG06  "
++  cis "cis/CE-AG06.dat"
++  bind "sharpzdc_cs"
++
+diff -Nur pcmcia-cs-3.2.8/etc/spectrum pcmcia-cs-3.2.8.new/etc/spectrum
+--- pcmcia-cs-3.2.8/etc/spectrum	1970-01-01 00:00:00.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/spectrum	2005-02-05 19:12:31.000000000 +0000
+@@ -0,0 +1,6 @@
++#!/bin/sh
++#
++export WIRELESS_USE=$0
++./network $*
++exit $?
++
+diff -Nur pcmcia-cs-3.2.8/etc/spectrum.conf pcmcia-cs-3.2.8.new/etc/spectrum.conf
+--- pcmcia-cs-3.2.8/etc/spectrum.conf	1970-01-01 00:00:00.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/spectrum.conf	2005-02-05 19:12:31.000000000 +0000
+@@ -0,0 +1,19 @@
++device "spectrum_cs"
++#  class "network" module "hermes", "orinoco", "spectrum_cs"
++  class "spectrum" module "hermes", "orinoco", "spectrum_cs"
++
++card "LA4100 Spectrum24 CF WLAN Card"
++  manfid 0x026c, 0x0001
++  bind "spectrum_cs"
++
++card "Socket Communications CF+ LP WLAN Card"
++  manfid 0x0104, 0x0001
++  bind "spectrum_cs"
++
++card "Intel PRO/Wireless 2011B CF Card"
++  manfid 0x0089, 0x0001
++  bind "spectrum_cs"
++
++#card "LA4137 Spectrum24 CF WLAN CARD"
++#  manfid 0x014d, 0x0001
++#  bind "spectrum_cs"
+diff -Nur pcmcia-cs-3.2.8/etc/sprint1x-serial.opts pcmcia-cs-3.2.8.new/etc/sprint1x-serial.opts
+--- pcmcia-cs-3.2.8/etc/sprint1x-serial.opts	1970-01-01 00:00:00.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/sprint1x-serial.opts	2005-02-05 19:12:31.000000000 +0000
+@@ -0,0 +1,10 @@
++#!/bin/sh
++#
++# Device-specific options for the Sprint Growell 1xRTT Modem
++#
++
++if grep "CF2031" $STAB >/dev/null
++then
++    SERIAL_OPTS="baud_base 230400"
++fi
++
+diff -Nur pcmcia-cs-3.2.8/etc/sprint1x.conf pcmcia-cs-3.2.8.new/etc/sprint1x.conf
+--- pcmcia-cs-3.2.8/etc/sprint1x.conf	1970-01-01 00:00:00.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/sprint1x.conf	2005-02-05 19:12:31.000000000 +0000
+@@ -0,0 +1,8 @@
++#
++# Sprint Connection Manager
++#
++
++card "Sprint / Growell CF2031"
++  manfid 0x026d, 0x0101
++  bind "serial_cs"
++
+diff -Nur pcmcia-cs-3.2.8/etc/wireless pcmcia-cs-3.2.8.new/etc/wireless
+--- pcmcia-cs-3.2.8/etc/wireless	2002-07-03 06:22:56.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/wireless	2005-02-05 19:12:31.000000000 +0000
+@@ -11,79 +11,73 @@
+ # of the extended device address
+ #
+ 
+-if [ `basename $0` != 'network' ] ; then
+-    echo "Invalid invocation: this script should not be executed directly"
+-    exit 1
+-fi
+-
+ # Load site-specific settings
+-if [ -r ./wireless.opts ] ; then
++if [ -x ./wireless.opts ] ; then
+     . ./wireless.opts
+ else
+     . /etc/pcmcia/wireless.opts
+ fi
+ 
+ # Find the path where wireless tools are installed
+-for IWPATH in /usr/{bin,sbin} /usr/local/{bin,sbin} /sbin ; do
++for IWPATH in /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin /sbin ; do
+     if [ -x $IWPATH/iwconfig ] ; then break ; fi
+ done
+ 
+ case "$ACTION" in
+ 
+ 'start')
+-    [ -n "$VERBOSE" -a -n "$INFO" ] && echo "$INFO"
+     # Set all desired settings via iwconfig
+ 
+     # Mode need to be first : some settings apply only in a specific mode !
+-    if [ -n "$MODE" ] ; then
+-	log $IWPATH/iwconfig $DEVICE mode $MODE
++    if [ "$MODE" ] ; then
++	$IWPATH/iwconfig $DEVICE mode $MODE
+     fi
+     # This is a bit hackish, but should do the job right...
+-    if [ ! -n "$NICKNAME" ] ; then
++    if [ "$ESSID" ] || [ "$MODE" ] ; then
+         NICKNAME=`/bin/hostname`
+-    fi
+-    if [ -n "$ESSID" -o -n "$MODE" ] ; then
+-	log $IWPATH/iwconfig $DEVICE nick \"$NICKNAME\" >/dev/null 2>&1
++	$IWPATH/iwconfig $DEVICE nick $NICKNAME >/dev/null 2>&1
+     fi
+     # Regular stuff...
+-    if [ -n "$NWID" ] ; then
+-	log $IWPATH/iwconfig $DEVICE nwid $NWID
+-    fi
+-    if [ -n "$FREQ" ] ; then
+-	log $IWPATH/iwconfig $DEVICE freq $FREQ
+-    elif [ -n "$CHANNEL" ] ; then
+-	log $IWPATH/iwconfig $DEVICE channel $CHANNEL
+-    fi
+-    if [ -n "$SENS" ] ; then
+-	log $IWPATH/iwconfig $DEVICE sens $SENS
+-    fi
+-    if [ -n "$RATE" ] ; then
+-	log $IWPATH/iwconfig $DEVICE rate $RATE
++    if [ "$NWID" ] ; then
++	$IWPATH/iwconfig $DEVICE nwid $NWID
+     fi
+-    if [ -n "$KEY" ] ; then
+-	log $IWPATH/iwconfig $DEVICE key $KEY
++    if [ "$FREQ" ] ; then
++	$IWPATH/iwconfig $DEVICE freq $FREQ
++    elif [ "$CHANNEL" ] ; then
++	$IWPATH/iwconfig $DEVICE channel $CHANNEL
++    fi
++    if [ "$SENS" ] ; then
++	$IWPATH/iwconfig $DEVICE sens $SENS
++    fi
++    if [ "$RATE" ] ; then
++	$IWPATH/iwconfig $DEVICE rate $RATE
++    fi
++    if [ "$KEY" ] ; then
++	$IWPATH/iwconfig $DEVICE key $KEY
++    else
++	$IWPATH/iwconfig $DEVICE enc off
+     fi
+-    if [ -n "$RTS" ] ; then
+-	log $IWPATH/iwconfig $DEVICE rts $RTS
++    if [ "$RTS" ] ; then
++	$IWPATH/iwconfig $DEVICE rts $RTS
+     fi
+-    if [ -n "$FRAG" ] ; then
+-	log $IWPATH/iwconfig $DEVICE frag $FRAG
++    if [ "$FRAG" ] ; then
++	$IWPATH/iwconfig $DEVICE frag $FRAG
+     fi
+     # More specific parameters
+-    if [ -n "$IWCONFIG" ] ; then
+-	log $IWPATH/iwconfig $DEVICE $IWCONFIG
++    if [ "$IWCONFIG" ] ; then
++	$IWPATH/iwconfig $DEVICE $IWCONFIG
+     fi
+-    if [ -n "$IWSPY" ] ; then
+-	log $IWPATH/iwspy $DEVICE $IWSPY
++    if [ "$IWSPY" ] ; then
++	$IWPATH/iwspy $DEVICE $IWSPY
+     fi
+-    if [ -n "$IWPRIV" ] ; then
+-	log $IWPATH/iwpriv $DEVICE $IWPRIV
++    if [ "$IWPRIV" ] ; then
++	$IWPATH/iwpriv $DEVICE $IWPRIV
+     fi
+     # ESSID need to be last : most device re-perform the scanning/discovery
+     # when this is set, and things like encryption keys are better be
+     # defined if we want to discover the right set of APs/nodes.
+-    if [ -n "$ESSID" ] ; then
+-	log $IWPATH/iwconfig $DEVICE essid \"$ESSID\"
++    if [ "$ESSID" ] ; then
++	$IWPATH/iwconfig $DEVICE essid "$ESSID"
+     fi
+     ;;
+ 
+diff -Nur pcmcia-cs-3.2.8/etc/wireless.opts pcmcia-cs-3.2.8.new/etc/wireless.opts
+--- pcmcia-cs-3.2.8/etc/wireless.opts	2001-08-27 00:08:37.000000000 +0000
++++ pcmcia-cs-3.2.8.new/etc/wireless.opts	2005-02-05 19:12:31.000000000 +0000
+@@ -1,38 +1,18 @@
+ # Wireless LAN adapter configuration
+ #
+-# Theory of operation : 
++# The address format is "scheme,socket,instance,hwaddr".
+ #
+-# The script attempts to match a block of settings to the specific wireless
+-# card inserted, the *first* block matching the card is used.
+- # The address format is "scheme,socket,instance,hwaddr", with * as a wildcard.
+-# 'scheme' is the pcmcia scheme (set via 'cardctl scheme XXX').
+-# 'hwaddr' is the unique MAC address identifier of the wireless card.
+-# The MAC address is usually printed on the card, or can be found via ifconfig.
+-# Some examples here use only half of the MAC address with a wildcard to
+-# match a whole family of cards...
+-#
+-# All the Wireless specific configuration is done through the Wireless
+-# Extensions, so we will just call 'iwconfig' with the right parameters
+-# defined below.
++# Theory of operation : all the Wireless specific configuration is done
++# through the Wireless Extensions, so we will just call 'iwconfig' with
++# the right parameters defined below.
+ # Of course, you need to have iwconfig installled on your system.
+ # To download iwconfig, or for more info on Wireless Extensions :
+ #	http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html
+ #
+ # Note : you don't need to fill all parameters, leave them blank, in most
+ # cases the driver will initialise itself with sane defaults values or
+-# automatically figure out the value... And no drivers do support all
+-# possible settings...
+-#
+-# If you make any mistakes, you'll get a cryptic message in the system
+-# log.  You'll need to figure out on your own which parameter was wrong:
+-#     cardmgr[310]: executing: './network start wvlan0'
+-#     cardmgr[310]: + SIOCSIWMODE: Invalid argument
+-# I've tried to give more troubleshooting help at :
+-#	http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html#debug
+-# In case of doubts, just check "/etc/pcmcia/wireless" for the gory details...
+-#
+-# Note also that this script will work only with the original Pcmcia scripts,
+-# and not with the default Red Hat scripts. Send a bug report to Red Hat ;-)
++# automatically figure out the value... And not all drivers do support
++# all settings...
+ #
+ # Finally, send comments and flames to me, Jean Tourrilhes <jt@hpl.hp.com>
+ #
+@@ -45,60 +25,23 @@
+     ;;
+ # ---------- END SECTION TO REMOVE ------------
+ 
+-# Here is an example of scheme matching
+-# Activate with "cardctl scheme essidany"
+-
+-# Pick up any Access Point, should work on most 802.11 cards
+-essidany,*,*,*)
+-    INFO="Any ESSID"
+-    ESSID="any"
+-    ;;
+-
+ # Here are a few examples with a few Wireless LANs supported...
+-# The matching is done on the first 3 bytes of the MAC address
+ 
+-# Lucent Wavelan IEEE (+ Orinoco, RoamAbout and ELSA)
++# Lucent Wavelan IEEE
+ # Note : wvlan_cs driver only, and version 1.0.4+ for encryption support
+-*,*,*,00:60:1D:*|*,*,*,00:02:2D:*)
++*,*,*,00:60:1D:*)
+     INFO="Wavelan IEEE example (Lucent default settings)"
+     ESSID="Wavelan Network"
+     MODE="Managed"
+-#    RATE="auto"
++    RATE="auto"
+     KEY="s:secu1"
+ # To set all four keys, use :
+-#   KEY="s:secu1 [1] key s:secu2 [2] key s:secu3 [3] key s:secu4 [4] key [1]"
+-# For the RG 1000 Residential Gateway: The ESSID is the identifier on
+-# the unit, and the default key is the last 5 digits of the same.
+-#   ESSID="084d70"
+-#   KEY="s:84d70"
+-    ;;
+-
+-# Cisco/Aironet 4800/340
+-# Note : MPL driver only (airo/airo_cs), version 1.3 or later
+-*,*,*,00:40:96:*)
+-    INFO="Cisco/Aironet example (Cisco default settings)"
+-    ESSID="any"
+-# To set all four ESSID, use iwconfig v21 and the same trick as above
+-    MODE="Managed"
+-#    RATE="11M auto"
+-#    KEY="off"
+-    ;;
+-
+-# Samsung MagicLan (+ some other PrismII cards)
+-# Note : Samsung binary library driver, version 1.20 or later
+-*,*,*,00:00:F0:*|*,*,*,00:02:78:*)
+-    INFO="Samsung MagicLan example (Samsung default settings)"
+-    ESSID="any"
+-    MODE="Managed"
+-    CHANNEL="4"
+-    RATE="auto"
+-#    KEY="883e-aa67-21 [1] key 5501-d0da-87 [2] key 91f5-3368-6b [3] key 2d73-31b7-96 [4]"
+-#    IWCONFIG="power on"
++# KEY="s:secu1 [1] key s:secu2 [2] key s:secu3 [3] key s:secu4 [4] key [1]"
+     ;;
+ 
+-# Raytheon Raylink/WebGear Aviator2.4
+-# Note : doesn't work yet, please use for debugging only :-(
+-*,*,*,00:00:8F:*|*,*,*,00:00:F1:*)
++# Raytheon Raylink/WebGear Aviator2.4 (end with 8F or F1 !)
++# Note : driver version 1.70+ only
++*,*,*,00:00:8F:*)
+     INFO="Raylink/Aviator2.4 example (Aviator default ad-hoc setting)"
+     ESSID="ADHOC_ESSID"
+     MODE="Ad-Hoc"

@@ -1,0 +1,8 @@
+config GAWK
+        bool
+        prompt "Compile GNU awk (gawk)"
+
+config GAWK_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GAWK

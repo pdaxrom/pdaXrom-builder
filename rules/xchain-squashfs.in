@@ -1,0 +1,4 @@
+config XCHAIN_SQUASHFS
+	bool
+	prompt "squashfs"
+	default n

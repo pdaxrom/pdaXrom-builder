@@ -1,0 +1,13 @@
+--- xmms/libxmms/xmmsctrl.h~	2004-11-16 23:35:35.000000000 +0000
++++ xmms/libxmms/xmmsctrl.h	2004-11-16 23:35:58.000000000 +0000
+@@ -83,7 +83,9 @@
+ void xmms_remote_play_pause(gint session);
+ void xmms_remote_playlist_ins_url_string(gint session, gchar * string, gint pos);
+ 
+-	
++void xmms_remote_main_volume_up(gint session );
++void xmms_remote_main_volume_down(gint session );
++
+ #ifdef __cplusplus
+ };
+ #endif

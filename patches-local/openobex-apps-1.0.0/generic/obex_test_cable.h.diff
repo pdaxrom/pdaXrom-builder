@@ -1,0 +1,11 @@
+--- openobex-apps-1.0.0/src/obex_test_cable.h~	2004-09-22 12:27:13.000000000 +0000
++++ openobex-apps-1.0.0/src/obex_test_cable.h	2004-09-22 12:27:49.000000000 +0000
+@@ -38,7 +38,7 @@
+ #include <openobex/obex.h>
+ 
+ #ifdef CABLE_DEBUG
+-#define CDEBUG(args...) printf(__FUNCTION__ "() " args)
++#define CDEBUG(args...) printf("%s() ", __FUNCTION__, args)
+ #else
+ #define CDEBUG(args...)
+ #endif

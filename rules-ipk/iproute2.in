@@ -1,0 +1,8 @@
+config IPROUTE2
+	bool
+	prompt "iproute2"
+
+config IPROUTE2_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on IPROUTE2

@@ -1,0 +1,48 @@
+diff -Nur lesstif-0.93.94/clients/Motif-1.2/mwm/Makefile.in lesstif-0.93.94-new/clients/Motif-1.2/mwm/Makefile.in
+--- lesstif-0.93.94/clients/Motif-1.2/mwm/Makefile.in	2003-11-27 19:29:46.000000000 +0000
++++ lesstif-0.93.94-new/clients/Motif-1.2/mwm/Makefile.in	2004-10-10 00:03:13.000000000 +0000
+@@ -250,7 +250,7 @@
+ 		$(X_LIBS) -lXt $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
+ 
+ 
+-appdir = $(libdir)/X11/app-defaults
++appdir = /etc/X11/app-defaults
+ 
+ mwmddir = $(libdir)/X11/mwm
+ mwmd_DATA = system.mwmrc alt.map README
+diff -Nur lesstif-0.93.94/clients/Motif-2.0/mwm/Makefile.in lesstif-0.93.94-new/clients/Motif-2.0/mwm/Makefile.in
+--- lesstif-0.93.94/clients/Motif-2.0/mwm/Makefile.in	2003-11-27 19:29:47.000000000 +0000
++++ lesstif-0.93.94-new/clients/Motif-2.0/mwm/Makefile.in	2004-10-10 00:03:06.000000000 +0000
+@@ -265,7 +265,7 @@
+ 		$(X_LIBS) -lXt $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
+ 
+ 
+-appdir = $(libdir)/X11/app-defaults
++appdir = /etc/X11/app-defaults
+ 
+ mwmddir = $(libdir)/X11/mwm
+ mwmd_DATA = system.mwmrc alt.map README
+diff -Nur lesstif-0.93.94/clients/Motif-2.1/mwm/Makefile.in lesstif-0.93.94-new/clients/Motif-2.1/mwm/Makefile.in
+--- lesstif-0.93.94/clients/Motif-2.1/mwm/Makefile.in	2003-11-27 19:29:48.000000000 +0000
++++ lesstif-0.93.94-new/clients/Motif-2.1/mwm/Makefile.in	2004-10-10 00:02:56.000000000 +0000
+@@ -267,7 +267,7 @@
+ 		$(X_LIBS) $(XPLIB) -lXt $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
+ 
+ 
+-appdir = $(libdir)/X11/app-defaults
++appdir = /etc/X11/app-defaults
+ 
+ mwmddir = $(libdir)/X11/mwm
+ mwmd_DATA = system.mwmrc alt.map README
+diff -Nur lesstif-0.93.94/scripts/RedHat/lesstif.spec.in lesstif-0.93.94-new/scripts/RedHat/lesstif.spec.in
+--- lesstif-0.93.94/scripts/RedHat/lesstif.spec.in	2002-05-19 12:27:44.000000000 +0000
++++ lesstif-0.93.94-new/scripts/RedHat/lesstif.spec.in	2004-10-10 00:03:44.000000000 +0000
+@@ -129,7 +129,7 @@
+ %attr(755, root, root) %dir /usr/X11R6/lib/X11/mwm
+ %attr(755, root, root) /usr/X11R6/bin/mwm
+ %attr(644, root, root) %config /usr/X11R6/lib/X11/mwm/*
+-%attr(644, root, root) %config /usr/X11R6/lib/X11/app-defaults/Mwm
++%attr(644, root, root) %config /etc/X11/app-defaults/Mwm
+ %attr(644, root, root) /usr/X11R6/man/man1/mwm.1*
+ %attr(644, root, root) /usr/X11R6/man/man5/mwmrc.5*
+ 

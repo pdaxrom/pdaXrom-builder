@@ -1,0 +1,72 @@
+#!/bin/bash
+
+#
+# /etc/rc.d/init.d/S15inet - Start/Stop the inetd daemon(s).
+#
+
+# Comment out the following exit line to enable this script.
+# exit 0
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+DEVICE=eth0
+DHCP_HOSTNAME=""
+RESOLV=/etc/resolv.conf
+
+case "$1" in
+
+    start)
+	msg -n "Starting dhcpc:"
+	HN=${DHCP_HOSTNAME:+-h $DHCP_HOSTNAME}
+	TO=${DHCP_TIMEOUT:+-t $DHCP_TIMEOUT}
+	if [ -x /sbin/dhcpcd ] ; then
+	    # This is a version check: I know it looks weird
+	    if /sbin/dhcpcd -XYZZY 2>&1 | grep -q DHCP ; then
+		/sbin/dhcpcd $HN $TO $DEVICE >/dev/null 2>&1 || exit 1
+	    else
+		# Jump through hoops for lame 0.70-era dhcpcd
+		L=/var/run/dhcp-lock-$DEVICE
+		/bin/echo "#!/bin/sh\nrm $L" > $L ; chmod +x $L
+		/sbin/dhcpcd $HN -c $L $DEVICE >/dev/null 2>&1
+		for t in 0 1 2 3 4 5 6 7 8 9 ; do
+		    sleep 2 ; if [ ! -e $L ] ; then break ; fi
+		done
+		rm -f $L
+		if [ -e /etc/dhcpc/resolv.conf ] ; then
+		    echo "# $DEVICE begin" > $RESOLV.N
+		    cat /etc/dhcpc/resolv.conf >> $RESOLV.N
+		    echo "# $DEVICE end" >> $RESOLV.N
+		    cat $RESOLV >> $RESOLV.N ; mv $RESOLV.N $RESOLV
+		fi
+	    fi
+	fi
+	;;
+
+    stop)
+	msg -n "Stopping dhcpc:"
+	if [ -x /sbin/dhcpcd ] ; then
+	    if [ -e /var/run/dhcpcd-$DEVICE.pid ] ; then
+		kill -TERM `cat /var/run/dhcpcd-$DEVICE.pid`
+	    fi
+	    sleep 2
+	    /sbin/dhcpcd -XYZZY 2>&1 | grep -q DHCP || \
+	    rm -f /var/run/dhcpcd-$DEVICE.pid
+	fi
+	;;
+
+    restart)
+	$0 stop
+	sleep 1
+	$0 start
+	;;
+
+    *)
+	echo "Usage: $0 (start|stop|restart)"
+	exit 1
+	;;
+
+esac
+
+exit 0
+

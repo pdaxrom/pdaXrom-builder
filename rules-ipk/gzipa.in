@@ -1,0 +1,9 @@
+config GZIPA
+	bool
+	prompt "gzip"
+	depends on !BB_CONFIG_GZIP
+
+config GZIPA_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on GZIPA

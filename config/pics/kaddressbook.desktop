@@ -1,0 +1,8 @@
+[Desktop Entry]
+Comment=KAddressbook
+Exec=/usr/lib/qt/bin/kapi
+Icon=/usr/lib/qt/lib/kdepim/kaddressbook/kaddressbook.png
+Name=KA/Pi
+Type=Application
+Categories=Application;Office;WordProcessor;
+StartupNotify=True

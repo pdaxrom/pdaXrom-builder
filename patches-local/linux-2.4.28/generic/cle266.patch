@@ -1,0 +1,191 @@
+diff -Nur linux-2.4.25/drivers/char/drm/Config.in linux-2.4.25-patched/drivers/char/drm/Config.in
+--- linux-2.4.25/drivers/char/drm/Config.in	2003-11-28 18:26:20.000000000 +0000
++++ linux-2.4.25-patched/drivers/char/drm/Config.in	2004-03-27 04:06:40.000000000 +0000
+@@ -17,4 +17,4 @@
+ #
+ # Not ready yet. XFree DRI folks have to fix this up.
+ # dep_tristate '  S3 Savage' CONFIG_DRM_SAVAGE $CONFIG_AGP
+-# dep_tristate '  VIA CLE266' CONFIG_DRM_VIA $CONFIG_AGP
++dep_tristate '  VIA CLE266' CONFIG_DRM_VIA $CONFIG_AGP
+diff -Nur linux-2.4.25/drivers/char/agp/agp.h linux-2.4.25-patched/drivers/char/agp/agp.h
+--- linux-2.4.25/drivers/char/agp/agp.h	2004-02-18 13:36:31.000000000 +0000
++++ linux-2.4.25-patched/drivers/char/agp/agp.h	2004-03-27 03:34:57.000000000 +0000
+@@ -155,6 +155,9 @@
+ #define AGPGART_MODULE_NAME	"agpgart"
+ #define PFX			AGPGART_MODULE_NAME ": "
+ 
++/* Chipset independant registers (from AGP Spec) */
++#define AGP_APBASE	0x10
++
+ #define PGE_EMPTY(p) (!(p) || (p) == (unsigned long) agp_bridge.scratch_page)
+ 
+ #ifndef PCI_DEVICE_ID_VIA_82C691_0
+@@ -178,6 +181,9 @@
+ #ifndef PCI_DEVICE_ID_VIA_8385_0
+ #define PCI_DEVICE_ID_VIA_8385_0	0x3188
+ #endif 
++#ifndef PCI_DEVICE_ID_VIA_8378_0
++#define PCI_DEVICE_ID_VIA_8378_0	0x3205
++#endif
+ #ifndef PCI_DEVICE_ID_INTEL_810_0
+ #define PCI_DEVICE_ID_INTEL_810_0       0x7120
+ #endif
+@@ -446,6 +452,12 @@
+ #define VIA_APSIZE      0x84
+ #define VIA_ATTBASE     0x88
+ 
++/* VIA KT400 */
++#define VIA_AGP3_GARTCTRL	0x90
++#define VIA_AGP3_APSIZE		0x94
++#define VIA_AGP3_ATTBASE	0x98
++#define VIA_AGPSEL		0xfd
++
+ /* SiS registers */
+ #define SIS_APBASE      0x10
+ #define SIS_ATTBASE     0x90
+diff -Nur linux-2.4.25/drivers/char/agp/agpgart_be.c linux-2.4.25-patched/drivers/char/agp/agpgart_be.c
+--- linux-2.4.25/drivers/char/agp/agpgart_be.c	2004-02-18 13:36:31.000000000 +0000
++++ linux-2.4.25-patched/drivers/char/agp/agpgart_be.c	2004-03-27 03:49:52.000000000 +0000
+@@ -2873,6 +2873,87 @@
+ 	{0x00000000, 0}
+ };
+ 
++static int via_fetch_size_agp3(void)
++{
++	int i;
++	u16 temp;
++	aper_size_info_16 *values;
++
++	values = A_SIZE_16(agp_bridge.aperture_sizes);
++	pci_read_config_word(agp_bridge.dev, VIA_AGP3_APSIZE, &temp);
++	temp &= 0xfff;
++
++	for (i = 0; i < agp_bridge.num_aperture_sizes; i++) {
++		if (temp == values[i].size_value) {
++			agp_bridge.previous_size =
++				agp_bridge.current_size = (void *) (values + i);
++			agp_bridge.aperture_size_idx = i;
++			return values[i].size;
++		}
++	}
++	return 0;
++}
++
++
++static int via_configure_agp3(void)
++{
++	u32 temp;
++	aper_size_info_16 *current_size;
++    
++	current_size = A_SIZE_16(agp_bridge.current_size);
++
++	/* address to map too */
++	pci_read_config_dword(agp_bridge.dev, AGP_APBASE, &temp);
++	agp_bridge.gart_bus_addr = (temp & PCI_BASE_ADDRESS_MEM_MASK);
++
++	/* attbase - aperture GATT base */
++	pci_write_config_dword(agp_bridge.dev, VIA_AGP3_ATTBASE,
++		agp_bridge.gatt_bus_addr & 0xfffff000);
++
++	/* 1. Enable GTLB in RX90<7>, all AGP aperture access needs to fetch 
++	 *    translation table first.
++	 * 2. Enable AGP aperture in RX91<0>. This bit controls the enabling of the
++	 *    graphics AGP aperture for the AGP3.0 port.
++	 */
++	pci_read_config_dword(agp_bridge.dev, VIA_AGP3_GARTCTRL, &temp);
++	pci_write_config_dword(agp_bridge.dev, VIA_AGP3_GARTCTRL, temp | (3<<7));		
++	return 0;
++}
++
++
++static void via_cleanup_agp3(void)
++{
++	aper_size_info_16 *previous_size;
++
++	previous_size = A_SIZE_16(agp_bridge.previous_size);
++	pci_write_config_byte(agp_bridge.dev, VIA_APSIZE, previous_size->size_value);
++}
++
++
++static void via_tlbflush_agp3(agp_memory *mem)
++{
++	u32 temp;
++
++	pci_read_config_dword(agp_bridge.dev, VIA_AGP3_GARTCTRL, &temp);
++	pci_write_config_dword(agp_bridge.dev, VIA_AGP3_GARTCTRL, temp & ~(1<<7));
++	pci_write_config_dword(agp_bridge.dev, VIA_AGP3_GARTCTRL, temp);
++}
++
++
++static aper_size_info_16 via_generic_agp3_sizes[10] =
++{
++	{ 4,     1024,  0, 1<<11|1<<10|1<<9|1<<8|1<<5|1<<4|1<<3|1<<2|1<<1|1<<0 },
++	{ 8,     2048,  1, 1<<11|1<<10|1<<9|1<<8|1<<5|1<<4|1<<3|1<<2|1<<1},
++	{ 16,    4096,  2, 1<<11|1<<10|1<<9|1<<8|1<<5|1<<4|1<<3|1<<2},
++	{ 32,    8192,  3, 1<<11|1<<10|1<<9|1<<8|1<<5|1<<4|1<<3},
++	{ 64,   16384,  4, 1<<11|1<<10|1<<9|1<<8|1<<5|1<<4},
++	{ 128,  32768,  5, 1<<11|1<<10|1<<9|1<<8|1<<5},
++	{ 256,  65536,  6, 1<<11|1<<10|1<<9|1<<8},
++	{ 512,  131072, 7, 1<<11|1<<10|1<<9},
++	{ 1024, 262144, 8, 1<<11|1<<10},
++	{ 2048, 524288, 9, 1<<11}	/* 2GB <- Max supported */
++};
++
+ static int __init via_generic_setup (struct pci_dev *pdev)
+ {
+ 	agp_bridge.masks = via_generic_masks;
+@@ -2905,6 +2986,38 @@
+ 	(void) pdev; /* unused */
+ }
+ 
++static int __init via_generic_setup_agp3 (struct pci_dev *pdev)
++{
++	agp_bridge.masks = via_generic_masks;
++	agp_bridge.aperture_sizes = (void *) via_generic_agp3_sizes;
++	agp_bridge.size_type = U8_APER_SIZE;
++	agp_bridge.num_aperture_sizes = 10;
++	agp_bridge.dev_private_data = NULL;
++	agp_bridge.needs_scratch_page = FALSE;
++	agp_bridge.configure = via_configure_agp3;
++	agp_bridge.fetch_size = via_fetch_size_agp3;
++	agp_bridge.cleanup = via_cleanup_agp3;
++	agp_bridge.tlb_flush = via_tlbflush_agp3;
++	agp_bridge.mask_memory = via_mask_memory;
++	agp_bridge.agp_enable = agp_generic_agp_enable;
++	agp_bridge.cache_flush = global_cache_flush;
++	agp_bridge.create_gatt_table = agp_generic_create_gatt_table;
++	agp_bridge.free_gatt_table = agp_generic_free_gatt_table;
++	agp_bridge.insert_memory = agp_generic_insert_memory;
++	agp_bridge.remove_memory = agp_generic_remove_memory;
++	agp_bridge.alloc_by_type = agp_generic_alloc_by_type;
++	agp_bridge.free_by_type = agp_generic_free_by_type;
++	agp_bridge.agp_alloc_page = agp_generic_alloc_page;
++	agp_bridge.agp_destroy_page = agp_generic_destroy_page;
++	agp_bridge.suspend = agp_generic_suspend;
++	agp_bridge.resume = agp_generic_resume;
++	agp_bridge.cant_use_aperture = 0;
++
++	return 0;
++	
++	(void) pdev; /* unused */
++}
++
+ #endif /* CONFIG_AGP_VIA */
+ 
+ #ifdef CONFIG_AGP_SIS
+@@ -6338,12 +6451,12 @@
+ 		"Via",
+ 		"Apollo Pro KT400",
+ 		via_generic_setup },
+-        { PCI_DEVICE_ID_VIA_8377_0,
++        { PCI_DEVICE_ID_VIA_8378_0,
+ 		PCI_VENDOR_ID_VIA,
+ 		VIA_APOLLO_KT400,
+ 		"Via",
+-		"Apollo Pro KT400",
+-		via_generic_setup },
++		"Apollo Pro KM400",
++		via_generic_setup_agp3 },
+         { PCI_DEVICE_ID_VIA_CLE266,
+ 		PCI_VENDOR_ID_VIA,
+ 		VIA_CLE266,

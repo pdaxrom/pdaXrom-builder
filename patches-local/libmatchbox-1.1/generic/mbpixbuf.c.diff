@@ -1,0 +1,21 @@
+diff -Nur libmatchbox-1.1/libmb/mbpixbuf.c libmatchbox-1.1.patched/libmb/mbpixbuf.c
+--- libmatchbox-1.1/libmb/mbpixbuf.c	2004-02-08 19:41:36.000000000 +0000
++++ libmatchbox-1.1.patched/libmb/mbpixbuf.c	2004-02-19 17:13:29.000000000 +0000
+@@ -1684,7 +1684,7 @@
+ 			  unsigned char  b)
+ { 
+   int idx;
+-  if (x > img->width || y > img->height) return;
++  if (x >= img->width || y >= img->height) return;
+ 
+   idx = 3 + img->has_alpha;
+ 
+@@ -1711,7 +1711,7 @@
+       return;
+     }
+     
+-   if (x > img->width || y > img->height) return;   
++   if (x >= img->width || y >= img->height) return;   
+               
+   alpha_composite(img->rgba[idx],   (r), (a), img->rgba[idx]);    
+   alpha_composite(img->rgba[idx+1], (g), (a), img->rgba[idx+1]);  

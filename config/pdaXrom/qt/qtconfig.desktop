@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=QtConfig
+Comment=Qt Configurator
+Exec=qtconfig
+Terminal=0
+Type=Application
+Icon=qtconfig.png
+Categories=Application;SystemSettings;Qt
+StartupNotify=False
+SingleInstance=False

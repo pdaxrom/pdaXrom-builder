@@ -1,0 +1,11 @@
+--- fontconfig/fc-lang/Makefile.in~	2004-06-30 20:07:14.000000000 +0000
++++ fontconfig/fc-lang/Makefile.in	2004-08-23 21:49:28.000000000 +0000
+@@ -492,7 +492,7 @@
+ 
+ $(TARG):$(ORTH) fc-lang $(STMPL)
+ 	rm -f $(TARG)
+-	./fc-lang -d ${srcdir} $(ORTH) < $(STMPL) > $(TARG)
++	./fc-lang.host -d ${srcdir} $(ORTH) < $(STMPL) > $(TARG)
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+ .NOEXPORT:

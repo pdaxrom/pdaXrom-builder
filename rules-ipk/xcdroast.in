@@ -1,0 +1,9 @@
+config XCDROAST
+	bool
+	prompt "xcdroast"
+	depends on ARCH_X86
+
+config XCDROAST_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XCDROAST

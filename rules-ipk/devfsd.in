@@ -1,0 +1,12 @@
+#menu    "devfsd              "
+
+config DEVFSD
+        bool
+        prompt "Compile devfsd"
+
+config DEVFSD_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on DEVFSD
+
+#endmenu

@@ -1,0 +1,18 @@
+--- ROX-Session-0.1.22/ROX-Session/src/log.c~	2004-06-03 02:00:09.000000000 +0000
++++ ROX-Session-0.1.22/ROX-Session/src/log.c	2004-06-03 02:02:04.000000000 +0000
+@@ -336,6 +336,7 @@
+ 
+ 
+ 	/* And to the popup message area... */
++/*
+ 	new = g_new(Chunk, 1);
+ 
+ 	time(&new->time);
+@@ -344,6 +345,7 @@
+ 
+ 	prune(NULL);
+ 	show();
++ */
+ }
+ 
+ static void log_own_errors(const gchar *log_domain,

@@ -1,0 +1,8 @@
+config SCITE
+	bool
+	prompt "SciTe"
+
+config SCITE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on SCITE

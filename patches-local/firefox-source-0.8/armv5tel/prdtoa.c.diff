@@ -1,0 +1,33 @@
+diff -Nur mozilla/nsprpub/pr/src/misc/prdtoa.c mozilla-patched/nsprpub/pr/src/misc/prdtoa.c
+--- mozilla/nsprpub/pr/src/misc/prdtoa.c	2003-01-07 15:30:15.000000000 +0000
++++ mozilla-patched/nsprpub/pr/src/misc/prdtoa.c	2004-02-27 13:27:16.000000000 +0000
+@@ -231,11 +231,19 @@
+ Exactly one of IEEE_8087, IEEE_MC68k, VAX, or IBM should be defined.
+ #endif
+ 
++/*
++ * Though ARM is a little endian architecture, it stores doubles using the big
++ * endian format.
++ */
++#if defined(__arm) || defined(__arm32__) || defined(__arm26__) || defined(__arm__)
++#define CPU_IS_ARM
++#endif
++
+ typedef union { double d; unsigned Long L[2]; } U;
+ 
+ #ifdef YES_ALIAS
+ #define dval(x) x
+-#ifdef IEEE_8087
++#if defined(IEEE_8087) && !defined(CPU_IS_ARM)
+ #define word0(x) ((unsigned Long *)&x)[1]
+ #define word1(x) ((unsigned Long *)&x)[0]
+ #else
+@@ -243,7 +251,7 @@
+ #define word1(x) ((unsigned Long *)&x)[1]
+ #endif
+ #else
+-#ifdef IEEE_8087
++#if defined(IEEE_8087) && !defined(CPU_IS_ARM)
+ #define word0(x) ((U*)&x)->L[1]
+ #define word1(x) ((U*)&x)->L[0]
+ #else

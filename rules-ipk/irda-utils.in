@@ -1,0 +1,12 @@
+#menu 	"irda-utils          "
+
+config IRDA-UTILS
+	bool
+	prompt "irda-utils"
+
+config IRDA-UTILS_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on IRDA-UTILS
+
+#endmenu

@@ -1,0 +1,12 @@
+diff -Nur tmake-1.13-old/lib/qws/linux-sharp-g++/tmake.conf tmake-1.13/lib/qws/linux-sharp-g++/tmake.conf
+--- tmake-1.13-old/lib/qws/linux-sharp-g++/tmake.conf	2003-08-01 04:16:38.000000000 +0000
++++ tmake-1.13/lib/qws/linux-sharp-g++/tmake.conf	2004-10-26 02:37:12.000000000 +0000
+@@ -12,7 +12,7 @@
+ TMAKE_CFLAGS		= -pipe 
+ TMAKE_CFLAGS_WARN_ON	= -Wall -W
+ TMAKE_CFLAGS_WARN_OFF	= -w
+-TMAKE_CFLAGS_RELEASE	= -O2
++TMAKE_CFLAGS_RELEASE	= -O2 -fomit-frame-pointer
+ TMAKE_CFLAGS_DEBUG	= -g
+ TMAKE_CFLAGS_SHLIB	= -fPIC
+ TMAKE_CFLAGS_YACC	= -Wno-unused -Wno-parentheses

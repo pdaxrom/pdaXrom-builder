@@ -1,0 +1,9 @@
+config NATIVE_HEADERS
+	bool
+	prompt "Header files for gcc/g++"
+	depends on NATIVE_GCC
+
+config NATIVE_HEADERS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on NATIVE_HEADERS

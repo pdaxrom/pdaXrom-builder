@@ -1,0 +1,14 @@
+diff -Nur tcl8.4.6/compat/strstr.c tcl8.4.6-patched/compat/strstr.c
+--- tcl8.4.6/compat/strstr.c	2002-01-26 01:10:08.000000000 +0000
++++ tcl8.4.6-patched/compat/strstr.c	2004-03-31 17:38:21.000000000 +0000
+@@ -33,6 +33,10 @@
+  *----------------------------------------------------------------------
+  */
+ 
++#ifndef NULL
++#define NULL 0
++#endif
++
+ char *
+ strstr(string, substring)
+     register char *string;	/* String to search. */

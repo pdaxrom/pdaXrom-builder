@@ -1,0 +1,9 @@
+config ATICORE
+	bool
+	prompt "AtiCore - ATI W100 graphics library"
+	depends on ARM_ARCH_PXA
+
+config ATICORE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on ATICORE

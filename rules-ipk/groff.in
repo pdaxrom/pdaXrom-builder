@@ -1,0 +1,8 @@
+config GROFF
+	bool
+	prompt "groff"
+
+config GROFF_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GROFF

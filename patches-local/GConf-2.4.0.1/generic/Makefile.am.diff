@@ -1,0 +1,9 @@
+--- GConf-2.4.0.1/Makefile.am~	2005-02-07 21:20:58.000000000 +0000
++++ GConf-2.4.0.1/Makefile.am	2005-02-07 21:21:10.000000000 +0000
+@@ -1,5 +1,5 @@
+ 
+-SUBDIRS = gconf backends po doc examples
++SUBDIRS = gconf backends po examples
+ DIST_SUBDIRS=tests $(SUBDIRS)
+ 
+ EXTRA_DIST=gconf.m4.in gconf.spec.in gconf.spec TODO \

@@ -1,0 +1,29 @@
+diff -Nur pygtk-2.5.3/gtk/__init__.py pygtk-2.5.3.new/gtk/__init__.py
+--- pygtk-2.5.3/gtk/__init__.py	2005-01-08 18:16:06.000000000 +0000
++++ pygtk-2.5.3.new/gtk/__init__.py	2005-02-03 15:19:42.000000000 +0000
+@@ -64,7 +64,7 @@
+         message = '%s is deprecated, use %s instead' % (oldname, newname)
+         # DeprecationWarning is imported from _gtk, so it's not the same
+         # as the one found in exceptions.
+-        _warn(message, DeprecationWarning, 2)
++        print message, DeprecationWarning, 2
+         try:
+ 	    return self.func(*args, **kwargs)
+ 	except TypeError, e:
+@@ -93,13 +93,13 @@
+ 
+ # _gobject deprecation
+ from types import ModuleType as _module
+-from warnings import warn as _warn
++#from warnings import warn as _warn
+ 
+ class _GObjectWrapper(_module):
+     _gobject = _gobject
+     def __getattr__(self, attr):
+-        _warn('gtk._gobject is deprecated, use gobject directly instead',
+-	      DeprecationWarning, 2)
++        print 'gtk._gobject is deprecated, use gobject directly instead', DeprecationWarning, 2
++	 #python sucks
+         return getattr(self._gobject, attr)
+ _gobject = _GObjectWrapper('gtk._gobject')
+ del _GObjectWrapper, _module

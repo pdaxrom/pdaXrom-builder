@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Dillo2
+Categories=Application;Network;WebBrowser;
+Comment=Lightweight GTK2 web browser
+Exec=dillo2 -g 500x400
+Terminal=0
+Type=Application
+Icon=dillo.png
+StartupNotify=True

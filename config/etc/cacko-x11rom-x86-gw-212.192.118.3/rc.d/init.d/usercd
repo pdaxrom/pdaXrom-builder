@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#
+# /etc/rc.d/init.d/S15inet - Start/Stop user scripts from bootable CD.
+#
+
+# Comment out the following exit line to enable this script.
+# exit 0
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+mount | grep '/mnt/initrd/cdrom' || exit 0
+
+case "$1" in
+
+    start)
+	msg -n "Starting user scripts:"
+	if [ -d /mnt/initrd/cdrom/scripts/S ]; then
+	    for S in /mnt/initrd/cdrom/scripts/S/* ; do
+		[ ! -f $S] && continue
+		if [ -x $S ]; then
+		    $S start
+		fi
+	    done
+	fi
+	msg
+	;;
+
+    stop)
+	msg -n "Stopping user scripts:"
+	if [ -d /mnt/initrd/cdrom/scripts/K ]; then
+	    for S in /mnt/initrd/cdrom/scripts/K/* ; do
+		[ ! -f $S] && continue
+		if [ -x $S ]; then
+		    $S stop
+		fi
+	    done
+	fi
+	msg
+	;;
+
+    restart)
+	$0 stop
+	sleep 1
+	$0 start
+	;;
+
+    *)
+	echo "Usage: $0 (start|stop|restart)"
+	exit 1
+	;;
+
+esac
+
+exit 0
+

@@ -1,0 +1,11 @@
+--- kismet/configure~	2004-10-03 19:42:19.000000000 +0000
++++ kismet/configure	2004-10-03 19:42:45.000000000 +0000
+@@ -5806,7 +5806,7 @@
+     # If we're compiling under linux and we need the wireless extentions,
+     # then we should try to look in the current kernel module build dir, too.
+     if test "$linux" = "yes"; then
+-        CPPFLAGS="$CPPFLAGS -I/lib/modules/\`uname -r\`/build/include/"
++        CPPFLAGS="$CPPFLAGS"
+     fi
+ 
+     echo "$as_me:$LINENO: checking that linux/wireless.h is what we expect" >&5

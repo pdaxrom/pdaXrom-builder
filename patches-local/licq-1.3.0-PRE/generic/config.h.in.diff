@@ -1,0 +1,12 @@
+--- licq-1.3.0-PRE/plugins/qt-gui/config.h.in~	2004-08-13 00:31:06.000000000 +0000
++++ licq-1.3.0-PRE/plugins/qt-gui/config.h.in	2004-09-18 14:55:06.000000000 +0000
+@@ -72,6 +72,9 @@
+ /* use KDE support */
+ #undef USE_KDE
+ 
++/* Use startup-notification */
++#undef USE_LIBSN
++
+ /* use X screensaver support */
+ #undef USE_SCRNSAVER
+ 

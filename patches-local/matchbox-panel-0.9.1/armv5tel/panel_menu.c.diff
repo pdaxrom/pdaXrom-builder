@@ -1,0 +1,11 @@
+diff -Nur matchbox-panel-0.8/src/panel_menu.c matchbox-panel-0.8-patched/src/panel_menu.c
+--- matchbox-panel-0.8/src/panel_menu.c	2004-02-07 14:20:26.000000000 +0000
++++ matchbox-panel-0.8-patched/src/panel_menu.c	2004-02-17 22:27:00.000000000 +0000
+@@ -163,6 +163,7 @@
+     {
+       panel->mbmenu = mb_menu_new(panel->dpy, panel->screen ); 
+       mb_menu_set_icon_size(panel->mbmenu, 16);
++      mb_menu_set_font(panel->mbmenu, MB_MSG_FONT);
+     }
+   else mb_menu_free(panel->mbmenu); /* XXX should be mb_menu_empty */
+ 

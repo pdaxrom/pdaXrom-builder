@@ -1,0 +1,8 @@
+config READLINE
+	bool
+	prompt "readline"
+
+config READLINE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on READLINE

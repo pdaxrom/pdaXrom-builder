@@ -1,0 +1,8 @@
+config NATIVE_CVS
+	bool
+	prompt "cvs"
+
+config NATIVE_CVS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on NATIVE_CVS

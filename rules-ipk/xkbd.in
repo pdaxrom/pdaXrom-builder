@@ -1,0 +1,8 @@
+config XKBD
+	bool
+	prompt "xkbd"
+
+config XKBD_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XKBD

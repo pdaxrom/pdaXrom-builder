@@ -1,0 +1,429 @@
+#
+# config/Config.in: Main menu structure definition
+# Copyright (C) Robert Schwebel <r.schwebel@pengutronix.de> 2002, 2003
+#
+
+mainmenu "Configuration"
+
+config PTXCONF
+	bool
+	default y
+	help
+	  This is the Pengutronix Distribution Build System. A better name
+	  for the Projest still has to be found.
+
+source "rules/experimental.in"
+
+############################################################################## 
+comment	"General Options ------------------    "
+##############################################################################
+
+source "rules/target.in"
+source "rules/cross-toolchain.in"
+source "rules/hosttools.in"
+
+##############################################################################
+comment "Core System ----------------------    "
+##############################################################################
+
+source "rules/os.in"
+source "rules/kernel.in"
+source "rules/kos.in"
+source "rules/libc.in"
+source "rules/libcxx.in"
+source "rules/rootfs.in"
+
+comment "Embedded linux target specific ---  "
+
+menu "Monolitic image     "
+
+##############################################################################
+comment "Core Tools ---  "
+##############################################################################
+
+
+############################################################################## 
+comment	"Disk and file ---   "
+##############################################################################
+
+menu	"Disk and file utils "
+
+source "rules/grub.in"
+source "rules/cramfs.in"
+
+endmenu
+
+############################################################################## 
+
+endmenu
+
+menu "Ipk packages        "
+
+menu "Core tools          "
+source "rules-ipk/bash.in"
+source "rules-ipk/busybox.in"
+source "rules-ipk/coreutils.in"
+source "rules-ipk/devfsd.in"
+source "rules-ipk/dhcpd.in"
+source "rules-ipk/dhcpcd.in"
+source "rules-ipk/e2fsprogs.in"
+config GLIBC_INSTALL
+	bool
+	prompt "glibc - Install in ROM"
+	depends on GLIBC
+config LIBSTDCXX_INSTALL
+	bool
+	prompt "libstdc++ - Install in ROM"
+	depends on LIBSTDCXX_SHARED
+source "rules-ipk/initscripts.in"
+source "rules-ipk/irda-utils.in"
+source "rules-ipk/modutils.in"
+source "rules-ipk/module-init-tools.in"
+source "rules-ipk/mtd.in"
+source "rules-ipk/net-tools.in"
+source "rules-ipk/netkit-base.in"
+source "rules-ipk/pcmcia-cs.in"
+source "rules-ipk/ppp.in"
+#source "rules-ipk/procps.in"
+source "rules-ipk/psmisc.in"
+source "rules-ipk/setserial.in"
+source "rules-ipk/survive.in"
+source "rules-ipk/sysvinit.in"
+source "rules-ipk/util-linux.in"
+source "rules-ipk/wireless.in"
+
+endmenu
+
+menu "Databases           "
+source "rules-ipk/gdbm.in"
+source "rules-ipk/mysql.in"
+source "rules-ipk/sqlite.in"
+endmenu
+
+menu "Desktop             "
+
+menu "Window Managers     "
+source "rules-ipk/metacity.in"
+source "rules-ipk/openbox.in"
+endmenu
+
+menu "Terminals           "
+source "rules-ipk/aterm.in"
+source "rules-ipk/rxvt-unicode.in"
+endmenu
+
+menu "ROX                 "
+source "rules-ipk/rox.in"
+source "rules-ipk/ROX-Session.in"
+source "rules-ipk/LookAndFeel.in"
+source "rules-ipk/rox-archive.in"
+source "rules-ipk/rox-edit.in"
+source "rules-ipk/rox-memo.in"
+source "rules-ipk/MIME-Editor.in"
+source "rules-ipk/Clock.in"
+#source "rules-ipk/Pager.in"
+source "rules-ipk/Battery-Status.in"
+source "rules-ipk/rox-wallpaper.in"
+endmenu
+
+menu "Matchbox            "
+source "rules-ipk/matchbox-window-manager.in"
+source "rules-ipk/matchbox-desktop.in"
+source "rules-ipk/matchbox-panel.in"
+source "rules-ipk/matchbox-pdaXrom.in"
+source "rules-ipk/mb-applet-blanker.in"
+source "rules-ipk/mb-applet-cards.in"
+source "rules-ipk/mb-applet-clock.in"
+source "rules-ipk/mb-applet-power.in"
+source "rules-ipk/mb-applet-tasks.in"
+source "rules-ipk/mb-applet-volume.in"
+source "rules-ipk/mb-applet-keyrus.in"
+source "rules-ipk/mb-start-button.in"
+endmenu
+
+menu "X11 utils           "
+#source "rules-ipk/x11rom-settings.in"
+source "rules-ipk/hot-babe.in"
+source "rules-ipk/xkbd.in"
+source "rules-ipk/xvkbd.in"
+source "rules-ipk/xkeymouse.in"
+source "rules-ipk/rotate.in"
+source "rules-ipk/eXit.in"
+endmenu
+
+menu "X11 fonts           "
+source "rules-ipk/crox-cyrillic.in"
+source "rules-ipk/x11-fonts-misc.in"
+source "rules-ipk/webfonts-part1.in"
+source "rules-ipk/ttf-bitstream-vera.in"
+endmenu
+
+source "rules-ipk/gpe-cvs.in"
+source "rules-ipk/nautilus.in"
+source "rules-ipk/qtopia-free.in"
+
+menu "Misc Settings       "
+source "rules-ipk/backlight.in"
+source "rules-ipk/datentime.in"
+#source "rules-ipk/datentime2.in"
+source "rules-ipk/inputconfig.in"
+source "rules-ipk/lanconfig.in"
+source "rules-ipk/usbdconfig.in"
+source "rules-ipk/pppsettings.in"
+source "rules-ipk/packagemanager.in"
+source "rules-ipk/pxa-overclock.in"
+endmenu
+endmenu
+
+menu "Development         "
+menu "Languages ---       "
+source "rules-ipk/bison.in"
+source "rules-ipk/native_binutils.in"
+source "rules-ipk/native_gcc.in"
+source "rules-ipk/native_headers.in"
+source "rules-ipk/flex.in"
+source "rules-ipk/gawk.in"
+source "rules-ipk/m4.in"
+source "rules-ipk/perl.in"
+source "rules-ipk/php.in"
+source "rules-ipk/python.in"
+source "rules-ipk/ruby.in"
+source "rules-ipk/tcl.in"
+source "rules-ipk/tk.in"
+endmenu
+menu "Mono ---            "
+source "rules-ipk/mono.in"
+endmenu
+source "rules-ipk/native_autoconf.in"
+source "rules-ipk/native_automake.in"
+source "rules-ipk/native_cvs.in"
+source "rules-ipk/distcc.in"
+source "rules-ipk/make.in"
+source "rules-ipk/patch.in"
+source "rules-ipk/pkgconfig.in"
+source "rules-ipk/ddd.in"
+menu "gdb                 "
+source "rules-ipk/gdb.in"
+endmenu
+#source "rules-ipk/debug.in"
+endmenu
+
+menu "Emulators           "
+source "rules-ipk/dosbox.in"
+source "rules-ipk/pyldin.in"
+source "rules-ipk/stella.in"
+source "rules-ipk/wine.in"
+endmenu
+
+menu "File managers       "
+source "rules-ipk/mc.in"
+endmenu
+
+menu "Games               "
+source "rules-ipk/bzflag.in"
+source "rules-ipk/battalion.in"
+source "rules-ipk/frozen-bubble.in"
+source "rules-ipk/gtkboard.in"
+source "rules-ipk/prboom.in"
+source "rules-ipk/quake1.in"
+source "rules-ipk/xdemineur.in"
+endmenu
+
+menu "Image Viewers       "
+#source "rules-ipk/gimageview.in"
+#source "rules-ipk/qiv.in"
+source "rules-ipk/gqview.in"
+endmenu
+
+menu "Libraries           "
+menu "Modules"
+source "rules-ipk/ovlfs.in"
+source "rules-ipk/translucency.in"
+endmenu
+source "rules-ipk/ncurses.in"
+source "rules-ipk/termcap.in"
+source "rules-ipk/AtiCore.in"
+source "rules-ipk/glib1210.in"
+source "rules-ipk/glib22.in"
+source "rules-ipk/gtk1210.in"
+source "rules-ipk/gtk22.in"
+source "rules-ipk/libgcrypt.in"
+source "rules-ipk/libid3tag.in"
+source "rules-ipk/libmad.in"
+source "rules-ipk/libiconv.in"
+source "rules-ipk/libxml2.in"
+source "rules-ipk/libxslt.in"
+source "rules-ipk/MesaLib.in"
+source "rules-ipk/popt.in"
+source "rules-ipk/qt-x11-free.in"
+source "rules-ipk/readline.in"
+source "rules-ipk/tremor.in"
+source "rules-ipk/tslib.in"
+source "rules-ipk/SDL.in"
+source "rules-ipk/zlib.in"
+endmenu
+
+menu "Multimedia          "
+menu "xmms                "
+source "rules-ipk/xmms.in"
+source "rules-ipk/dumb-xmms.in"
+source "rules-ipk/xmmsctrl.in"
+source "rules-ipk/xmms-mad.in"
+source "rules-ipk/xmmspipe.in"
+source "rules-ipk/xmms-tremor.in"
+source "rules-ipk/xmmsmplayer.in"
+endmenu
+menu "Drivers             "
+source "rules-ipk/cfxga.in"
+endmenu
+source "rules-ipk/alsa-utils.in"
+source "rules-ipk/bmp.in"
+source "rules-ipk/esound.in"
+source "rules-ipk/ffmpeg.in"
+source "rules-ipk/lame.in"
+source "rules-ipk/madplay.in"
+source "rules-ipk/mpg123.in"
+source "rules-ipk/mikmod.in"
+source "rules-ipk/MPlayer.in"
+source "rules-ipk/mixmos.in"
+source "rules-ipk/sox.in"
+source "rules-ipk/TiMidity.in"
+source "rules-ipk/vlc.in"
+source "rules-ipk/xawtv.in"
+source "rules-ipk/xdtv.in"
+endmenu
+
+menu "Network             "
+menu "Terminals           "
+source "rules-ipk/minicom.in"
+source "rules-ipk/rdesktop.in"
+endmenu
+menu "Network security    "
+source "rules-ipk/ethereal.in"
+source "rules-ipk/iproute2.in"
+source "rules-ipk/iptables.in"
+source "rules-ipk/iputils.in"
+source "rules-ipk/nmap.in"
+source "rules-ipk/openssl.in"
+source "rules-ipk/openssh.in"
+source "rules-ipk/tcpdump.in"
+endmenu
+menu "Bluetooth           "
+source "rules-ipk/bluez-utils.in"
+source "rules-ipk/bluez-sdp.in"
+source "rules-ipk/bluez-pan.in"
+source "rules-ipk/btscanner.in"
+endmenu
+menu "Wireless            "
+source "rules-ipk/kismet.in"
+endmenu
+menu "Web browsers        "
+source "rules-ipk/links.in"
+source "rules-ipk/lynx.in"
+source "rules-ipk/firefox.in"
+source "rules-ipk/minimo.in"
+source "rules-ipk/mozilla.in"
+source "rules-ipk/dillo2.in"
+source "rules-ipk/dillo-xft.in"
+#source "rules-ipk/konqueror-embedded.in"
+endmenu
+menu "Mail clients        "
+source "rules-ipk/sylpheed.in"
+source "rules-ipk/thunderbird.in"
+endmenu
+menu "Instant messenging  "
+source "rules-ipk/gaim.in"
+source "rules-ipk/licq.in"
+source "rules-ipk/xchat.in"
+endmenu
+menu "WebServers          "
+source "rules-ipk/apache.in"
+source "rules-ipk/boa.in"
+endmenu
+menu "Downloaders/p2p     "
+source "rules-ipk/aMule.in"
+source "rules-ipk/curl.in"
+source "rules-ipk/wgeta.in"
+endmenu
+menu "File systems        "
+source "rules-ipk/samba.in"
+endmenu
+source "rules-ipk/vlan.in"
+endmenu
+
+menu "Office              "
+source "rules-ipk/abiword.in"
+source "rules-ipk/JustReader.in"
+source "rules-ipk/galculator.in"
+source "rules-ipk/gimp.in"
+source "rules-ipk/gnumeric.in"
+#source "rules-ipk/gpaint.in"
+source "rules-ipk/leafpad.in"
+source "rules-ipk/tuxpaint.in"
+source "rules-ipk/scite.in"
+source "rules-ipk/xpdf.in"
+menu "PIM                 "
+source "rules-ipk/dlume.in"
+source "rules-ipk/fltdj.in"
+source "rules-ipk/kdepim.in"
+source "rules-ipk/kopi.in"
+endmenu
+endmenu
+
+menu "Utils               "
+menu "Hotplug             "
+source "rules-ipk/hotplug.in"
+source "rules-ipk/sdcard.in"
+endmenu
+menu "IrDA stuff          "
+source "rules-ipk/ircp.in"
+source "rules-ipk/openobex-apps.in"
+source "rules-ipk/obexftp.in"
+source "rules-ipk/xircp.in"
+endmenu
+menu "Archive stuffs      "
+source "rules-ipk/bzip2.in"
+source "rules-ipk/gzipa.in"
+source "rules-ipk/unrar.in"
+source "rules-ipk/tara.in"
+source "rules-ipk/zip.in"
+source "rules-ipk/unzip.in"
+endmenu
+menu "NVidia              "
+    depends on ARCH_X86
+source "rules-ipk/NVIDIA_nforce.in"
+source "rules-ipk/NVIDIA_nvaudio.in"
+endmenu
+source "rules-ipk/apmd.in"
+source "rules-ipk/cdrtools.in"
+source "rules-ipk/console-tools.in"
+source "rules-ipk/dialog.in"
+source "rules-ipk/diffutils.in"
+source "rules-ipk/eject.in"
+source "rules-ipk/file.in"
+source "rules-ipk/findutils.in"
+source "rules-ipk/gammu.in"
+source "rules-ipk/getopt.in"
+source "rules-ipk/groff.in"
+source "rules-ipk/gettext.in"
+source "rules-ipk/ugrep.in"
+source "rules-ipk/hdparm.in"
+source "rules-ipk/lilo.in"
+source "rules-ipk/mtools.in"
+source "rules-ipk/mtr.in"
+source "rules-ipk/ntp.in"
+source "rules-ipk/pciutils.in"
+source "rules-ipk/rsync.in"
+source "rules-ipk/sed.in"
+source "rules-ipk/siefs.in"
+source "rules-ipk/zoneinfo.in"
+source "rules-ipk/dosfstools.in"
+source "rules-ipk/reiser4progs.in"
+source "rules-ipk/reiserfsprogs.in"
+source "rules-ipk/usbutils.in"
+source "rules-ipk/xcdroast.in"
+endmenu
+
+source "rules-ipk/xfree430.in"
+
+endmenu

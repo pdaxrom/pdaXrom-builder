@@ -1,0 +1,9 @@
+config PAGER
+	bool
+	prompt "Pager"
+	depends on ROX
+
+config PAGER_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PAGER

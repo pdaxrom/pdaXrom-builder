@@ -1,0 +1,2 @@
+TARGET=i686-cacko-linux-gnu
+TARGET_CFLAGS="-O"

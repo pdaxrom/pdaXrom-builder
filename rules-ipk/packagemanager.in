@@ -1,0 +1,18 @@
+config PACKAGEMANAGER
+	bool
+	prompt "Package manager"
+	depends on QTOPIA-FREE2 || XFREE430
+
+config PACKAGEMANAGER_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PACKAGEMANAGER
+
+config PACKAGEMANAGER_QTOPIA-FREE2
+	bool
+	prompt "Qtopia package manager"
+	depends on PACKAGEMANAGER && QTOPIA-FREE2 && XFREE430
+
+config PACKAGEMANAGER_QTOPIA-FREE2
+	bool
+	default y if PACKAGEMANAGER && QTOPIA-FREE2 && !XFREE430

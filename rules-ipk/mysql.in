@@ -1,0 +1,8 @@
+config MYSQL
+	bool
+	prompt "mysql"
+
+config MYSQL_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on MYSQL

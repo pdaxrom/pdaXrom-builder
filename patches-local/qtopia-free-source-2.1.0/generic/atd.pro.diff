@@ -1,0 +1,11 @@
+--- qtopia/src/3rdparty/tools/atd/atd.pro~	2004-12-24 14:58:44.000000000 +0000
++++ qtopia/src/3rdparty/tools/atd/atd.pro	2004-12-24 15:26:38.000000000 +0000
+@@ -1,7 +1,7 @@
+ requires(contains(QTOPIA_ARCH,sharp))
+ 
+ TEMPLATE	= app
+-CONFIG		= singleexec
++CONFIG		+= singleexec
+ DESTDIR		= $$(QPEDIR)/bin
+ 
+ SOURCES		= atd.cpp

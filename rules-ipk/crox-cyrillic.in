@@ -1,0 +1,9 @@
+config CROX-CYRILLIC
+	bool
+	prompt "Crox KOI-8R fonts"
+	depends on XFREE430
+
+config CROX-CYRILLIC_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on CROX-CYRILLIC

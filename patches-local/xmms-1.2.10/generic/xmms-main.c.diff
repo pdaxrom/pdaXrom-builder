@@ -1,0 +1,53 @@
+--- xmms/xmms/main.c-orig	2004-05-09 19:33:05.000000000 +0100
++++ xmms/xmms/main.c	2004-05-09 20:35:03.000000000 +0100
+@@ -3212,6 +3212,8 @@
+ 	{"show-main-window", 0, NULL, 'm'},
+ 	{"version", 0, NULL, 'v'},
+ 	{"sm-client-id", 1, NULL, 'i'},
++	{"vol-up", 0, NULL, 'l'},
++	{"vol-down", 0, NULL, 'q'},
+ 	{0, 0, 0, 0}
+ };
+ 
+@@ -3263,7 +3265,7 @@
+ struct cmdlineopt {
+ 	GList *filenames;
+ 	int session;
+-	gboolean play, stop, pause, fwd, rew, play_pause;
++	gboolean play, stop, pause, fwd, rew, play_pause, louder, quieter;
+ 	gboolean enqueue, mainwin, remote;
+ 	char *previous_session_id;
+ };
+@@ -3275,7 +3277,7 @@
+ 
+ 	memset(opt, 0, sizeof(struct cmdlineopt));
+ 	opt->session = -1;
+-	while ((c = getopt_long(argc, argv, "hn:rpusfemvt", long_options, NULL)) != -1)
++	while ((c = getopt_long(argc, argv, "hn:rpusfemvtlq", long_options, NULL)) != -1)
+ 	{
+ 		switch (c)
+ 		{
+@@ -3316,6 +3318,12 @@
+ 			case 'i':
+ 				opt->previous_session_id = g_strdup(optarg);
+ 				break;
++			case 'l':
++				opt->louder = TRUE;
++				break;
++			case 'q':
++				opt->quieter = TRUE;
++				break;
+ 		}
+ 	}
+ 	for (i = optind; i < argc; i++)
+@@ -3380,6 +3388,10 @@
+ 		xmms_remote_play_pause(opt->session);
+ 	if (opt->mainwin)
+ 		xmms_remote_main_win_toggle(opt->session, TRUE);
++	if (opt->louder)
++		xmms_remote_main_volume_up(opt->session);
++	if (opt->quieter)
++		xmms_remote_main_volume_down(opt->session);
+ }
+ 
+ void segfault_handler(int sig)

@@ -1,0 +1,52 @@
+diff -Nur translucency-0.6.0/Configure translucency-0.6.0-new/Configure
+--- translucency-0.6.0/Configure	1970-01-01 00:00:00.000000000 +0000
++++ translucency-0.6.0-new/Configure	2004-10-10 21:12:50.000000000 +0000
+@@ -0,0 +1,48 @@
++#!/bin/sh
++
++CONFIG=config.new
++CONFIG_H=autoconf.h
++CONFIG_MK=config.mk
++
++LINUX=/lib/modules/`uname -r`/build
++
++arg () {
++    VALUE="`echo X"$2" | sed -e 's/^X--[a-zA-Z_]*=//'`"
++    eval $1=\"$VALUE\"
++}
++
++version () {
++    expr $1 \* 65536 + $2 \* 256 + $3
++}
++
++write_str () {
++    value=`eval echo '$'$1`
++    echo "$1"=\"$value\" >> $CONFIG
++    echo "$1=$value" >> $CONFIG_MK
++    echo "#define $1 \"$value\"" >> $CONFIG_H
++}
++
++while [ $# -gt 0 ] ; do
++    case "$1" in
++    --kernel=*)		arg LINUX $1 		;;
++    --target=*)		arg PREFIX $1		;;
++    *)			usage			;;
++    esac
++    shift
++done
++
++echo $LINUX
++
++for TAG in VERSION PATCHLEVEL SUBLEVEL EXTRAVERSION ; do
++    eval `sed -ne "/^$TAG/s/[ 	]//gp" $LINUX/Makefile`
++done
++if [ "$EXTRAVER" != "" ] ; then
++    EXTRAVERSION=$EXTRAVER
++fi
++SRC_RELEASE=$VERSION.$PATCHLEVEL.$SUBLEVEL$EXTRAVERSION
++SRC_BASE=$VERSION.$PATCHLEVEL.$SUBLEVEL
++VERSION_CODE=`version $VERSION $PATCHLEVEL $SUBLEVEL`
++#rm -rf root/lib/modules/*
++echo "The kernel source tree is version $SRC_RELEASE."
++echo "SRC_RELEASE=$SRC_RELEASE" >config.mk
++echo "KERNELDIR=$LINUX" >>config.mk

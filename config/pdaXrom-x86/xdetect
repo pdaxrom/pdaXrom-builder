@@ -1,0 +1,185 @@
+#!/bin/sh
+
+export PATH=@PTXCONF_PREFIX@/bin:/opt/sdk/bin:/root/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/X11R6/bin
+
+if [ -f /etc/X11/XF86Config ]; then
+    exit 0;
+fi
+
+analyze_argument()
+{
+   if   [ "`echo \"$1\" | egrep -i \"^[0-9]{3,4}x[0-9]{3,4}\\\$\"`" ]; then RESOL="$1"
+   elif [ "`echo \"$1\" | egrep -i \"^[0-9]{2,3}\\\$\"`" ]; then VREFRESH="$1"
+   elif [ "`echo \"$1\" | egrep -i \"guifast|box\"`" ]; then WM="box"
+   elif [ "`echo \"$1\" | egrep -i \"twm\"`" ]; then WM="twm"
+   elif [ "`echo \"$1\" | egrep -i \"kde\"`" ]; then WM="kde"
+   elif [ "`echo \"$1\" | egrep -i \"vesa|safe\"`" ]; then VESA=1
+   fi
+}
+
+# $1=number
+mouse_identifier()
+{
+   echo "Identifier  \"Mouse$1\""
+   echo "Driver      \"mouse\""
+   echo "Option      \"ZAxisMapping\" \"4 5\""
+   echo "Option      \"Buttons\" \"3\""
+   echo "Option      \"AlwaysCore\" \"true\""
+   echo "Option      \"Protocol\" \""${M_PROTO[$I]}"\""
+   echo "Option      \"Device\" \""${M_DEV[$I]}"\""
+   echo "EndSection"
+   echo ""
+   echo "Section \"InputDevice\""
+}
+
+# look into cmdline and echo value of $1 option
+# $1 = value name, case sensitive, for example livecd_subdir
+# $2 = file to use instead /proc/cmdline, optional
+#
+cmdline_value()
+{
+   CMDLINE=/proc/cmdline
+   if [ ! "$2" = "" ]; then CMDLINE="$2"; fi
+   cat "$CMDLINE" | egrep -io "(^|[[:space:]]+)$1=([^[:space:]]+)" | egrep -o "[^=]+\$" | tail -n 1
+}
+
+RESOL="1024x768"
+COLORDEPTH="16"
+HREFRESH="30-64"
+VREFRESH="60-120"
+
+HREFRESH_BOOT="`cmdline_value hrefresh`"
+VREFRESH_BOOT="`cmdline_value vrefresh`"
+COLORDEPTH_BOOT="`cmdline_value colordepth`"
+HREFRESH=${HREFRESH_BOOT:-$HREFRESH}
+VREFRESH=${VREFRESH_BOOT:-$VREFRESH}
+COLORDEPTH=${COLORDEPTH_BOOT:-$COLORDEPTH}
+
+# mouse config
+MOUSEDEV="`cmdline_value mousedev`"
+MOUSEPROTO="`cmdline_value mouseproto`"
+if cat /proc/cmdline | grep nowheelmouse 1>/dev/null ; then MOUSEPROTO="ps/2"; fi
+
+# QEMU emulate ps/2 mouse
+# fit QEMU display into 1024x768 host display :-)
+if dmesg | grep ' QEMU CD-ROM' 1>/dev/null  ; then
+    MOUSEDEV="/dev/misc/psaux"
+    MOUSEPROTO="ps/2"
+    RESOL="800x600"
+fi
+
+I=0 # temp counter start
+
+# try com1 com2 mice first (so they will be used last in XConfig)
+if [ -a /dev/ttyS1 ]; then M_DEV[$I]=/dev/ttyS1; M_PROTO[$I]="bare"; I=$(($I+1)); fi
+if [ -a /dev/ttyS0 ]; then M_DEV[$I]=/dev/ttyS0; M_PROTO[$I]="bare"; I=$(($I+1)); fi
+
+# try ps/2 mouse
+if [ -a /dev/misc/psaux ]; then M_DEV[$I]=/dev/misc/psaux; M_PROTO[$I]="imps/2"; I=$(($I+1)); fi
+
+# add all USB mice
+for INPDEV in `ls /dev/input/mouse* 2>/dev/null`; do
+ M_DEV[$I]=$INPDEV;
+ M_PROTO[$I]="imps/2";
+ I=$(($I+1));
+done
+
+# total count of all detected mice
+M_COUNT=$(($I)) # temp counter I end
+
+if [ ! "$MOUSEPROTO" = "" ]; then
+   I=0
+   M_PROTO[0]="$MOUSEPROTO"
+   M_DEV[0]="/dev/mouse"
+   M_COUNT=1
+fi
+
+if [ ! "$MOUSEDEV" = "" ]; then
+   I=0
+   M_DEV[0]=$MOUSEDEV
+   M_COUNT=1
+fi
+
+HOME="/tmp"
+
+XConfig="/etc/X11/XF86Config"
+
+/usr/X11R6/bin/XFree86 -configure 2>/dev/null
+if [ ! $? = 0 ]; then
+  echo "cannot run auto config. Try xorgconfig manually."
+  exit 1
+fi
+
+rm -f $XConfig
+
+cat $HOME/XF86Config.new | while read LINE ;
+do
+  # force X to configure mouse
+
+  if echo $LINE | grep -i Identifier | grep -i Mouse 1> /dev/null ; then
+     I=$(($M_COUNT-1))
+     while [ "$I" -ge 0 ]; do
+        echo "`mouse_identifier $I`" >>$XConfig
+	I=$(($I-1))
+     done
+     echo -n "Identifier  \"Mouse"$(($M_COUNT))"\"" >>$XConfig
+     LINE=""
+  fi
+
+  if echo $LINE | grep -i CorePointer 1>/dev/null ; then
+     I=$(($M_COUNT-1))
+     while [ "$I" -ge 0 ]; do
+        echo "InputDevice    \"Mouse$I\" \"CorePointer\"" >> $XConfig
+	I=$(($I-1))
+     done
+     LINE=""
+  fi
+
+  # remove default (usually broken) values of refresh rates
+  if echo $LINE | egrep -i "VertRefresh|HorizSync" 1>/dev/null ; then
+     LINE=""
+  fi
+  
+  echo "$LINE" >> $XConfig
+
+  if echo $LINE | grep ModulePath | grep '/usr/X11R6/lib/modules' 1> /dev/null ; then
+    echo "FontPath     \"/usr/X11R6/lib/X11/fonts/TTF/\"" >> $XConfig
+    echo "FontPath     \"/usr/X11R6/lib/X11/fonts/cyrillic/\"" >> $XConfig
+  fi
+
+#  if echo $LINE | grep -i usebios 1> /dev/null ; then
+#    # To disable blinking on some savage cards
+#    echo "Option     \"UseBIOS\" \"$USEBIOS\"" >> $XConfig
+#  fi
+
+  if echo $LINE | grep -i Section | grep -i Monitor 1> /dev/null ; then
+    # X -configure leaves out the vrefresh frequency
+    # We'll work around this.
+    echo "HorizSync    $HREFRESH" >> $XConfig
+    echo "VertRefresh  $VREFRESH" >> $XConfig
+  fi
+
+  if echo $LINE | grep -i Depth | egrep "$COLORDEPTH" 1> /dev/null ; then
+    # Screen resolution
+    echo "Modes \"$RESOL\" \"800x600\" \"640x480\"" >> $XConfig
+  fi
+
+  if echo $LINE | grep Load | grep type1 1> /dev/null ; then
+    # X -configure leaves out the freetype module.
+    # We'll work around this.
+    echo "Load  \"freetype\"" >> $XConfig
+  fi
+
+  if echo $LINE | grep -i Section | grep -i Screen 1> /dev/null ; then
+    START_LOOKING=true
+  fi
+  if [ "$START_LOOKING" = "true" ]; then
+    if echo $LINE | grep -i Monitor 1> /dev/null ; then
+      echo "DefaultDepth $COLORDEPTH" >> $XConfig
+      START_LOOKING=false
+    fi
+  fi
+
+done
+
+rm -f $HOME/XF86Config.new

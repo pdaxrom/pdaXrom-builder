@@ -1,0 +1,17 @@
+--- qt-2.3.8/src/kernel/qwsmouse_qws.cpp~	2004-10-26 13:56:32.000000000 +0000
++++ qt-2.3.8/src/kernel/qwsmouse_qws.cpp	2004-10-26 14:37:13.000000000 +0000
+@@ -72,10 +72,10 @@
+ #define QT_QWS_SL5XXX_RAW
+ #ifndef QT_QWS_CUSTOM
+ typedef struct {
+-        unsigned short pressure;
+-        unsigned short x;
+-        unsigned short y;
+-        unsigned short pad;
++       long y;
++       long x;
++       long pressure;
++       long long pad;
+ } TS_EVENT;
+ #else
+ typedef struct {

@@ -1,0 +1,53 @@
+diff -Nur gpaint-0.2/configure.in gpaint-0.2.new/configure.in
+--- gpaint-0.2/configure.in	2000-11-20 22:16:50.000000000 +0000
++++ gpaint-0.2.new/configure.in	2004-10-07 17:14:38.000000000 +0000
+@@ -5,27 +5,27 @@
+ AM_CONFIG_HEADER(config.h)
+ 
+ dnl Pick up the Gnome macros.
+-AM_ACLOCAL_INCLUDE(macros)
++#AM_ACLOCAL_INCLUDE(macros)
+ 
+-GNOME_INIT
++#GNOME_INIT
+ AC_ISC_POSIX
+ AC_PROG_CC
+ AM_PROG_CC_STDC
+ AC_HEADER_STDC
+ 
+-GNOME_COMPILE_WARNINGS
+-GNOME_X_CHECKS
++#GNOME_COMPILE_WARNINGS
++#GNOME_X_CHECKS
+ 
+ dnl Add the languages which your application supports here.
+ ALL_LINGUAS=""
+ AM_GNU_GETTEXT
+ 
+-AM_PATH_GDK_PIXBUF(0.9.0, ,AC_MSG_ERROR([Need gdk-pixbuf-0.9.0 or later!]))
++#AM_PATH_GDK_PIXBUF(0.9.0, ,AC_MSG_ERROR([Need gdk-pixbuf-0.9.0 or later!]))
+ 
+-AM_PATH_GNOME_PRINT(0.25.0, ,AC_MSG_ERROR([Need gnome-print 0.25 or later!]))
++#AM_PATH_GNOME_PRINT(0.25.0, ,AC_MSG_ERROR([Need gnome-print 0.25 or later!]))
+ 
+-EXTRA_GNOME_CFLAGS=`gnome-config --cflags gdk_pixbuf print gnomeui`
+-EXTRA_GNOME_LIBS=`gnome-config --libs gdk_pixbuf print gnomeui`
++EXTRA_GNOME_CFLAGS=`pkg-config --cflags gdk-pixbuf-2.0 libgnomeprint-2.2 libgnomeui-2.0 gtk+-2.0`
++EXTRA_GNOME_LIBS=`pkg-config --libs gdk-pixbuf-2.0 libgnomeprint-2.2 libgnomeui-2.0 gtk+-2.0`
+ AC_SUBST(EXTRA_GNOME_CFLAGS)
+ AC_SUBST(EXTRA_GNOME_LIBS)
+ 
+@@ -38,12 +38,11 @@
+ fi
+ 
+ dnl Subst PACKAGE_PIXMAPS_DIR.
+-PACKAGE_PIXMAPS_DIR="`gnome-config --datadir`/pixmaps/${PACKAGE}"
++PACKAGE_PIXMAPS_DIR="${prefix}/${DATADIRNAME}/pixmaps/${PACKAGE}"
+ AC_SUBST(PACKAGE_PIXMAPS_DIR)
+ 
+ AC_OUTPUT([
+ Makefile
+-macros/Makefile
+ src/Makefile
+ intl/Makefile
+ po/Makefile.in

@@ -1,0 +1,8 @@
+config NVIDIA_NVAUDIO
+	bool
+	prompt "NVIDIA NForce audiomixer"
+
+config NVIDIA_NVAUDIO_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on NVIDIA_NVAUDIO

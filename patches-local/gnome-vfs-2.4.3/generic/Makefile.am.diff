@@ -1,0 +1,11 @@
+--- gnome-vfs/Makefile.am~	2005-02-07 21:28:04.000000000 +0000
++++ gnome-vfs/Makefile.am	2005-02-07 21:28:55.000000000 +0000
+@@ -4,8 +4,6 @@
+ 	libgnomevfs				\
+ 	modules					\
+ 	schemas					\
+-	devel-docs				\
+-	doc					\
+ 	programs				\
+ 	test					\
+ 	monikers				\

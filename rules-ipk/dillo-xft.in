@@ -1,0 +1,8 @@
+config DILLO-XFT
+	bool
+	prompt "dillo-xft"
+
+config DILLO-XFT_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on DILLO-XFT

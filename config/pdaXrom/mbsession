@@ -1,0 +1,58 @@
+#!/bin/sh
+#
+# Very simple session manager for matchbox tools
+#
+
+# Uncomment below to enable parsing of debian menu entrys
+# export MB_USE_DEB_MENUS=1 
+
+if [ -e $HOME/.matchbox/session ]
+then
+    exec $HOME/.matchbox/session
+fi
+
+if [ -e /etc/matchbox/session ]
+then
+    exec /etc/matchbox/session
+fi
+
+if [ ! -d $HOME/Choices/common ]; then
+    mkdir -p $HOME/Choices/common
+fi
+
+if [ -f $HOME/Choices/common/backlight ]; then
+    setfl `cat $HOME/Choices/common/backlight`
+fi
+
+if [ -f $HOME/Choices/common/screenoff ]; then
+    xset s `cat $HOME/Choices/common/screenoff`
+else
+    xset s 180
+fi
+
+if [ -f $HOME/Choices/common/suspend ]; then
+    xset dpms 0 0 `cat $HOME/Choices/common/suspend`
+else
+    xset dpms 0 0 2400
+fi
+
+xmodmap /etc/X11/kb/corgi.xmodmap
+
+# Default files to run if $HOME/.matchbox/session or /etc/matchbox/session
+# dont exist. 
+
+if [ -f $HOME/.matchbox/mb-desktop-background ]; then
+    MBBGND=`cat $HOME/.matchbox/mb-desktop-background`
+else
+    MBBGND=""
+fi
+
+if [ -f $HOME/.matchbox/mb-panel-orientation ]; then
+    MBORIENT=`cat $HOME/.matchbox/mb-panel-orientation`
+else
+    MBORIENT="--orientation south"
+fi
+
+matchbox-desktop --icon-size 48 --font 'Sans 14' --titlefont 'Sans 16' $MBBGND &
+matchbox-panel --no-flip $MBORIENT &
+openbox

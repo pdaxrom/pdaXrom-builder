@@ -1,0 +1,9 @@
+config DUMB-XMMS
+	bool
+	prompt "xmms-dumb"
+	depends on XMMS && LIBMAD && LIBID3TAG
+
+config DUMB-XMMS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on DUMB-XMMS

@@ -1,0 +1,4 @@
+KERNELCONFIG=$PWD/arm.config
+TARGET=arm-cacko-linux
+GCC_EXTRA_CONFIG="--with-cpu=strongarm --enable-cxx-flags=-mcpu=strongarm"
+TARGET_CFLAGS="-O"

@@ -1,0 +1,11 @@
+--- qtopia-free-1.7.1/src/libraries/qtopia/qpeapplication.cpp~	2004-10-25 18:30:43.000000000 +0000
++++ qtopia-free-1.7.1/src/libraries/qtopia/qpeapplication.cpp	2004-10-25 18:30:53.000000000 +0000
+@@ -673,7 +673,7 @@
+     if ( !i1 && !i2 && !i3 ){
+ 	QWSServer::setScreenSaverInterval(0);
+     }else{
+-#if QT_VERSION > 237
++#if QT_VERSION > 238
+ 	QWSServer::setScreenSaverIntervals(v, QPEScreenSaver::eventBlockLevel);
+ #else
+ 	QWSServer::setScreenSaverIntervals(v);

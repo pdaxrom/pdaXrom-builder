@@ -1,0 +1,11 @@
+--- qtopia/src/libraries/qtopia/custom-linux-sharp-g++.h~	2004-12-26 13:14:39.000000000 +0000
++++ qtopia/src/libraries/qtopia/custom-linux-sharp-g++.h	2004-12-26 13:14:49.000000000 +0000
+@@ -108,7 +108,7 @@
+ }
+ 
+ #define QPE_HAVE_MEMALERTER
+-#define QPE_LAZY_APPLICATION_SHUTDOWN
++//#define QPE_LAZY_APPLICATION_SHUTDOWN
+ 
+ #define QPE_MEMALERTER_IMPL \
+ static void sig_handler(int sig) \

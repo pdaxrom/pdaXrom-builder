@@ -1,0 +1,10 @@
+--- net-tools/lib/inet_sr.c~	2004-09-21 16:39:17.000000000 +0000
++++ net-tools/lib/inet_sr.c	2004-09-21 16:39:21.000000000 +0000
+@@ -104,7 +104,6 @@
+        isnet = 1; break;
+     case 2:
+        isnet = 0; break;
+-    default:
+     }
+ 
+     /* Fill in the other fields. */

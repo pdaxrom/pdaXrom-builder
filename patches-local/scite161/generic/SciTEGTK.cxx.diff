@@ -1,0 +1,23 @@
+--- scite/gtk/SciTEGTK.cxx~	2004-05-29 11:25:03.000000000 +0000
++++ scite/gtk/SciTEGTK.cxx	2004-05-30 22:00:39.000000000 +0000
+@@ -66,9 +66,11 @@
+ #endif
+ #endif
+ 
++/*
+ #if GTK_MAJOR_VERSION >= 2 && GTK_MINOR_VERSION >= 4
+ #define USE_FILE_CHOOSER
+ #endif
++ */
+ 
+ #define MB_ABOUTBOX	0x100000L
+ 
+@@ -492,7 +494,7 @@
+ 	itemFactory = 0;
+ 
+ 	fileSelectorWidth = 580;
+-	fileSelectorHeight = 480;
++	fileSelectorHeight = 440;
+ 
+ 	// Fullscreen handling
+ 	fullScreen = false;

@@ -1,0 +1,20 @@
+--- Clock/src/configure.in~	2004-04-10 12:08:19.000000000 +0000
++++ Clock/src/configure.in	2004-05-31 17:52:03.000000000 +0000
+@@ -57,6 +57,7 @@
+ ROX_REQUIRE(gtk+-2.0, 2.0.1)
+ ROX_REQUIRE(glib-2.0, 2.0.3)
+ ROX_REQUIRE(libxml-2.0, 2.4.0)
++ROX_REQUIRE(ROX-CLib, 2.1.0)
+ 
+ dnl Checks for header files.
+ AC_PATH_X
+@@ -68,9 +69,6 @@
+ dnl Checks for library functions.
+ AC_CHECK_FUNCS(setlocale fstat stat bindtextdomain gettext)
+ 
+-dnl Check for ROX-CLib and version
+-ROX_CLIB(2, 1, 0)
+-
+ dnl Is altzone defined in <time.h> ?
+ AC_MSG_CHECKING(for altzone)
+ AC_TRY_LINK(

@@ -1,0 +1,8 @@
+config FILE
+	bool
+	prompt "file"
+
+config FILE_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on FILE

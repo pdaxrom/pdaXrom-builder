@@ -1,0 +1,8 @@
+--- Makefile.am~	2004-12-21 02:20:15.000000000 +0000
++++ Makefile.am	2004-12-21 02:20:24.000000000 +0000
+@@ -1,4 +1,4 @@
+-SUBDIRS = . po src plugins icons templates doc schemas
++SUBDIRS = . po src plugins icons templates schemas
+ # automake does not like subdirs that are not directly below
+ #if WITH_WIN32
+ #  SUBDIRS += src/cut-n-paste-code/goffice/graph/plugins

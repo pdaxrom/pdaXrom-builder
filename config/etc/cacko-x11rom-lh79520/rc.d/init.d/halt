@@ -1,0 +1,64 @@
+#!/bin/ash
+#
+# Finaiize Unmount and Rebbot/Halt
+
+# Set the path.
+PATH=/sbin:/bin
+
+# See how we were called
+case "$0" in
+	*halt)
+		message="The system is halted"
+		command="/sbin/halt"
+		;;
+	*poweroff)
+		message="The system is powered off"
+		command="/sbin/poweroff"
+		;;
+	*reboot)
+		message="Rebooting the system..."
+		command="/sbin/reboot"
+		;;
+	*)
+		echo "call me as '*halt' or '*poweroff' or '*reboot'"
+		exit 1
+		;;
+esac
+
+# Write to wtmp file before unmounting /var
+halt -w
+
+# Sync the system clock.
+sltime -set
+
+# Turn off swap, then unmount file systems.
+swapoff -a
+
+# Unmount
+sig=
+retry=3
+remaining=`cat /proc/mounts | sed -e '/^none/D;/\/dev\/root/D;/\/var/D;/\/dev/D;/\/home/D;/proc/D;/loopfs/D;s/[0-9a-zA-Z\:\/\(\)]* */\2/;s/ .*//'`
+while [ -n "$remaining" -a "$retry" -gt 0 ]
+do
+	umount -a -f
+	sleep 2
+	remaining=`cat /proc/mounts | sed -e '/^none/D;/\/dev\/root/D;/\/var/D;/\/dev/D;/\/home/D;/proc/D;/loopfs/D;s/[0-9a-zA-Z\:\/\(\)]* */\2/;s/ .*//'`
+	[ -z "$remaning" ] && break
+	fuser -k -m $sig $remaining >/dev/null
+	sleep 3
+	retry=$(($retry-1))
+	sig=-9
+done
+
+# Remount read only anything that's left mounted
+for list in `mount | egrep '(ext2 | minix | vfat)' |sed -e 's/.* on //;s/ .*//'`
+do
+	mount -n -o ro,remount $list
+done
+
+umount /proc
+
+# Now halt or reboot
+echo "$message"
+sleep 5
+exec $command -nf

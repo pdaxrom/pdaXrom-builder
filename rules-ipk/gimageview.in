@@ -1,0 +1,8 @@
+config GIMAGEVIEW
+	bool
+	prompt "gimageview"
+
+config GIMAGEVIEW_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GIMAGEVIEW

@@ -1,0 +1,16 @@
+0f                  02Welcome to the pdaX86 CD!0f
+
+       0epdaX860f is a small 0eGNU/Linux0f distribution that contains only
+        the software to play most of the office, audio/video files around and
+	0epdaXrom0f crossplatform development.
+
+          To get a more recent version of this software (if any) go to
+
+                           01http://www.pdaXrom.org/0f
+
+For booting 0epdaX860f press enter, if you want boot it in the RAM, enter 0epdaX86ram0f.
+For running from CD only, enter 0epdaX86cd0f. On default, system will running from
+RAM, if it in 3 times bigger than linux image size. For disable looking user settings on local
+drives enter 0epdaX86save0f.
+
+

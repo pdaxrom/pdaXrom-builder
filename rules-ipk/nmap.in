@@ -1,0 +1,13 @@
+config NMAP
+	bool
+	prompt "nmap"
+
+config NMAP_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on NMAP
+
+config NMAP_INSTALL_NMAPFE
+	bool
+	prompt "Install nmapfe in ROM"
+	depends on NMAP_INSTALL

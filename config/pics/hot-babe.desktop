@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Hot-Babe
+Comment=Hot-babe is a small graphical utility which displays the system activity in a very special way.
+Exec=hot-babe -d 400 -i
+Terminal=0
+Type=Application
+Icon=hot-babe.png
+Categories=Applications
+StartupNotify=False
+SingleInstance=False

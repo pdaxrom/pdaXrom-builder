@@ -1,0 +1,8 @@
+config ATERM
+	bool
+	prompt "aterm"
+
+config ATERM_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on ATERM

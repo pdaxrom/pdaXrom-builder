@@ -1,0 +1,82 @@
+#!/bin/sh
+
+. /etc/rc.d/init.d/functions
+
+# Local network card
+INTMAC=00:20:ED:8C:0D:6F
+# External network card
+EXTMAC=00:02:44:20:9C:0F
+
+check_mac() {
+    local chk=""
+    local dev=""
+    for dev in eth0 eth1 eth2 eth3 eth4 eth5 eth6 eth7; do
+	chk=`ifconfig "$dev" | grep $1`
+	if [ ! "x$chk" = "x" ]; then 
+	    echo "$dev"
+	    return
+	fi
+    done
+    echo ""
+}
+
+ifconfig_mac() {
+    local dev=`check_mac $1`
+    if [ ! "x$dev" = "" ]; then
+	echo "MAC $1 = $dev"
+	/sbin/ifconfig "$dev" $2
+    else
+	echo "Unknown MAC $1!"
+    fi
+}
+
+route_mac() {
+    local dev=`check_mac $2`
+    if [ ! "x$dev" = "" ]; then
+	echo "MAC $2 = $dev"
+	/sbin/route $1 "$dev"
+    else
+	echo "Unknown MAC $2!"
+    fi
+}
+
+dhcpd_mac() {
+    local dev=`check_mac $1`
+    if [ ! "x$dev" = "" ]; then
+	echo "MAC $1 = $dev"
+	/usr/sbin/dhcpd "$dev"
+    else
+	echo "Unknown MAC $1!"
+    fi
+}
+
+case "$1" in
+  start)
+    /sbin/modprobe ipip
+    /sbin/ifconfig lo 127.0.0.1
+    /sbin/route add -net 127.0.0.0 netmask 255.0.0.0 lo
+    
+    ifconfig_mac "$INTMAC" "inet 212.192.118.3 broadcast 212.192.118.255 netmask 255.255.255.0"
+    ifconfig_mac "$EXTMAC" "inet 192.168.52.10 broadcast 192.168.52.11 netmask 255.255.255.252"
+    
+    route_mac "add -net 212.192.119.0 netmask 255.255.255.0" "$INTMAC"
+    /sbin/route add -net 169.254.0.0  netmask 255.255.0.0 mbnet
+    
+    /etc/rc.d/init.d/tunnel start
+    dhcpd_mac "$INTMAC"
+    ;;
+  stop)
+    /etc/rc.d/init.d/tunnel stop
+    /sbin/route del -net 212.192.119.0
+    /sbin/route del -net 169.254.0.0
+    ;;
+  restart|reload)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|restart|reload}"
+    exit 1
+esac
+ 
+exit 0

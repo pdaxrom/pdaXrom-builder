@@ -1,0 +1,11 @@
+--- nx-X11/config/cf/host.def~	2004-10-03 22:39:42.000000000 +0000
++++ nx-X11/config/cf/host.def	2004-10-03 22:41:31.000000000 +0000
+@@ -44,6 +44,8 @@
+  *
+ */
+ 
++#define CrossCompiling             YES
++
+ #define BuildFonts NO
+ 
+ #if defined(LinuxArchitecture) && !defined(NXZaurusXServer) && !defined(NXiPAQXServer)

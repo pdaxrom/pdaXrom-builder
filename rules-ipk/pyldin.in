@@ -1,0 +1,8 @@
+config PYLDIN
+	bool
+	prompt "Pyldin-601"
+
+config PYLDIN_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PYLDIN

@@ -1,0 +1,115 @@
+diff -Nur matchbox-panel-0.8/src/panel.c matchbox-panel-0.8-patched/src/panel.c
+--- matchbox-panel-0.8/src/panel.c	2004-02-03 15:01:39.000000000 +0000
++++ matchbox-panel-0.8-patched/src/panel.c	2004-04-06 01:53:34.000000000 +0000
+@@ -1070,54 +1070,29 @@
+ 		  DBG("%s() **** HAD ROTATION ***\n", __func__);
+ 		  break;
+ 		}	 
+-     
+ 	      if (an_event.xconfigure.window == panel->win)
+ 		{
+ 		  DBG("%s(): configureNotify on panel\n", __func__);
+-		  /* These can be confused by a flip */
+-		  if (an_event.xconfigure.send_event)
+-		    break;
+ 
+ 		  if (panel->w != an_event.xconfigure.width
+ 		      || panel->h != an_event.xconfigure.height)
+ 		    {
+ 		      int diff = 0;
+ 		      MBPanelApp *papp = NULL;
+-
+-		      if (panel->ignore_next_config)
+-			{
+-			  panel->ignore_next_config = False;
+-			  break;
+-			}
++		      int dpy_w, dpy_h;
++		      XWindowAttributes root_attr;
++			  
++		      XGetWindowAttributes(panel->dpy, 
++					    panel->win_root, 
++					    &root_attr);
++			  
++		      dpy_w = root_attr.width;
++		      dpy_h = root_attr.height;
+ 
+ 		      if (panel->use_flip && had_rotation) 
+ 			{
+-			  /* Flip if are length is changed 
+-			     XXX a little hacky XXXX
+-			  */
+-			  int dpy_w, dpy_h;
+-			  XWindowAttributes root_attr;
+-			  
+-			  XGetWindowAttributes(panel->dpy, 
+-					       panel->win_root, 
+-					       &root_attr);
+-			  
+-			  dpy_w = root_attr.width;
+-			  dpy_h = root_attr.height;
+-			  
+ 			  had_rotation = False;
+ 
+-			  if ((PANEL_IS_VERTICAL(panel)
+-			       && (an_event.xconfigure.width == panel->w)
+-			       )
+-			      ||
+-			      (!PANEL_IS_VERTICAL(panel)
+-			       && (an_event.xconfigure.height == panel->h)
+-			       /* && (an_event.xconfigure.width  == dpy_w) 
+-				  && dpy_w != panel->w */ )
+-			      )
+-			    {
+-
+ 			      DBG("%s() flipping ....\n", __func__);
+ 
+ 			      panel->ignore_next_config = True;
+@@ -1141,28 +1116,28 @@
+ 							   dpy_w, dpy_h);
+ 				  break;
+ 				}
+-			      break;
++				break;
++			} else {
++			    if (PANEL_IS_VERTICAL(panel))
++			    {
++			      diff = an_event.xconfigure.height - panel->h;
++			      panel->h = an_event.xconfigure.height;
++			      if (an_event.xconfigure.y > panel->y)
++			        papp = panel->apps_start_head;
++			      else
++			        papp = panel->apps_end_head;
++			    } else {			      
++			      diff = an_event.xconfigure.width - panel->w;
++			      panel->w = an_event.xconfigure.width;
++			      if (an_event.xconfigure.x > panel->x)
++			        papp = panel->apps_start_head;
++			      else
++			        papp = panel->apps_end_head;
+ 			    }
++			    	panel_change_orientation(panel, panel->orientation,
++			    				   dpy_w, dpy_h);
+ 			}
+ 
+-		      if (PANEL_IS_VERTICAL(panel))
+-			{
+-			  diff = an_event.xconfigure.height - panel->h;
+-			  if (an_event.xconfigure.y > panel->y)
+-			    papp = panel->apps_start_head;
+-			  else
+-			    papp = panel->apps_end_head;
+-			} else {			      
+-			  diff = an_event.xconfigure.width - panel->w;
+-			  if (an_event.xconfigure.x > panel->x)
+-			    papp = panel->apps_start_head;
+-			  else
+-			    papp = panel->apps_end_head;
+-			}
+-
+-		      panel->w = an_event.xconfigure.width;
+-		      panel->h = an_event.xconfigure.height;
+-
+ 		      panel_apps_nudge (panel, papp, diff); 
+ 
+ 		      /* Nake sure bg gets updated */

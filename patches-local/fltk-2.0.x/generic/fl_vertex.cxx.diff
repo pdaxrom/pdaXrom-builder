@@ -1,0 +1,11 @@
+--- fltk-2.0.x/src/fl_vertex.cxx~	2004-06-17 00:39:09.000000000 +0000
++++ fltk-2.0.x/src/fl_vertex.cxx	2004-06-17 00:39:15.000000000 +0000
+@@ -531,7 +531,7 @@
+   closepath();
+   cairo_arc(cc,x,y,r,0,M_PI*2);
+   closepath();
+-#elif
++#else
+   transform(x,y);
+   float rt = r * sqrtf(fabsf(m.a*m.d-m.b*m.c));
+   circle_w = circle_h = int(rt*2 + .5);

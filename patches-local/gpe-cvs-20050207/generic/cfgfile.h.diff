@@ -1,0 +1,13 @@
+--- gpe/base/gpe-conf/cfgfile.h~	2005-02-07 12:22:02.000000000 +0000
++++ gpe/base/gpe-conf/cfgfile.h	2005-02-07 12:25:00.000000000 +0000
+@@ -4,8 +4,8 @@
+ #include <gtk/gtk.h>
+ 
+ 
+-#define NET_CONFIGFILE "/etc/network/interfaces"
+-#define NET_NEWFILE "/tmp/interfaces"
++#define NET_CONFIGFILE "/etc/sysconfig/network-interfaces"
++#define NET_NEWFILE "/tmp/network-interfaces"
+ 
+ 
+ #define Saddress 	1

@@ -1,0 +1,8 @@
+config HOTPLUG
+	bool
+	prompt "hotplug"
+
+config HOTPLUG_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on HOTPLUG

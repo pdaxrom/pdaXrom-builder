@@ -1,0 +1,9 @@
+--- gpe/base/gpe-word/gpe-word.desktop~	2005-02-07 04:09:24.000000000 +0000
++++ gpe/base/gpe-word/gpe-word.desktop	2005-02-07 04:09:30.000000000 +0000
+@@ -5,5 +5,5 @@
+ Terminal=0
+ Type=Application
+ Icon=gpe-word.png
+-Categories=Application;PIM;GPE
++Categories=Application;Office;WordProcessor;
+ StartupNotify=True

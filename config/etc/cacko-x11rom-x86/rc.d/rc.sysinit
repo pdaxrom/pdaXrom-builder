@@ -1,0 +1,253 @@
+#!/bin/bash
+
+
+# Set the path
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+
+if [ -r /dev/.devfsd ]	;    then
+  if [ -x /sbin/devfsd ] ;    then
+    echo "Starting devfs daemon: /sbin/devfsd /dev"
+    /sbin/devfsd /dev
+  fi
+fi
+
+#if [ -f /lib/modules/`uname -r`/kernel/fs/translucency.o ]; then
+#    mount -n -t tmpfs none /tmp
+#    mount -n -t proc none /proc
+#    mkdir -p /tmp/trans
+#
+#    insmod /lib/modules/`uname -r`/kernel/fs/translucency.o
+#    sleep 1
+#    echo "/ -> /tmp/trans" > /proc/sys/translucency/0
+#fi
+
+mount -n -t proc none /proc
+
+if [ ! -z "`cat /proc/cmdline | grep "initrd=initrd"`" ]; then
+
+    mkdir -p /dev/lazydisk
+
+    USERHD=""
+
+    if [ -z "`cat /proc/cmdline | grep "LABEL=pdaX86save"`" ]; then
+      # search user settings
+      for dev in `fdisk -l | grep '^/dev/' | grep -v 'Linux swap' | cut -d ' ' -f 1`; do
+	mount -n $dev /dev/lazydisk >/dev/null 2>/dev/null || continue
+	if [ -f /dev/lazydisk/.pdax86.dsk ]; then
+	    mount -n -o loop /dev/lazydisk/.pdax86.dsk /var
+	    USERHD=$dev
+	    break
+	elif [ -d /dev/lazydisk/.pdaX86 ]; then
+	    mount -n --bind /dev/lazydisk/.pdaX86 /var
+	    USERHD=$dev
+	    break
+	fi
+	umount /dev/lazydisk
+      done
+    fi
+    test "$USERHD" = "" && mount -n -t tmpfs none /var
+    if [ ! -d /var/etc ]; then
+        mkdir -p /var/etc
+        mkdir -p /var/home
+        mkdir -p /var/mnt
+        mkdir -p /var/tmp
+        mkdir -p /var/modules
+        cp -a /lib/modules /var
+        chmod -R +w /var/modules 2>/dev/null >/dev/null
+        /bin/tar -C /var --no-same-owner -xmf /root/.etc_default.tar
+        /bin/tar -C /var --no-same-owner -xmf /root/.home_default.tar
+        /bin/tar -C /    --no-same-owner -xmf /root/.var_default.tar
+        chmod 777 /var/tmp
+    fi
+
+    mount --bind /var/etc		/etc
+    mount --bind /var/home		/home
+    mount --bind /var/modules		/lib/modules
+    mount --bind /var/mnt		/mnt
+    mount --bind /var/tmp		/tmp
+
+    rm -rf /mnt/*
+
+    if [ ! -f /etc/fstab.orig ]; then
+	cp /etc/fstab /etc/fstab.orig
+    else
+	rm -f /etc/fstab
+	cp /etc/fstab.orig /etc/fstab
+    fi
+
+    # add hd
+    COUNT=0
+    for dev in `fdisk -l | grep '^/dev/' | grep -v 'Linux swap' | cut -d ' ' -f 1`; do
+	if [ $COUNT -eq 0 ]; then
+	    if [ "$USERHD" = "$dev" ]; then
+		ln -sf /dev/lazydisk /mnt/hd
+		echo "$dev       /dev/lazydisk	auto	defaults	1   1" >>/etc/fstab
+	    else
+		echo "$dev       /mnt/hd	auto	defaults	0   0" >>/etc/fstab
+		mkdir -p /mnt/hd
+	        mount $dev /mnt/hd >/dev/null 2>/dev/null || continue
+	    fi
+	else
+	    if [ "$USERHD" = "$dev" ]; then
+		ln -sf /dev/lazydisk /mnt/hd$COUNT
+		echo "$dev       /dev/lazydisk	auto	defaults	1   1" >>/etc/fstab
+	    else
+	        echo "$dev       /mnt/hd$COUNT	auto	defaults	0   0" >>/etc/fstab
+	        mkdir -p "/mnt/hd$COUNT"
+		mount $dev /mnt/hd$COUNT >/dev/null 2>/dev/null || continue
+	    fi
+	fi
+	COUNT=$((COUNT + 1))
+    done
+
+    # add swap
+    for dev in `/sbin/fdisk -l | grep 'Linux swap' | cut -d ' ' -f 1`; do
+	echo "Found swap on $dev, turn it on."
+	echo "$dev       swap	swap	defaults	0   0" >>/etc/fstab
+	/sbin/swapon "$dev" && break
+    done
+
+    # add cdroms
+    COUNT=0
+    for cdrom in /dev/cdroms/*; do
+	if [ $COUNT -eq 0 ]; then
+	    echo "$cdrom       /mnt/cdrom       iso9660     ro,users,noauto,unhide,iocharset=koi8-r  0   0" >>/etc/fstab
+	    mkdir -p /mnt/cdrom
+	else
+	    echo "$cdrom       /mnt/cdrom$COUNT       iso9660     ro,users,noauto,unhide,iocharset=koi8-r  0   0" >>/etc/fstab
+	    mkdir -p "/mnt/cdrom$COUNT"
+	fi
+	COUNT=$((COUNT + 1))
+    done
+fi
+#fix
+#chmod +s /bin/busybox
+#chmod +s /bin/ping
+
+# set time
+#sltime
+
+HOSTNAME=`/bin/hostname`
+
+# Read in config data.
+if [ -f /etc/sysconfig/network ]; then
+    . /etc/sysconfig/network
+else
+    NETWORKING=no
+fi
+
+if [ -z "$HOSTNAME" -o "$HOSTNAME" = "(none)" ]; then
+    HOSTNAME=cacko
+fi
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Print a banner. ;)
+if [ -z "$SILENT" ] ; then
+    echo -en $"   Welcome to "
+    [ "$BOOTUP" != "serial" ] && echo -en $"\\033[1;31m"
+    echo -en $"SHARP"
+    [ "$BOOTUP" != "serial" ] && echo -en $"\\033[0;39m"
+    echo $" Zaurus"
+fi
+
+#mount -w /proc /proc -t proc
+if [ ! -f /etc/rc.d/rc.rofilesys -o ! -x /etc/rc.d/rc.rofilesys ];then   
+    #if [ ! -z "`cat /proc/cmdline | grep "root=/dev/cdroms/"`" ]; then
+	action "Mounting filesystem:" mount -o remount -w /
+    #fi
+else
+    #action "Starting filesystem:" /etc/rc.d/rc.rofilesys
+    . /etc/rc.d/rc.rofilesys
+fi
+
+# rebuild cache for shared libraries, don't update links.
+if [ -x /sbin/ldconfig ]; then
+    /sbin/ldconfig -X
+fi
+
+# check /etc/HOSTNAME
+if [ -f /etc/HOSTNAME ]; then
+    HOSTNAME=`cat /etc/HOSTNAME`
+fi
+
+# setup for lo loopback device
+action "Set loopback device:" ifconfig lo 127.0.0.1 netmask 255.0.0.0
+
+# set hostname
+action $"Hostname: ${HOSTNAME}" /bin/hostname $HOSTNAME
+
+# module dependency
+if [ -x /sbin/depmod ]; then
+    action "Module dependencies:" depmod -a
+fi
+
+# Load device specific information
+#if [ -x /sbin/modprobe ]; then
+#    action "Loading devinfo:" modprobe devinfo
+#fi
+
+# Run all rc.* files apart rc.local in /etc/rc.d
+cd /etc/rc.d
+for I in rc.modules rc.serial;do
+  if [ -f ./$I ];then
+    if [ -x ./$I ];then
+      ./$I
+    fi
+  fi
+done
+
+action "Mounting local FS:" mount -a -t nonfs
+#action "Mounting remote FS:" mount -a -t nfs
+
+## Finish by running rc.local
+#cd /etc/rc.d
+#if [ -f "./rc.local" ];then
+#  if [ -x "./rc.local" ];then
+#    echo "*** Running rc.local"
+#    ./rc.local
+#  fi
+#fi
+
+# /var clean up
+for f in /var/lock/* /var/run/*; do
+    if test -d "$f" ; then
+	rm -f $f/*
+    else
+	rm -f $f
+    fi
+done
+
+# utmp clean up
+>/var/run/utmp
+touch /var/log/wtmp
+chgrp utmp /var/run/utmp /var/log/wtmp
+chmod 0664 /var/run/utmp /var/log/wtmp
+
+# save dmesg
+dmesg > /var/log/dmesg
+/sbin/syslogd
+
+# reconfiguring offline installed packages
+
+if [ ! -f /etc/.ipks_configured ]; then
+    for FILE in /usr/lib/ipkg/info/*.postinst ; do
+	echo "Configuring $FILE"
+	$FILE configure
+	rm -f $FILE 2>/dev/null 1>/dev/null
+    done
+fi
+touch /etc/.ipks_configured
+
+if [ -f /usr/bin/lightnpower.py ]; then
+    HOME=/home/root /usr/bin/lightnpower.py --setbackonly
+fi
+
+if [ -f /home/root/zgcc-...img ]; then
+    if [ ! -d /opt/i686/3.3.2 ]; then
+	mkdir -p /opt/i686/3.3.2
+    fi
+    mount -o loop /home/root/zgcc-...img /opt/i686/3.3.2
+fi

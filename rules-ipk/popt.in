@@ -1,0 +1,8 @@
+config POPT
+	bool
+	prompt "popt"
+
+config POPT_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on POPT

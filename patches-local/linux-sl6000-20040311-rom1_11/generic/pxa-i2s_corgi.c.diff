@@ -1,0 +1,23 @@
+diff -Nur linux/drivers/sound/pxa-i2s_corgi.c linux-new/drivers/sound/pxa-i2s_corgi.c
+--- linux/drivers/sound/pxa-i2s_corgi.c	2003-08-04 03:24:09.000000000 +0000
++++ linux-new/drivers/sound/pxa-i2s_corgi.c	2004-10-29 16:00:55.000000000 +0000
+@@ -21,6 +21,7 @@
+  *
+  * Change Log
+  *	16-Jan-2003 SHARP sleep_on -> interruptible_sleep_on
++ *	25-Jul-2003 IKM adds support for sound mixer source read/write
+  *
+  */
+ #include <linux/init.h>
+@@ -2902,7 +2903,10 @@
+     CorgiSetGain(data);
+   case SOUND_MIXER_READ_MIC:
+     return IOCTL_OUT(arg, CorgiGetGain());
+-
++  case SOUND_MIXER_READ_RECSRC:
++    return IOCTL_OUT( arg, SOUND_MASK_MIC );
++  case SOUND_MIXER_WRITE_RECSRC:
++    return IOCTL_OUT( arg, 0 );
+   }
+ 
+   return -EINVAL;

@@ -1,0 +1,18 @@
+diff -urN xkbd-0.8.15/src/xkbd.c xkbd-0.8.15-no-minsize/src/xkbd.c
+--- xkbd-0.8.15/src/xkbd.c	2003-09-29 19:29:35.000000000 +0200
++++ xkbd-0.8.15-no-minsize/src/xkbd.c	2004-08-13 10:14:44.000000000 +0200
+@@ -353,13 +353,11 @@
+       if (xret || yret)
+ 	 XMoveWindow(display,win,xret,yret);
+     
+-      size_hints.flags = PPosition | PSize | PMinSize;
++      size_hints.flags = PPosition | PSize;
+       size_hints.x = 0;
+       size_hints.y = 0;
+       size_hints.width      =  xkbd_get_width(kb);
+       size_hints.height     =  xkbd_get_height(kb);
+-      size_hints.min_width  =  xkbd_get_width(kb);
+-      size_hints.min_height =  xkbd_get_height(kb);
+     
+       XSetStandardProperties(display, win, window_name, 
+ 			     icon_name, 0,

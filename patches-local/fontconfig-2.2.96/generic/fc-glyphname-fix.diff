@@ -1,0 +1,11 @@
+--- fontconfig/fc-glyphname/Makefile.in~	2004-08-23 21:59:07.000000000 +0000
++++ fontconfig/fc-glyphname/Makefile.in	2004-08-23 21:59:20.000000000 +0000
+@@ -493,7 +493,7 @@
+ 
+ $(TARG): $(STMPL) fc-glyphname $(SGLYPHNAME)
+ 	rm -f $(TARG)
+-	./fc-glyphname $(SGLYPHNAME) < $(STMPL) > $(TARG)
++	./fc-glyphname.host $(SGLYPHNAME) < $(STMPL) > $(TARG)
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+ .NOEXPORT:

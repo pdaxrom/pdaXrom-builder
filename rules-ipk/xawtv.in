@@ -1,0 +1,9 @@
+config XAWTV
+	bool
+	prompt "xawtv"
+	depends on ARCH_X86
+
+config XAWTV_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XAWTV

@@ -1,0 +1,114 @@
+menu	"Cross Toolchain     "
+
+config BUILD_CROSSCHAIN
+	bool
+	prompt "Build Cross Toolchain"
+	default y
+
+choice
+	prompt "binutils Version"
+		default 2.14
+		depends on BUILD_CROSSCHAIN || NATIVE_BINUTILS
+
+	config BINUTILS_2_11
+		bool
+		prompt "2.11"
+		depends on ARCH_ARM || ARCH_X86 || ARCH_SH
+
+	config BINUTILS_2_14
+		bool
+		prompt "2.14"
+		depends on ARCH_ARM || ARCH_X86 || ARCH_SH
+
+	config BINUTILS_2_15
+		bool
+		prompt "2.15"
+		depends on ARCH_ARM || ARCH_X86 || ARCH_SH
+
+	config BINUTILS_2_15_91_0_2
+		bool
+		prompt "2.15.91.0.2"
+		depends on ARCH_ARM || ARCH_X86 || ARCH_SH
+
+endchoice
+
+choice
+	prompt "GCC (GNU Compiler Collection) Version"
+		default GCC_3_3_2
+		depends on BUILD_CROSSCHAIN || NATIVE_GCC
+
+	config GCC_2_95_3
+		bool
+		prompt "2.95.3"
+		depends on ARCH_X86 || ARCH_ARM || ARCH_ARM_NOMMU || ARCH_SPARC
+
+	config GCC_3_3_2
+		bool
+		prompt "3.3.2"
+		depends on ARCH_ARM || ARCH_X86 || ARCH_SH
+
+	config GCC_3_4_2
+		bool
+		prompt "3.4.2"
+		depends on ARCH_ARM || ARCH_X86 || ARCH_SH
+	
+endchoice
+
+config GCC_2
+	bool
+	default y if GCC_2_95_3
+
+config GCC_3
+	bool
+	default y if GCC_3_3_2
+	default y if GCC_3_4_2
+
+config GCC_SHARED
+	bool
+	prompt "  build gcc shared"
+	default y
+#	depends on BUILD_CROSSCHAIN || NATIVE_GCC
+
+config GCC_SOFTFLOAT
+	bool
+	prompt "  build system softfloat"
+	default n
+
+config FPU_TYPE
+	string
+	default "softfloat"		if GCC_SOFTFLOAT
+	default "hardfloat"		if !GCC_SOFTFLOAT
+
+config XCHAIN-DISTCC
+	bool
+	prompt "Build distcc"
+	default n
+
+config NASM
+	bool
+	prompt "x86 NASM"
+	depends on ARCH_X86
+
+config XCHAIN-SCONS
+	bool
+	prompt "Build scons (see help)"
+	help
+		Requires Python-1.6 or later and Python distutils on the Host,
+		these tools are not (yet) part of ptxdist
+
+config XCHAIN-LIBTOOL
+	bool
+	prompt "Build libtool"
+	default n
+
+config AUTOCONF257
+	bool
+	prompt "Build autoconf"
+	default n
+
+config AUTOMAKE176
+	bool
+	prompt "Build automake"
+	default n
+
+endmenu

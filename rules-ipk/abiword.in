@@ -1,0 +1,9 @@
+config ABIWORD
+	bool
+	prompt "abiword"
+	depends on GTK22
+
+config ABIWORD_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on ABIWORD

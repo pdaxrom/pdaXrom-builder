@@ -1,0 +1,9 @@
+config WINE
+	bool
+	prompt "wine"
+	depends on ARCH_X86
+
+config WINE_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on WINE

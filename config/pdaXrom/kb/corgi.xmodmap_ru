@@ -1,0 +1,33 @@
+keysym  q            = Cyrillic_shorti	Cyrillic_SHORTI
+keysym  w            = Cyrillic_tse	Cyrillic_TSE	asciicircum asciicircum
+keysym  e            = Cyrillic_u	Cyrillic_U	equal equal
+keysym  r            = Cyrillic_ka	Cyrillic_KA	plus plus
+keysym  t            = Cyrillic_ie	Cyrillic_IE	bracketleft bracketleft
+keysym  y            = Cyrillic_en	Cyrillic_EN	bracketright bracketright
+keysym  u            = Cyrillic_ghe	Cyrillic_GHE	braceleft braceleft
+keysym  i            = Cyrillic_sha	Cyrillic_SHA	braceright braceright
+keysym  o            = Cyrillic_shcha	Cyrillic_SHCHA	
+keysym  p            = Cyrillic_ze	Cyrillic_ZE
+keycode 129          = Cyrillic_ha	Cyrillic_HA
+keycode 130          = Cyrillic_hardsign	Cyrillic_HARDSIGN
+
+keysym  a            = Cyrillic_ef	Cyrillic_EF	question question
+keysym  s            = Cyrillic_yeru	Cyrillic_YERU	comma comma
+keysym  d            = Cyrillic_ve	Cyrillic_VE	period period
+keysym  f            = Cyrillic_a	Cyrillic_A	backslash slash
+keysym  g            = Cyrillic_pe	Cyrillic_PE	semicolon semicolon
+keysym  h            = Cyrillic_er	Cyrillic_ER	colon colon
+keysym  j            = Cyrillic_o	Cyrillic_O	asterisk asterisk
+keysym  k            = Cyrillic_el	Cyrillic_EL	
+keysym  l            = Cyrillic_de	Cyrillic_DE	bar bar
+keycode 71           = Cyrillic_be	Cyrillic_BE	Cyrillic_zhe	Cyrillic_ZHE
+keycode 66           = Cyrillic_e	Cyrillic_E	minus at
+keycode 72           = Cyrillic_yu	Cyrillic_YU	Cyrillic_io	Cyrillic_IO
+
+keysym  z            = Cyrillic_ya	Cyrillic_YA
+keysym  x            = Cyrillic_che	Cyrillic_CHE
+keysym  c            = Cyrillic_es	Cyrillic_ES
+keysym  v            = Cyrillic_em	Cyrillic_EM
+keysym  b            = Cyrillic_i	Cyrillic_I	underscore underscore
+keysym  n            = Cyrillic_te	Cyrillic_TE
+keysym  m            = Cyrillic_softsign	Cyrillic_SOFTSIGN

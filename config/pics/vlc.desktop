@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=VLC
+Comment=VideoLan client
+Exec=vlc
+Icon=/usr/share/vlc/vlc48x48.png
+Terminal=0
+Type=Application
+Categories=AudioVideo
+StartupNotify=True
+SingleInstance=False

@@ -1,0 +1,67 @@
+config GPE-CVS
+	bool
+	prompt "GPE"
+
+menu "GPE Applications"
+	depends on GPE-CVS
+
+config GPE-CVS_INSTALL
+	bool
+	prompt "Enable Installation in ROM"
+	depends on GPE-CVS
+
+config GPE-CALCULATOR
+	bool
+	prompt "gpe-calculator"
+
+config GPE-CALCULATOR_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GPE-CVS_INSTALL && GPE-CALCULATOR
+
+config GPE-CLOCK
+	bool
+	prompt "gpe-clock"
+
+config GPE-CLOCK_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GPE-CVS_INSTALL && GPE-CLOCK
+
+config GPE-CONF
+	bool
+	prompt "gpe-conf"
+
+config GPE-CONF_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GPE-CVS_INSTALL && GPE-CONF
+
+config GPE-EDIT
+	bool
+	prompt "gpe-edit"
+
+config GPE-EDIT_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GPE-CVS_INSTALL && GPE-EDIT
+
+config GPE-GALLERY
+	bool
+	prompt "gpe-gallery"
+
+config GPE-GALLERY_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GPE-CVS_INSTALL && GPE-GALLERY
+
+config GPE-WORD
+	bool
+	prompt "gpe-word"
+
+config GPE-WORD_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GPE-CVS_INSTALL && GPE-WORD
+
+endmenu

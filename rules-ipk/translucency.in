@@ -1,0 +1,8 @@
+config TRANSLUCENCY
+	bool
+	prompt "translucency"
+
+config TRANSLUCENCY_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on TRANSLUCENCY

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+test -f /etc/hotplug/pci.agent && exit 0
+
+get_pci_modules () {
+       while read IGNORE ID IGNORE
+       do
+               VENDOR=`echo $ID | cut -b1-4`
+               DEVICE=`echo $ID | cut -b5-8`
+               DEVENTRY=`echo 0x0000${VENDOR} 0x0000${DEVICE}`
+               cat /lib/modules/`uname -r`/*.pcimap | grep "$DEVENTRY" | cut -d ' ' -f1
+       done
+}
+
+for MODULE in `get_pci_modules < /proc/bus/pci/devices | sort -u`
+do 
+    echo Loading module $MODULE
+    modprobe -s $MODULE
+    #sleep 5
+done

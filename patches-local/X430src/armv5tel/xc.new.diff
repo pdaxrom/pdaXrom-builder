@@ -1,0 +1,1284 @@
+diff -Nur xc/build.sh xc.new/build.sh
+--- xc/build.sh	1970-01-01 00:00:00.000000000 +0000
++++ xc.new/build.sh	2005-02-04 00:41:54.000000000 +0000
+@@ -0,0 +1 @@
++make CROSSCOMPILEDIR=/opt/arm/3.3.2-vfp/armv5tel-cacko-linux/bin World
+diff -Nur xc/config/cf/host.def xc.new/config/cf/host.def
+--- xc/config/cf/host.def	1970-01-01 00:00:00.000000000 +0000
++++ xc.new/config/cf/host.def	2004-08-24 19:24:59.000000000 +0000
+@@ -0,0 +1,42 @@
++/*#define BuildServersOnly	YES*/
++
++#define KDriveXServer              YES
++#define KdriveServerExtraDefines -DITSY -DMAXSCREENS=2 -DXResExtension -fexpensive-optimizations -ffast-math -fomit-frame-pointer -Os -mapcs-32 -mcpu=xscale -mtune=xscale
++#define TinyXServer                YES
++#define CrossCompiling             YES
++#define TouchScreen                YES
++#define ItsyCompilerBug            YES
++#undef BuildRandR
++#define BuildRandR                 YES
++#define BuildXInputLib             YES
++
++#define HasExpat		YES
++#define HasFreetype2		YES
++#define HasLibpng		YES
++#define HasZlib			YES
++#define HasFontconfig		YES
++
++#define Freetype2Dir               @FREETYPE2DIR@
++#define FontconfigDir              @FONTCONFIGDIR@
++#define ExpatDir                   @EXPATDIR@
++#define LibpngDir                  @LIBPNGDIR@
++
++#define BuildXTrueType             YES
++#define BuildScreenSaverExt        YES
++#define BuildScreenSaverLibrary    YES
++#define SharedLibXss               YES
++#define ServerXdmcpDefines
++#define XfbdevServer               YES
++#define MakeLocalFontDir	YES
++#define StandardDefines         -Dlinux -D__arm__ -D_POSIX_SOURCE \
++                                -D_BSD_SOURCE -D_GNU_SOURCE -DX_LOCALE \
++				-fomit-frame-pointer
++#define ProjectRoot                /usr/X11R6
++#define HasTsLib                   YES
++#define BuildXcursorgen		   NO
++#define BuildXResExt               YES
++#define XResExtension              YES
++#define BuildXKB		YES
++#define BuildXKBlib		YES
++#define BuildDPMS		YES
++#define ATI_Imageon		YES
+diff -Nur xc/config/cf/linux.cf xc.new/config/cf/linux.cf
+--- xc/config/cf/linux.cf	2003-02-17 17:07:32.000000000 +0000
++++ xc.new/config/cf/linux.cf	2005-02-04 00:41:54.000000000 +0000
+@@ -759,7 +759,7 @@
+ #ifdef Arm32Architecture
+ # define DefaultCCOptions	-fsigned-char
+ # ifndef OptimizedCDebugFlags
+-#  define OptimizedCDebugFlags	-O3
++#  define OptimizedCDebugFlags	-Os -fomit-frame-pointer -mcpu=xscale -mtune=xscale
+ # endif
+ # define LinuxMachineDefines	-D__arm__ -D__arm32__ -U__arm -Uarm
+ # define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME -DPART_NET
+diff -Nur xc/lib/X11/Imakefile xc.new/lib/X11/Imakefile
+--- xc/lib/X11/Imakefile	2002-11-26 02:31:23.000000000 +0000
++++ xc.new/lib/X11/Imakefile	2005-02-04 00:41:54.000000000 +0000
+@@ -1063,7 +1063,7 @@
+ 
+ ks_tables.h: $(XINCLUDESRC)/keysymdef.h util/makekeys.c
+ 	RemoveFiles($@ HostProgramTargetName(makekeys) makekeys.Osuf)
+-	-HostLinkRule(HostProgramTargetName(makekeys),$(CFLAGS) $(LOCAL_LDFLAGS),util/makekeys.c,$(HOST_LDLIBS))
++	-HostLinkRule(HostProgramTargetName(makekeys),$(LOCAL_LDFLAGS),util/makekeys.c,$(HOST_LDLIBS))
+ 	RunProgram(MAKEKEYS,< $(XINCLUDESRC)/keysymdef.h > ks_tables_h)
+ 	$(MV) ks_tables_h $@
+ 	RemoveFiles(HostProgramTargetName(makekeys) makekeys.Osuf ks_tables_h)
+diff -Nur xc/lib/Xft/Xft.h xc.new/lib/Xft/Xft.h
+--- xc/lib/Xft/Xft.h	2003-02-25 21:57:53.000000000 +0000
++++ xc.new/lib/Xft/Xft.h	2005-02-04 00:41:54.000000000 +0000
+@@ -32,7 +32,8 @@
+ #define XftVersion	XFT_VERSION
+ 
+ #include <stdarg.h>
+-#include <freetype/freetype.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ #include <fontconfig/fontconfig.h>
+ #include <X11/extensions/Xrender.h>
+ 
+diff -Nur xc/lib/Xft1/XftFreetype.h xc.new/lib/Xft1/XftFreetype.h
+--- xc/lib/Xft1/XftFreetype.h	2002-03-02 22:09:04.000000000 +0000
++++ xc.new/lib/Xft1/XftFreetype.h	2005-02-04 00:41:54.000000000 +0000
+@@ -26,7 +26,8 @@
+ #define _XFTFREETYPE_H_
+ 
+ #include "Xft.h"
+-#include <freetype/freetype.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ 
+ #include <X11/Xfuncproto.h>
+ #include <X11/Xosdefs.h>
+diff -Nur xc/programs/Xserver/Imakefile xc.new/programs/Xserver/Imakefile
+--- xc/programs/Xserver/Imakefile	2003-02-17 17:06:40.000000000 +0000
++++ xc.new/programs/Xserver/Imakefile	2005-02-04 00:41:54.000000000 +0000
+@@ -683,11 +683,14 @@
+ 
+         KDRIVE = hw/kdrive
+ #if HasTsLib
+-       KDTSLIB = -lts
++       KDTSLIB = -lts -ldl
++#endif
++#if ATI_Imageon
++       KDATILIB  = -laticore
+ #endif
+ #ifdef LinuxArchitecture
+        KDOSDIR = $(KDRIVE)/linux
+-          KDOS = $(KDOSDIR)/LibraryTargetName(linux) $(KDTSLIB)
++          KDOS = $(KDOSDIR)/LibraryTargetName(linux) $(KDTSLIB) $(KDATILIB)
+ #endif
+ 
+ #ifdef VXWORKS
+diff -Nur xc/programs/Xserver/hw/kdrive/fbdev/Imakefile xc.new/programs/Xserver/hw/kdrive/fbdev/Imakefile
+--- xc/programs/Xserver/hw/kdrive/fbdev/Imakefile	2001-05-24 19:31:46.000000000 +0000
++++ xc.new/programs/Xserver/hw/kdrive/fbdev/Imakefile	2005-02-04 00:41:54.000000000 +0000
+@@ -9,7 +9,13 @@
+ 
+ SRCS = 	fbdev.c fbinit.c
+ 
+-OBJS = 	fbdev.o fbinit.o
++OBJS = 	fbdev.o fbinit.o 
++
++#if ATI_Imageon
++DEFINES = -DATI_Imageon
++SRCS += imageon.c
++OBJS += imageon.o
++#endif
+ 
+ INCLUDES = $(KDINCS) -I.
+ 
+diff -Nur xc/programs/Xserver/hw/kdrive/fbdev/fbdev.c xc.new/programs/Xserver/hw/kdrive/fbdev/fbdev.c
+--- xc/programs/Xserver/hw/kdrive/fbdev/fbdev.c	2002-11-05 05:28:05.000000000 +0000
++++ xc.new/programs/Xserver/hw/kdrive/fbdev/fbdev.c	2005-02-04 00:51:27.000000000 +0000
+@@ -25,8 +25,21 @@
+ 
+ #include "fbdev.h"
+ 
+-/* this code was used to debug MSB 24bpp code on a 16bpp frame buffer */
+-#undef FAKE24_ON_16
++#ifdef ATI_Imageon
++#include "imageon.h"
++#endif
++
++#ifdef ATI_Imageon
++/*
++ * say me best way than that hack ;(
++ */
++#ifdef RANDR
++int		hack_ts_max_x;
++int		hack_ts_max_y;
++int		hack_ts_rotation;
++#endif
++static int	fbrot;
++#endif
+ 
+ Bool
+ fbdevInitialize (KdCardInfo *card, FbdevPriv *priv)
+@@ -62,6 +75,21 @@
+     }
+     off = (unsigned long) priv->fix.smem_start % (unsigned long) getpagesize();
+     priv->fb = priv->fb_base + off;
++    
++#ifdef ATI_Imageon
++#ifdef RANDR
++    fbrot = 101;
++    hack_ts_max_x = priv->var.xres;
++    hack_ts_max_y = priv->var.yres;
++    hack_ts_rotation = RR_Rotate_0;
++    ioctl(priv->fd, W100FB_CONFIG_EX, &fbrot);
++#endif
++    if (!Imageon_initScreen(priv->var.xres, priv->var.yres)) {
++	perror("Imageon_iniScreen()\n");
++	return FALSE;
++    }
++#endif
++    
+     return TRUE;
+ }
+ 
+@@ -111,9 +139,6 @@
+     int		depth;
+     Bool	shadow;
+     Bool	gray;
+-#ifdef FAKE24_ON_16
+-    Bool	fake24;
+-#endif
+ 
+     depth = priv->var.bits_per_pixel;
+     gray = priv->var.grayscale;
+@@ -188,22 +213,6 @@
+     screen->rate = 72;
+     scrpriv->randr = screen->randr;
+     
+-#ifdef FAKE24_ON_16
+-    if (screen->fb[0].depth == 24 && screen->fb[0].bitsPerPixel == 24 &&
+-	priv->var.bits_per_pixel == 16)
+-    {
+-	fake24 = TRUE;
+-	scrpriv->shadow = TRUE;
+-	scrpriv->rotation = 0;
+-	screen->fb[0].redMask = 0xff0000;
+-	screen->fb[0].greenMask = 0x00ff00;
+-	screen->fb[0].blueMask = 0x0000ff;
+-	screen->width = priv->var.xres;
+-	screen->height = priv->var.yres;
+-	screen->softCursor = TRUE;
+-    }
+-    else
+-#endif
+     {
+ 	screen->fb[0].depth = depth;
+ 	screen->fb[0].bitsPerPixel = priv->var.bits_per_pixel;
+@@ -252,88 +261,6 @@
+     return (CARD8 *) priv->fb + row * priv->fix.line_length + offset;
+ }
+ 
+-#ifdef FAKE24_ON_16
+-void
+-fbdevUpdateFake24 (ScreenPtr pScreen,
+-		   PixmapPtr pShadow,
+-		   RegionPtr damage)
+-{
+-    shadowScrPriv(pScreen);
+-    int		nbox = REGION_NUM_RECTS (damage);
+-    BoxPtr	pbox = REGION_RECTS (damage);
+-    FbBits	*shaBits;
+-    CARD8	*shaBase, *shaLine, *sha;
+-    CARD16	s;
+-    FbStride	shaStride;
+-    int		scrBase, scrLine, scr;
+-    int		shaBpp;
+-    int		x, y, w, h, width;
+-    int         i;
+-    CARD16	*winBase, *winLine, *win;
+-    CARD32      winSize;
+-
+-    fbGetDrawable (&pShadow->drawable, shaBits, shaStride, shaBpp);
+-    shaStride = shaStride * sizeof (FbBits) / sizeof (CARD8);
+-    shaBase = (CARD8 *) shaBits;
+-    while (nbox--)
+-    {
+-	x = pbox->x1;
+-	y = pbox->y1;
+-	w = (pbox->x2 - pbox->x1);
+-	h = pbox->y2 - pbox->y1;
+-
+-	shaLine = shaBase + y * shaStride + x * 3;
+-				   
+-	while (h--)
+-	{
+-	    winSize = 0;
+-	    scrBase = 0;
+-	    width = w;
+-	    scr = x;
+-	    sha = shaLine;
+-	    while (width) {
+-		/* how much remains in this window */
+-		i = scrBase + winSize - scr;
+-		if (i <= 0 || scr < scrBase)
+-		{
+-		    winBase = (CARD16 *) (*pScrPriv->window) (pScreen,
+-							      y,
+-							      scr * sizeof (CARD16),
+-							      SHADOW_WINDOW_WRITE,
+-							      &winSize);
+-		    if(!winBase)
+-			return;
+-		    scrBase = scr;
+-		    winSize /= sizeof (CARD16);
+-		    i = winSize;
+-		}
+-		win = winBase + (scr - scrBase);
+-		if (i > width)
+-		    i = width;
+-		width -= i;
+-		scr += i;
+-		while (i--)
+-		{
+-#if IMAGE_BYTE_ORDER == MSBFirst
+-		    *win++ = ((sha[2] >> 3) | 
+-			      ((sha[1] & 0xf8) << 2) |
+-			      ((sha[0] & 0xf8) << 7));
+-#else
+-		    *win++ = ((sha[0] >> 3) | 
+-			      ((sha[1] & 0xfc) << 3) |
+-			      ((sha[2] & 0xf8) << 8));
+-#endif
+-		    sha += 3;
+-		}
+-	    }
+-	    shaLine += shaStride;
+-	    y++;
+-	}
+-	pbox++;
+-    }
+-}
+-#endif /* FAKE24_ON_16 */
+-
+ LayerPtr
+ fbdevLayerCreate (ScreenPtr pScreen)
+ {
+@@ -348,14 +275,6 @@
+     int			kind;
+     KdMouseMatrix	m;
+ 
+-#ifdef FAKE24_ON_16
+-    if (fake24)
+-    {
+-	scrpriv->randr = RR_Rotate_0;
+-	scrpriv->shadow = TRUE;
+-    }
+-    else
+-#endif /* FAKE24_ON_16 */
+     {
+ 	if (scrpriv->randr != RR_Rotate_0)
+ 	    scrpriv->shadow = TRUE;
+@@ -385,13 +304,6 @@
+     {
+         window = fbdevWindowLinear;
+ 	update = 0;
+-#ifdef FAKE24_ON_16
+-	if (pScreenPriv->screen->fb[0].bitsPerPixel == 24 && priv->var.bits_per_pixel == 16)
+-	{
+-	    update = fbdevUpdateFake24;
+-	}
+-	else
+-#endif /* FAKE24_ON_16 */
+ 	{
+ 	    if (scrpriv->randr)
+ 		update = shadowUpdateRotatePacked;
+@@ -428,7 +340,7 @@
+     Rotation		    randr;
+     int			    n;
+     
+-    *rotations = RR_Rotate_All|RR_Reflect_All;
++    *rotations = RR_Rotate_All; //|RR_Reflect_All;
+     
+     for (n = 0; n < pScreen->numDepths; n++)
+ 	if (pScreen->allowedDepths[n].numVids)
+@@ -441,6 +353,18 @@
+ 			    screen->height,
+ 			    screen->width_mm,
+ 			    screen->height_mm);
++
++    RRRegisterSize (pScreen,
++			    640,
++			    480,
++			    screen->width_mm,
++			    screen->height_mm);
++
++    RRRegisterSize (pScreen,
++			    320,
++			    240,
++			    screen->width_mm,
++			    screen->height_mm);
+     
+     randr = KdSubRotation (scrpriv->randr, screen->randr);
+     
+@@ -490,7 +414,7 @@
+      */
+     randr = KdAddRotation (randr, screen->randr);
+ 
+-    if (scrpriv->randr != randr)
++    if ((scrpriv->randr != randr) || (pSize->width != pScreen->width) || (pSize->height != pScreen->height))
+     {
+ 	LayerPtr	pNewLayer;
+ 	int		kind;
+@@ -499,33 +423,102 @@
+ 	int		oldwidth = pScreen->width;
+ 	int		oldheight = pScreen->height;
+ 	PixmapPtr	pPixmap;
++	int		fbw, fbh;
++	int		t_w, t_h;
+ 
+ 	if (wasEnabled)
+ 	    KdDisableScreen (pScreen);
+-	
+-	scrpriv->randr = randr;
+-	pNewLayer = fbdevLayerCreate (pScreen);
+-	if (!pNewLayer)
+-	{
+-	    scrpriv->shadow = oldshadow;
+-	    scrpriv->randr = oldrandr;
+-	}
+-	if (WalkTree (pScreen, fbdevLayerAdd, (pointer) pNewLayer) == WT_STOPWALKING)
+-	{
+-	    WalkTree (pScreen, fbdevLayerRemove, (pointer) pNewLayer);
+-	    LayerDestroy (pScreen, pNewLayer);
+-	    scrpriv->randr = oldrandr;
+-	    scrpriv->shadow = oldshadow;
+-	    pScreen->width = oldwidth;
+-	    pScreen->height = oldheight;
+-	    if (wasEnabled)
+-		KdEnableScreen (pScreen);
+-	    return FALSE;
+-	}
+-        WalkTree (pScreen, fbdevLayerRemove, (pointer) scrpriv->pLayer);
+-	LayerDestroy (pScreen, scrpriv->pLayer);
+-	scrpriv->pLayer = pNewLayer;
+-	KdSetSubpixelOrder (pScreen, scrpriv->randr);
++
++#ifndef ATI_Imageon
++	    scrpriv->randr = randr;
++
++	    pNewLayer = fbdevLayerCreate (pScreen);
++	    if (!pNewLayer)
++	    {
++		scrpriv->shadow = oldshadow;
++		scrpriv->randr = oldrandr;
++	    }
++	    if (WalkTree (pScreen, fbdevLayerAdd, (pointer) pNewLayer) == WT_STOPWALKING)
++	    {
++		WalkTree (pScreen, fbdevLayerRemove, (pointer) pNewLayer);
++		LayerDestroy (pScreen, pNewLayer);
++		scrpriv->randr = oldrandr;
++		scrpriv->shadow = oldshadow;
++		pScreen->width = oldwidth;
++		pScreen->height = oldheight;
++		if (wasEnabled)
++		    KdEnableScreen (pScreen);
++		return FALSE;
++	    }
++    	    WalkTree (pScreen, fbdevLayerRemove, (pointer) scrpriv->pLayer);
++	    LayerDestroy (pScreen, scrpriv->pLayer);
++	    scrpriv->pLayer = pNewLayer;
++	    KdSetSubpixelOrder (pScreen, scrpriv->randr);
++#else
++	    Imageon_finishScreen();
++	    switch(randr) {
++		case RR_Rotate_0:
++		    fbrot = 101;
++		    fbw = pSize->width;
++		    fbh = pSize->height;
++		    break;
++		case RR_Rotate_90:
++		    fbrot = 100;
++		    fbw = pSize->height;
++		    fbh = pSize->width;
++		    break;
++		case RR_Rotate_180:
++		    fbrot = 103;
++		    fbw = pSize->width;
++		    fbh = pSize->height;
++		    break;
++		case RR_Rotate_270:
++		    fbrot = 102;
++		    fbw = pSize->height;
++		    fbh = pSize->width;
++		    break;
++		default:
++		    fbrot = 101;
++		    fbw = pSize->width;
++		    fbh = pSize->height;
++		    break;
++	    }
++	    if (pSize->width < 480) {
++		fbrot += 10;
++	    }
++	    ioctl(priv->fd, W100FB_CONFIG_EX, &fbrot);
++
++	    scrpriv->randr = randr;
++	    pScreen->width = fbw;
++	    pScreen->height = fbh;
++
++	    t_w = (pSize->width > pSize->height)?pSize->width:pSize->height;
++	    t_h = (pSize->height < pSize->width)?pSize->height:pSize->width;
++	    screen->width = t_w;
++	    screen->height = t_h;
++    	    screen->fb[0].byteStride = screen->width << 1;
++    	    screen->fb[0].pixelStride = ((screen->width << 1) * 8 / 
++    					priv->var.bits_per_pixel);
++	    priv->fix.line_length = screen->width << 1;
++	    priv->var.xres = t_w;
++	    priv->var.yres = t_h;
++
++	    (*pScreen->ModifyPixmapHeader) (fbGetScreenPixmap (pScreen),
++					    pScreen->width,
++					    pScreen->height,
++					    screen->fb[0].depth,
++					    screen->fb[0].bitsPerPixel,
++					    screen->fb[0].byteStride,
++					    screen->fb[0].frameBuffer);
++
++	    hack_ts_rotation = randr;
++	    hack_ts_max_x = t_w;
++	    hack_ts_max_y = t_h;
++
++    	    if (!Imageon_initScreen(t_w, t_h)) {
++		perror("Imageon_iniScreen()\n");
++	    }
++#endif
+ 	if (wasEnabled)
+ 	    KdEnableScreen (pScreen);
+     }
+@@ -666,22 +659,74 @@
+     FbdevPriv	*priv = pScreenPriv->card->driver;
+     static int oldmode = -1;
+ 
++/////////////////////////
++//    {
++//    FILE *of=fopen("/tmp/dpms.txt","a");
++//    fprintf(of, "\nmode=%d, oldmode=%d, DPMSEnabled=%d", mode, oldmode, DPMSEnabled);
++//    fclose(of);
++//    }
++/////////////////////////
++
+     if (mode == oldmode)
+ 	return TRUE;
+-#ifdef FBIOPUT_POWERMODE
+-    if (ioctl (priv->fd, FBIOPUT_POWERMODE, &mode) >= 0)
++
++    if (((mode == 1) || (mode == 2)) && (oldmode == 3)) {
++	return FALSE;
++    }
++
++    if (mode == 3) 
+     {
++	if (!DPMSEnabled) return FALSE;
++#ifdef ATI_Imageon
++	Imageon_finishScreen();
++#endif
++	system("apm --suspend");
++	KdEnqueueKeyboardEvent (0, 0x00);
++	KdEnqueueKeyboardEvent (0, 0x80);
++#ifdef ATI_Imageon
++#ifdef RANDR
++	if (fbrot != 101) {
++	    ioctl(priv->fd, W100FB_CONFIG_EX, &fbrot);
++	}
++#endif
++	if (!Imageon_initScreen(priv->var.xres, priv->var.yres)) {
++	    perror("Imageon_iniScreen()\n");
++	    return FALSE;
++	}
++#endif
+ 	oldmode = mode;
++	DPMSSet(0 /*DPMSModeOn*/);
+ 	return TRUE;
+-    }
++    } else {
++#ifdef FBIOPUT_POWERMODE
++	if (ioctl (priv->fd, FBIOPUT_POWERMODE, &mode) < 0)
++	{
++	    return FALSE;
++	}
+ #endif
+ #ifdef FBIOBLANK
+-    if (ioctl (priv->fd, FBIOBLANK, mode ? mode + 1 : 0) >= 0)
+-    {
++	if (ioctl (priv->fd, FBIOBLANK, mode ? mode + 1 : 0) < 0)
++	{
++	    return FALSE;
++	}
++#endif
++#ifdef ATI_Imageon
++#ifdef RANDR
++	if ((fbrot >= 110) && (mode == 0) && (oldmode != 3)) {
++	    Imageon_finishScreen();
++	    ioctl(priv->fd, W100FB_CONFIG_EX, &fbrot);
++	    if (!Imageon_initScreen(priv->var.xres, priv->var.yres)) {
++		perror("Imageon_iniScreen()\n");
++		return FALSE;
++	    }
++	}
++#endif
++#endif
++	if ((mode == 0) && (oldmode > 0)) KdSetRootClip (pScreen, TRUE);
+ 	oldmode = mode;
+ 	return TRUE;
+     }
+-#endif
++
+     return FALSE;
+ }
+ 
+@@ -706,6 +751,10 @@
+ {
+     int	k;
+     FbdevPriv	*priv = card->driver;
++
++#ifdef ATI_Imageon
++    Imageon_finishScreen();
++#endif
+     
+     munmap (priv->fb_base, priv->fix.smem_len);
+     close (priv->fd);
+@@ -803,13 +852,21 @@
+     0,			    /* disableCursor */
+     0,			    /* finiCursor */
+     0,			    /* recolorCursor */
+-    
++
++#ifdef ATI_Imageon
++    Imageon_drawInit,	    /* initAccel */
++    Imageon_drawEnable,	    /* enableAccel */
++    Imageon_drawSync,	    /* syncAccel */
++    Imageon_drawDisable,    /* disableAccel */
++    Imageon_drawFini,	    /* finiAccel */
++#else
+     0,			    /* initAccel */
+     0,			    /* enableAccel */
+     0,			    /* syncAccel */
+     0,			    /* disableAccel */
+     0,			    /* finiAccel */
+-    
++#endif
++
+     fbdevGetColors,    	    /* getColors */
+     fbdevPutColors,	    /* putColors */
+ };
+diff -Nur xc/programs/Xserver/hw/kdrive/fbdev/imageon.c xc.new/programs/Xserver/hw/kdrive/fbdev/imageon.c
+--- xc/programs/Xserver/hw/kdrive/fbdev/imageon.c	1970-01-01 00:00:00.000000000 +0000
++++ xc.new/programs/Xserver/hw/kdrive/fbdev/imageon.c	2005-02-04 00:41:54.000000000 +0000
+@@ -0,0 +1,299 @@
++/*
++ * sash@pdaXrom.org, 2003-2004
++ *
++ * AtiCore framebuffer 2d accel for BitBlt and SolidRect
++ * 
++ * (c)opyleft pdaXrom team (http://www.pdaXrom.org), 2003-2004
++ */
++
++#include <fbdev.h>
++
++#include <errno.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <inttypes.h>
++#include <unistd.h>
++#include <aticore.h>
++
++#include "imageon.h"
++
++#include "Xmd.h"
++#include "gcstruct.h"
++#include "scrnintstr.h"
++#include "pixmapstr.h"
++#include "regionstr.h"
++#include "mistruct.h"
++#include "fontstruct.h"
++#include "dixfontstr.h"
++#include "fb.h"
++#include "migc.h"
++#include "miline.h"
++
++static CARD8 ATISolidRop[16] = {
++    /* GXclear      */      0x00,         /* 0 */
++    /* GXand        */      0xa0,         /* src AND dst */
++    /* GXandReverse */      0x50,         /* src AND NOT dst */
++    /* GXcopy       */      0xf0,         /* src */
++    /* GXandInverted*/      0x0a,         /* NOT src AND dst */
++    /* GXnoop       */      0xaa,         /* dst */
++    /* GXxor        */      0x5a,         /* src XOR dst */
++    /* GXor         */      0xfa,         /* src OR dst */
++    /* GXnor        */      0x05,         /* NOT src AND NOT dst */
++    /* GXequiv      */      0xa5,         /* NOT src XOR dst */
++    /* GXinvert     */      0x55,         /* NOT dst */
++    /* GXorReverse  */      0xf5,         /* src OR NOT dst */
++    /* GXcopyInverted*/     0x0f,         /* NOT src */
++    /* GXorInverted */      0xaf,         /* NOT src OR dst */
++    /* GXnand       */      0x5f,         /* NOT src OR NOT dst */
++    /* GXset        */      0xff,         /* 1 */
++};
++
++static CARD8 ATIBltRop[16] = {
++    /* GXclear      */      0x00,         /* 0 */
++    /* GXand        */      0x88,         /* src AND dst */
++    /* GXandReverse */      0x44,         /* src AND NOT dst */
++    /* GXcopy       */      0xcc,         /* src */
++    /* GXandInverted*/      0x22,         /* NOT src AND dst */
++    /* GXnoop       */      0xaa,         /* dst */
++    /* GXxor        */      0x66,         /* src XOR dst */
++    /* GXor         */      0xee,         /* src OR dst */
++    /* GXnor        */      0x11,         /* NOT src AND NOT dst */
++    /* GXequiv      */      0x99,         /* NOT src XOR dst */
++    /* GXinvert     */      0x55,         /* NOT dst */
++    /* GXorReverse  */      0xdd,         /* src OR NOT dst */
++    /* GXcopyInverted*/     0x33,         /* NOT src */
++    /* GXorInverted */      0xbb,         /* NOT src OR dst */
++    /* GXnand       */      0x77,         /* NOT src OR NOT dst */
++    /* GXset        */      0xff,         /* 1 */
++};
++
++static int copydx, copydy;
++
++static int VRAMoffset;
++
++/*
++ * Init FrameBuffer for 2D operations
++ */
++
++int 
++Imageon_initScreen(int scr_w, int scr_h)
++{
++    uint32_t		extm, intm;
++    int			ret;
++    ATI_GRAPHICWINDOW	win;
++    ATI_CLIPRECT 	clip;
++    uint16_t		overlay;
++
++    if (AtiCore_ProcessAttach()) {
++    
++	GetAvailableVideoMem(&intm, &extm);
++//	printf( "internal memory = %d\n"
++//		"external memory = %d\n",
++//		intm, extm);
++
++	ret = AtiCore_ProcessAttachSpecialMode((scr_w == 480)?0xaaab:0xaaaa);
++	
++	ret = AtiCore_CursorOnOff(1, 0);
++	ret = AtiCore_CursorOnOff(2, 0);
++	ret = AtiCore_CursorOnOff(3, 0);
++	
++	win.dummy1 = 0;
++	win.Size.XCoord = 0; //160;
++	win.Size.YCoord = 0;
++	win.Size.Width  = scr_w;
++	win.Size.Height = scr_h;
++	win.Width       = scr_h;
++	win.Height      = scr_w;
++	win.Flag        = 5; // DSTTYPE_16BPP_444
++
++	ret = AtiCore_SetupGraphicWindow(&win);
++	
++	ret = AtiCore_SetGraphicWindowPos(0, 0);
++
++	/*
++	 * 320x240 (240x320) use only internal Imageon RAM, offset = 0
++	 * 640x480 (480x640) use external RAM, offset = 0xf000000
++	 * for get pointer for direct access to video memory use next trick:
++	 *	AtiCore_SetupMemoryTransfer(VRAMoffset, &fbmem);
++	 *	AtiCore_TerminateMemoryTransfer();
++	 */
++
++	VRAMoffset = (scr_w == 320)?0:0xf000000;
++	
++	ret = AtiCore_SetFrontBuffer(VRAMoffset, 0, 0);
++
++	ret = AtiCore_SetDstPitchOffset(scr_w, VRAMoffset);
++	
++	ret = AtiCore_SetDstType(5);
++	
++	ret = AtiCore_SetSrcPitchOffset(scr_w, VRAMoffset);
++	
++	ret = AtiCore_SetSrcType(4);
++	
++	clip.X_Top_Left = 0;
++	clip.Y_Top_Left = 0;
++	clip.X_Bottom_Right = scr_w;
++	clip.Y_Bottom_Right = scr_h;
++	
++	ret = AtiCore_SetDstClippingRect(&clip);
++	
++	clip.X_Top_Left = 57344;
++	clip.Y_Top_Left = 57344;
++	clip.X_Bottom_Right = 8191;
++	clip.Y_Bottom_Right = 8191;
++	
++	ret = AtiCore_SetSrcClippingRect(&clip);
++	
++	ret = AtiCore_SetRopOperation(ROP3_SRCCOPY);
++	
++	ret = AtiCore_SetGraphicWindowOnOff(1);
++	
++	ret = AtiCore_AllocOverlay(&overlay);
++	
++	ret = AtiCore_SetOverlayOnOff(overlay, 0);
++	
++	ret = AtiCore_ReleaseOverlay(overlay);
++
++	AtiCore_SetDstPitchOffset(scr_w, VRAMoffset);
++	AtiCore_SetDstClippingRect(NULL);
++
++    } else return 0;
++    
++    return 1;
++}
++
++int 
++Imageon_finishScreen()
++{
++    AtiCore_ProcessDetach();
++    return 1;
++}
++
++static Bool
++Imageon_PrepareSolid(DrawablePtr pDrawable, int alu, Pixel pm, Pixel fg)
++{
++	AtiCore_SetFrgColour(fg);
++	AtiCore_BrushType(6, 0);
++	AtiCore_SetRopOperation(ATISolidRop[alu]);
++
++	return TRUE;
++}
++
++static void
++Imageon_Solid(int x1, int y1, int x2, int y2)
++{
++	ATI_RECT	rect;
++	ATI_CLIPRECT 	clip;
++
++	clip.X_Top_Left = x1;
++	clip.Y_Top_Left = y1;
++	clip.X_Bottom_Right = x2;
++	clip.Y_Bottom_Right = y2;
++	AtiCore_SetDstClippingRect(&clip);
++
++	rect.XCoord = x1;
++	rect.YCoord = y1;
++	rect.Width  = x2 - x1;
++	rect.Height = y2 - y1;
++	AtiCore_PaintRect(1, &rect);
++	AtiCore_WaitComplete(-1);
++}
++
++static void
++Imageon_DoneSolid(void)
++{
++}
++
++static Bool
++Imageon_PrepareCopy(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable, int dx, int dy, int alu, Pixel pm)
++{
++	copydx = dx;
++	copydy = dy;
++
++	if (pm != 0xffffffff) return FALSE;
++
++	AtiCore_SetRopOperation(ATIBltRop[alu]);
++	AtiCore_SetDstType(5); 
++	AtiCore_SetSrcType(7); 
++
++        return TRUE;
++}
++
++static void
++Imageon_Copy(int srcX, int srcY, int dstX, int dstY, int w, int h)
++{
++	ATI_RECT	rect;
++	ATI_RECT	rect1;
++	ATI_CLIPRECT 	clip;
++
++	clip.X_Top_Left = dstX;
++	clip.Y_Top_Left = dstY;
++	clip.X_Bottom_Right = dstX + w;
++	clip.Y_Bottom_Right = dstY + h;
++	AtiCore_SetDstClippingRect(&clip);
++
++	/* destination */
++	rect.XCoord = dstX;
++	rect.YCoord = dstY;
++	rect.Width  = w;
++	rect.Height = h;
++	/* source */
++	rect1.XCoord = srcX;
++	rect1.YCoord = srcY;
++	rect1.Width  = w;
++	rect1.Height = h;
++	AtiCore_BitBlt(1, &rect, &rect1);
++	AtiCore_WaitComplete(-1);
++}
++
++static void
++Imageon_DoneCopy(void)
++{
++}
++
++static KaaScreenPrivRec ImageonKaa = {
++	Imageon_PrepareSolid,
++	Imageon_Solid,
++	Imageon_DoneSolid,
++
++	Imageon_PrepareCopy,
++	Imageon_Copy,
++	Imageon_DoneCopy,
++
++	0,				/* offscreenByteAlign */
++	0,				/* offscreenPitch */
++	0 /*KAA_OFFSCREEN_PIXMAPS*/	/* flags */
++};
++
++Bool
++Imageon_drawInit(ScreenPtr pScreen)
++{
++	KdScreenPriv(pScreen);
++	if (!kaaDrawInit (pScreen, &ImageonKaa))
++	    return FALSE;
++	return TRUE;
++}
++
++void
++Imageon_drawEnable(ScreenPtr pScreen)
++{
++        KdScreenPriv(pScreen);
++	KdMarkSync(pScreen);
++}
++
++void
++Imageon_drawDisable(ScreenPtr pScreen)
++{
++}
++
++void
++Imageon_drawFini(ScreenPtr pScreen)
++{
++}
++
++void
++Imageon_drawSync(ScreenPtr pScreen)
++{
++	AtiCore_WaitComplete(-1);
++}
+diff -Nur xc/programs/Xserver/hw/kdrive/fbdev/imageon.h xc.new/programs/Xserver/hw/kdrive/fbdev/imageon.h
+--- xc/programs/Xserver/hw/kdrive/fbdev/imageon.h	1970-01-01 00:00:00.000000000 +0000
++++ xc.new/programs/Xserver/hw/kdrive/fbdev/imageon.h	2005-02-04 00:41:54.000000000 +0000
+@@ -0,0 +1,22 @@
++/*
++ * sash@pdaXrom.org, 2003-2004
++ *
++ * AtiCore framebuffer 2d accel for BitBlt and SolidRect
++ * 
++ * (c)opyleft pdaXrom team (http://www.pdaXrom.org), 2003-2004
++ */
++
++#ifndef __IMAGEON_H__
++#define __IMAGEON_H__
++
++#define W100FB_CONFIG_EX       0x57415202 /* WAL\02 */
++
++int Imageon_initScreen(int scr_w, int scr_h);
++int Imageon_finishScreen();
++Bool Imageon_drawInit(ScreenPtr pScreen);
++void Imageon_drawEnable(ScreenPtr pScreen);
++void Imageon_drawDisable(ScreenPtr pScreen);
++void Imageon_drawFini(ScreenPtr pScreen);
++void Imageon_drawSync(ScreenPtr pScreen);
++
++#endif
+diff -Nur xc/programs/Xserver/hw/kdrive/kdrive.c xc.new/programs/Xserver/hw/kdrive/kdrive.c
+--- xc/programs/Xserver/hw/kdrive/kdrive.c	2002-10-31 18:29:50.000000000 +0000
++++ xc.new/programs/Xserver/hw/kdrive/kdrive.c	2005-02-04 00:41:54.000000000 +0000
+@@ -1364,17 +1364,41 @@
+ void
+ DPMSSet(int level)
+ {
++    KdCardInfo	    *card;
++    KdScreenInfo    *screen;
++
++    DPMSPowerLevel = level;
++
++    if (kdEnabled)
++    {
++	for (card = kdCardInfo; card; card = card->next)
++	{
++	    for (screen = card->screenList; screen; screen = screen->next)
++		if (screen->mynum == card->selected && screen->pScreen) 
++		{
++		    KdScreenPriv(screen->pScreen);
++		    if (pScreenPriv->enabled)
++			if (pScreenPriv->card->cfuncs->dpms)
++			    (*pScreenPriv->card->cfuncs->dpms) (screen->pScreen, level);
++		}
++	}
++	// no screen off, because already wakeup
++	//if (level == 3) {
++	//    DPMSPowerLevel = 0;
++	//}
++    }
+ }
+ 
+ int
+ DPMSGet (int *level)
+ {
+-    return -1;
++    return DPMSPowerLevel;
+ }
+ 
+ Bool
+ DPMSSupported (void)
+ {
+-    return FALSE;
++    return TRUE;
++//    return FALSE;
+ }
+ #endif
+diff -Nur xc/programs/Xserver/hw/kdrive/linux/Imakefile xc.new/programs/Xserver/hw/kdrive/linux/Imakefile
+--- xc/programs/Xserver/hw/kdrive/linux/Imakefile	2002-11-01 22:27:49.000000000 +0000
++++ xc.new/programs/Xserver/hw/kdrive/linux/Imakefile	2005-02-04 00:41:54.000000000 +0000
+@@ -13,6 +13,10 @@
+ #endif
+ #endif
+ 
++#if ATI_Imageon
++DEFINES += -DATI_Imageon
++#endif
++
+ SRCS = keyboard.c linux.c mouse.c ps2.c bus.c ms.c agp.c $(TSSRCS)
+ 
+ OBJS = keyboard.o linux.o mouse.o ps2.o bus.o ms.o agp.o $(TSOBJS)
+diff -Nur xc/programs/Xserver/hw/kdrive/linux/keyboard.c xc.new/programs/Xserver/hw/kdrive/linux/keyboard.c
+--- xc/programs/Xserver/hw/kdrive/linux/keyboard.c	2001-11-08 10:26:24.000000000 +0000
++++ xc.new/programs/Xserver/hw/kdrive/linux/keyboard.c	2005-02-04 00:41:54.000000000 +0000
+@@ -31,8 +31,18 @@
+ #include <termios.h>
+ #include <sys/ioctl.h>
+ 
++#define DPMSModeOn	0
++#define DPMSModeStandby	1
++#define DPMSModeSuspend	2
++#define DPMSModeOff	3
++
+ extern int  LinuxConsoleFd;
+ 
++extern int fn_right_button;
++extern int fn_middle_button;
++extern int fn_right_button_pressed;
++extern int fn_middle_button_pressed;
++
+ static const KeySym linux_to_x[256] = {
+ 	NoSymbol,	NoSymbol,	NoSymbol,	NoSymbol,
+ 	NoSymbol,	NoSymbol,	NoSymbol,	NoSymbol,
+@@ -387,8 +397,35 @@
+ 	b = buf;
+ 	while (n--)
+ 	{
+-	    KdEnqueueKeyboardEvent (b[0] & 0x7f, b[0] & 0x80);
+-	    b++;
++	    if ((b[0] & 0x7f )== 0x6d) {
++		if (b[0] & 0x80) {
++		    int oldDPMSEnabled = DPMSEnabled;
++		    DPMSEnabled = 1;
++		    DPMSSet(DPMSModeOff);
++		    DPMSEnabled = oldDPMSEnabled;
++		    //KdEnqueueKeyboardEvent (0, 0x00);
++		    //KdEnqueueKeyboardEvent (0, 0x80);
++		}
++		b++;
++	    } else {
++		if (((b[0] & 0x7f) == fn_right_button) && fn_right_button) {
++		    if (b[0] & 0x80) {
++			fn_right_button_pressed = 0;
++		    } else {
++			fn_right_button_pressed = 1;
++		    }
++		}
++		if (((b[0] & 0x7f) == fn_middle_button) && fn_middle_button) {
++		    if (b[0] & 0x80) {
++			fn_middle_button_pressed = 0;
++		    } else {
++			fn_middle_button_pressed = 1;
++		    }
++		}
++		//fprintf(stderr, "kb=%d\n", b[0]);
++		KdEnqueueKeyboardEvent (b[0] & 0x7f, b[0] & 0x80);
++		b++;
++	    }
+ 	}
+     }
+ }
+diff -Nur xc/programs/Xserver/hw/kdrive/linux/linux.c xc.new/programs/Xserver/hw/kdrive/linux/linux.c
+--- xc/programs/Xserver/hw/kdrive/linux/linux.c	2002-10-08 21:27:55.000000000 +0000
++++ xc.new/programs/Xserver/hw/kdrive/linux/linux.c	2005-02-04 00:41:54.000000000 +0000
+@@ -334,7 +334,7 @@
+     /*
+      * Open the APM driver
+      */
+-    LinuxApmFd = open ("/dev/apm_bios", 2);
++    LinuxApmFd = open ("/dev/apm_biosZ", 2);
+     if (LinuxApmFd >= 0)
+     {
+ 	LinuxApmRunning = TRUE;
+diff -Nur xc/programs/Xserver/hw/kdrive/linux/tslib.c xc.new/programs/Xserver/hw/kdrive/linux/tslib.c
+--- xc/programs/Xserver/hw/kdrive/linux/tslib.c	2002-11-05 05:28:06.000000000 +0000
++++ xc.new/programs/Xserver/hw/kdrive/linux/tslib.c	2005-02-04 00:41:54.000000000 +0000
+@@ -56,6 +56,32 @@
+ #include <sys/ioctl.h>
+ #include <tslib.h>
+ 
++#ifdef RANDR
++#ifdef ATI_Imageon
++/*
++ * say me best way than that hack ;(
++ */
++extern int	hack_ts_max_x;
++extern int	hack_ts_max_y;
++extern int	hack_ts_rotation;
++#endif
++#endif
++
++// --- need for mouse buttons emulation ---
++static int hold_right_button = 0;
++int fn_right_button = 0;
++int fn_middle_button = 0;
++int fn_right_button_pressed = 0;
++int fn_middle_button_pressed = 0;
++
++static unsigned int presstime = 0;
++static unsigned int xlastx = 0;
++static unsigned int xlasty = 0;
++static unsigned int xflags = 0;
++// --- screen buttons ---
++static int lastcode = -1;
++// ---
++
+ static long lastx = 0, lasty = 0;
+ static struct tsdev *tsDev = NULL;
+ 
+@@ -76,6 +102,55 @@
+     {
+ 	if (event.pressure) 
+ 	{
++	    if (hack_ts_max_x < 480) {
++		event.x >>= 1;
++		event.y >>= 1;
++	    }
++
++	    if (DPMSGet(NULL) > 0) {
++		KdEnqueueKeyboardEvent (0, 0x00);
++		KdEnqueueKeyboardEvent (0, 0x80);
++		DPMSSet(0);
++		return;
++	    }
++	    
++	    if (event.x > hack_ts_max_x) {
++		int code = 0;
++		switch (event.y / (hack_ts_max_y / 5)) {
++		    case 0: code = 110; break;
++		    case 1: code = 111; break;
++		    case 2: code = 112; break;
++		    case 3: code = 113; break;
++		    case 4: code = 114; break;
++		    default: break;
++		}
++		if (code == lastcode) return;
++		if ((lastcode != -1) && (lastcode != code)) KdEnqueueKeyboardEvent (lastcode, 0x80);
++		KdEnqueueKeyboardEvent (code, 0);
++		lastcode = code;
++		return;
++	    }
++#ifdef RANDR
++#ifdef ATI_Imageon
++	    long tmp1;
++	    switch(hack_ts_rotation) {
++		case RR_Rotate_90:
++		    tmp1 = event.y;
++		    event.y = event.x;
++		    event.x = hack_ts_max_y - tmp1;
++		    break;
++		case RR_Rotate_180:
++		    event.x = hack_ts_max_x - event.x;
++		    event.y = hack_ts_max_y - event.y;
++		    break;
++		case RR_Rotate_270:
++		    tmp1 = event.y;
++		    event.y = hack_ts_max_x - event.x;
++		    event.x = tmp1;
++		break;
++	    }
++#endif	    
++#endif
+ 	    /* 
+ 	     * HACK ATTACK.  (static global variables used !)
+ 	     * Here we test for the touch screen driver actually being on the
+@@ -83,9 +158,36 @@
+ 	     * then we send delta's so that we can track the entire vga screen.
+ 	     */
+ 	    if (KdTsCurScreen == KdTsPhyScreen) {
+-	    	flags = KD_BUTTON_1;
+ 	    	x = event.x;
+ 	    	y = event.y;
++		if ( !hold_right_button ) {
++		    if (fn_right_button_pressed) flags = KD_BUTTON_3;
++		    else if (fn_middle_button_pressed) flags = KD_BUTTON_2;
++	    	    else flags = KD_BUTTON_1;
++		} else {
++		    struct timeval tv;
++		    unsigned int curt;
++    		    gettimeofday(&tv, NULL);
++		    curt = tv.tv_usec/1000 + tv.tv_sec*1000;
++		    if (presstime == 0) {
++			presstime = curt;
++			lastx = xlastx = x;
++			lasty = xlasty = y;
++			xflags = KD_BUTTON_1;
++			return;
++		    }
++		    curt = curt - presstime;
++	    	    if (((xlastx >> 1) == (x >> 1)) || ((xlasty >> 1) == (y >> 1))) {
++			if      (curt <= 500) {  return; }
++			else if (curt >  500) { flags = KD_BUTTON_3; /*return;*/ }
++			//else if (curt > 1000) { flags = KD_BUTTON_3; /*return;*/ }
++		    } else {
++			flags = xflags;
++		    }
++		    xflags = flags;
++	    	    lastx = x;
++	    	    lasty = y;
++		}
+ 	    } else {
+ 	    	flags = /* KD_BUTTON_1 |*/ KD_MOUSE_DELTA;
+ 	    	if ((lastx == 0) || (lasty == 0)) {
+@@ -99,6 +201,18 @@
+ 	    	lasty = event.y;
+ 	    }
+ 	} else {
++	    if (lastcode != -1) {
++		KdEnqueueKeyboardEvent (lastcode, 0x80);
++		lastcode = -1;
++		return;
++	    }
++	    if (presstime && hold_right_button) {
++		flags = xflags;
++		x = lastx;
++		y = lasty;
++		KdEnqueueMouseEvent (mi, flags, x, y);
++		presstime = 0;
++	    }
+ 	    flags = KD_MOUSE_DELTA;
+ 	    x = 0;
+ 	    y = 0;
+@@ -125,9 +239,30 @@
+     KdMouseInfo	*mi, *next;
+     int		fd= 0;
+     int		n = 0;
++    char	*mouse_flag_ptr;
+ 
+     if (!TsInputType)
+ 	TsInputType = KdAllocInputType ();
++
++    hold_right_button = 0;
++    fn_right_button = 0;
++    fn_middle_button = 0;
++    fn_right_button_pressed = 0;
++    fn_middle_button_pressed = 0;
++    
++    if (mouse_flag_ptr = getenv("X11_RIGHT_MOUSE_BUTTON")) {
++	if (strcmp(mouse_flag_ptr, "hold") == 0) hold_right_button = 1;
++    }
++
++    if (mouse_flag_ptr = getenv("X11_RIGHT_MOUSE_BUTTON_MOD")) {
++	fn_right_button = atoi(mouse_flag_ptr); //30 for Fn, 27 for Shift
++    }
++
++    if (mouse_flag_ptr = getenv("X11_MIDDLE_MOUSE_BUTTON_MOD")) {
++	fn_middle_button = atoi(mouse_flag_ptr);
++    }
++
++    //fprintf(stderr, "mb= %d, %d\n", fn_right_button, fn_middle_button);
+     
+     for (mi = kdMouseInfo; mi; mi = next)
+     {
+diff -Nur xc/programs/mkfontscale/mkfontscale.c xc.new/programs/mkfontscale/mkfontscale.c
+--- xc/programs/mkfontscale/mkfontscale.c	2003-02-13 03:04:07.000000000 +0000
++++ xc.new/programs/mkfontscale/mkfontscale.c	2005-02-04 00:41:54.000000000 +0000
+@@ -29,7 +29,8 @@
+ #include <dirent.h>
+ 
+ #include <X11/fonts/fontenc.h>
+-#include <freetype/freetype.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ #include <freetype/ftsnames.h>
+ #include <freetype/tttables.h>
+ #include <freetype/ttnameid.h>
+diff -Nur xc/xf86Date.h xc.new/xf86Date.h
+--- xc/xf86Date.h	1970-01-01 00:00:00.000000000 +0000
++++ xc.new/xf86Date.h	2005-02-04 00:41:54.000000000 +0000
+@@ -0,0 +1 @@
++
+diff -Nur xc/xf86Version.h xc.new/xf86Version.h
+--- xc/xf86Version.h	1970-01-01 00:00:00.000000000 +0000
++++ xc.new/xf86Version.h	2005-02-04 00:41:54.000000000 +0000
+@@ -0,0 +1 @@
++

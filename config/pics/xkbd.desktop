@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Keyboard
+Comment=Virtual Keyboard
+Exec=xkbdlauncher
+Icon=xkbd.png
+Terminal=0
+Type=Application
+Categories=Applications
+StartupNotify=False
+SingleInstance=False

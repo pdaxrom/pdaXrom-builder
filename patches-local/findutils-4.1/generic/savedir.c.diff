@@ -1,0 +1,11 @@
+--- findutils-4.1/lib/savedir.c~	2004-10-10 15:19:43.000000000 +0000
++++ findutils-4.1/lib/savedir.c	2004-10-10 15:20:10.000000000 +0000
+@@ -62,7 +62,7 @@
+ #define NULL 0
+ #endif
+ 
+-char *stpcpy ();
++//char *stpcpy ();
+ 
+ /* Return a freshly allocated string containing the filenames
+    in directory DIR, separated by '\0' characters;

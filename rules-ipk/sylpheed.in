@@ -1,0 +1,8 @@
+config SYLPHEED
+	bool
+	prompt "sylpheed"
+
+config SYLPHEED_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on SYLPHEED

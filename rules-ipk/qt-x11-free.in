@@ -1,0 +1,18 @@
+config QT-X11-FREE
+	bool
+	prompt "Compile Qt-x11-free"
+
+config QT-X11-FREE-QT4
+	bool
+	prompt "Enable Qt4"
+	depends on QT-X11-FREE
+
+config QT-X11-FREE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on QT-X11-FREE
+
+config QT-X11-FREE-HEADERS_INSTALL
+	bool
+	prompt "install headers in ROM"
+	depends on QT-X11-FREE_INSTALL

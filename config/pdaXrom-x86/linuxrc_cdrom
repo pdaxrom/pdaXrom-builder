@@ -1,0 +1,53 @@
+#!/bin/bash
+
+CD_OK="no"
+
+for cdrom in `/bin/ls /dev/cdroms/cdrom*`; do
+    /bin/mount -n -o ro $cdrom /cdrom 2> /dev/null >/dev/null
+    if [ ! $? = 0 ]; then
+	continue
+    fi
+    if [ -f /cdrom/boot/rootfs.bin ]; then
+	CD_OK="yes"
+	echo "Found pdaX86 CD at $cdrom"
+	break
+    fi
+    /bin/umount /cdrom 
+    #2> /dev/null >/dev/null
+done
+
+if [ $CD_OK = "no" ]; then
+    echo "Can not detect pdaX86 CD!"
+    exit 1
+fi
+
+/bin/mount -n -t proc none /proc
+MEM=`/bin/cat /proc/meminfo | /bin/grep 'MemTotal' | /bin/cut -d':' -f 2`
+MEM=`echo $MEM | /bin/cut -d ' ' -f 1`
+MEM=$((MEM * 1024))
+echo "Total memory: $MEM"
+
+IMG=`/bin/wc -c /cdrom/boot/rootfs.bin`
+IMG=`echo $IMG | /bin/cut -d ' ' -f 1`
+echo "Image size:   $IMG"
+
+PDAX86RAM=
+PDAX86CD=
+cat /proc/cmdline | grep 'pdaX86ram' && PDAX86RAM=yes
+cat /proc/cmdline | grep 'pdaX86cd'  && PDAX86CD=yes
+
+if [ "$PDAX86CD" = "" -a $((IMG * 2)) -lt $MEM -o ! "$PDAX86RAM" = "" ]; then
+    echo "Ahh, so much memory there - $((MEM / 1024 / 1024)) MB. Copying linux to RAM..."
+    /bin/mount -n -t tmpfs none /tmp
+    /bin/cp -v /cdrom/boot/rootfs.bin /tmp/
+    /bin/umount /cdrom
+    /bin/mount -n -o loop,ro -t squashfs /tmp/rootfs.bin /mnt
+else
+    /bin/mount -n -o loop,ro -t squashfs /cdrom/boot/rootfs.bin /mnt
+fi
+
+/bin/mount -n -o remount,ro /
+/bin/mount -n -t devfs none /mnt/dev
+cd /mnt
+/bin/pivot_root . mnt/initrd
+exec /mnt/initrd/bin/chroot . /sbin/init </dev/console 2>/dev/console

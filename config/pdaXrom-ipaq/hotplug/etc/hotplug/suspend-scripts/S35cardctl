@@ -1,0 +1,8 @@
+#!/bin/sh
+# Suspend Cardctl
+if [ -x /sbin/cardctl ]; then
+/sbin/cardctl suspend
+fi
+
+
+

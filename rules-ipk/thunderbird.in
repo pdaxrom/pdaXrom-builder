@@ -1,0 +1,8 @@
+config THUNDERBIRD
+	bool
+	prompt "thunderbird"
+
+config THUNDERBIRD_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on THUNDERBIRD

@@ -1,0 +1,9 @@
+config MIME-EDITOR
+	bool
+	prompt "Mime editor"
+	depends on ROX
+
+config MIME-EDITOR_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on MIME-EDITOR

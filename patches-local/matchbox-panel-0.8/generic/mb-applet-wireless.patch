@@ -1,0 +1,150 @@
+--- matchbox-panel-0.8.orig/applets/mb-applet-wireless.c	2004-02-04 04:05:02.000000000 +1300
++++ matchbox-panel-0.8/applets/mb-applet-wireless.c	2004-10-23 22:06:16.000000000 +1300
+@@ -49,16 +49,25 @@
+ 
+ #endif
+ 
++#ifdef USE_LIBSN
++#define SN_API_NOT_YET_FROZEN 1
++#include <libsn/sn.h>
++#endif
++
++#define CONTEXT_APP        "/usr/bin/network.py"
++#define CONTEXT_APP_ARGS   ""
++#define CONTEXT_APP_WANT_SN 1
++
+ #ifdef MB_HAVE_PNG
+ #define IMG_EXT "png"
+ #else
+ #define IMG_EXT "xpm"
+ #endif
+ 
+-static int LastImg = 0;
++static int LastImg = -1;
+ 
+ enum {
+-  MW_BROKE = 1,
++  MW_BROKE = -1,
+   MW_NO_LINK,
+   MW_SIG_1_40,
+   MW_SIG_41_60,
+@@ -401,7 +410,7 @@
+ 
+   if (want_resize)  /* we only request a resize is absolutely needed */
+     {
+-      LastImg = 0;
++      LastImg = -1;
+       mb_tray_app_request_size (app, scale_width, scale_height);
+     }
+ 
+@@ -452,7 +461,7 @@
+   if (!theme_name) return;
+   if (ThemeName) free(ThemeName);
+ 
+-  LastImg = 0; 			/* Make sure paint gets updated */
++  LastImg = -1; 			/* Make sure paint gets updated */
+ 
+   ThemeName = strdup(theme_name);
+   load_icons(app);
+@@ -465,6 +474,78 @@
+   mb_tray_app_repaint (app);
+ }
+ 
++#ifdef USE_LIBSN
++
++static SnDisplay *sn_dpy;
++
++static void 
++sn_activate(char *name, char *exec_str)
++{
++  SnLauncherContext *context;
++  pid_t child_pid = 0;
++
++  context = sn_launcher_context_new (sn_dpy, 0);
++  
++  sn_launcher_context_set_name (context, name);
++  sn_launcher_context_set_binary_name (context, exec_str);
++  
++  sn_launcher_context_initiate (context, "monoluanch launch", exec_str,
++				CurrentTime);
++
++  switch ((child_pid = fork ()))
++    {
++    case -1:
++      fprintf (stderr, "Fork failed\n" );
++      break;
++    case 0:
++      sn_launcher_context_setup_child_process (context);
++      mb_exec(exec_str);
++      fprintf (stderr, "Failed to exec %s \n", exec_str);
++      _exit (1);
++      break;
++    }
++}
++
++#endif
++
++void 
++fork_exec(char *cmd)
++{
++  switch (fork())
++    {
++    case 0:
++      setpgid(0, 0); /* Stop us killing child */
++      mb_exec(cmd);
++      fprintf(stderr, "minitime: Failed to Launch '%s'", cmd);
++      exit(1);
++    case -1:
++      fprintf(stderr, "minitime: Failed to Launch '%s'", cmd);
++      break;
++    }
++}
++
++void
++context_callback ( MBTrayApp *app )
++{
++#ifdef USE_LIBSN
++  if (CONTEXT_APP_WANT_SN)
++    {
++      sn_activate(CONTEXT_APP, CONTEXT_APP " " CONTEXT_APP_ARGS);      
++      return;
++    }
++#endif
++
++  fork_exec(CONTEXT_APP " " CONTEXT_APP_ARGS);
++}
++
++static Bool 
++file_exists(char *filename)
++{
++  struct stat st; 		/* XXX Should probably check if exe too */
++  if (stat(filename, &st)) return False;
++  return True;
++}
++
+ int
+ main( int argc, char *argv[])
+ {
+@@ -501,11 +582,19 @@
+    mb_tray_app_set_theme_change_callback (app, theme_callback );
+ 
+    mb_tray_app_set_icon(app, pb, Imgs[3]);
++
++   if (file_exists(CONTEXT_APP))
++     {
++       mb_tray_app_set_context_info (app, _("Network settings")); 
++
++       mb_tray_app_set_context_callback (app, context_callback); 
++     }
++
++#ifdef USE_LIBSN
++   sn_dpy = sn_display_new (mb_tray_app_xdisplay(app), NULL, NULL);
++#endif
+    
+    mb_tray_app_main (app);
+    
+    return 1;
+ }
+-
+-
+-

@@ -1,0 +1,13 @@
+--- nxcompext/configure.in~	2004-10-03 22:22:00.000000000 +0000
++++ nxcompext/configure.in	2004-10-03 22:22:26.000000000 +0000
+@@ -5,8 +5,8 @@
+ AC_PREREQ(2.13)
+ 
+ dnl Reset default compilation flags.
+-CXXFLAGS="-O3"
+-CPPFLAGS="-O3"
++CXXFLAGS="-Os -fomit-frame-pointer -mcpu=xscale -mtune=xscale"
++CPPFLAGS="-Os -fomit-frame-pointer -mcpu=xscale -mtune=xscale"
+ 
+ dnl Check for programs.
+ AC_PROG_CXX

@@ -1,0 +1,150 @@
+#!/bin/bash
+
+
+# Set the path
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+
+if [ -r /dev/.devfsd ]	;    then
+  if [ -x /sbin/devfsd ] ;    then
+    echo "Starting devfs daemon: /sbin/devfsd /dev"
+    /sbin/devfsd /dev
+    ln -sf sharp_ts /dev/ts
+    ln -sf corgi-bl /dev/fl
+    ln -sf collie_slotdetect /dev/sd_slotstat
+  fi
+fi
+
+# set time
+sltime
+
+HOSTNAME=`/bin/hostname`
+
+# Read in config data.
+if [ -f /etc/sysconfig/network ]; then
+    . /etc/sysconfig/network
+else
+    NETWORKING=no
+fi
+
+if [ -z "$HOSTNAME" -o "$HOSTNAME" = "(none)" ]; then
+    HOSTNAME=zaurus
+fi
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Print a banner. ;)
+if [ -z "$SILENT" ] ; then
+    echo -en $"   Welcome to "
+    [ "$BOOTUP" != "serial" ] && echo -en $"\\033[1;31m"
+    echo -en $"SHARP"
+    [ "$BOOTUP" != "serial" ] && echo -en $"\\033[0;39m"
+    echo $" Zaurus"
+fi
+
+mount -w /proc /proc -t proc
+
+echo "0 0 0 0" >/proc/sys/kernel/printk
+
+# set hardware info
+/sbin/writerominfo
+
+if [ ! -f /etc/rc.d/rc.rofilesys -o ! -x /etc/rc.d/rc.rofilesys ];then   
+    action "Mounting filesystem:" mount -o remount -w %root% / 2>/dev/null >/dev/null
+else
+    #action "Starting filesystem:" /etc/rc.d/rc.rofilesys
+    . /etc/rc.d/rc.rofilesys
+fi
+
+# rebuild cache for shared libraries, don't update links.
+if [ -x /sbin/ldconfig ]; then
+    /sbin/ldconfig -X
+fi
+
+# check /etc/HOSTNAME
+if [ -f /etc/HOSTNAME ]; then
+    HOSTNAME=`cat /etc/HOSTNAME`
+fi
+
+# setup for lo loopback device
+action "Set loopback device:" ifconfig lo 127.0.0.1 netmask 255.0.0.0
+
+# set hostname
+action $"Hostname: ${HOSTNAME}" /bin/hostname $HOSTNAME
+
+# module dependency
+if [ -x /sbin/depmod ]; then
+    action "Module dependencies:" depmod -A
+fi
+
+# Load device specific information
+#if [ -x /sbin/modprobe ]; then
+#    action "Loading devinfo:" modprobe devinfo
+#fi
+
+# Run all rc.* files apart rc.local in /etc/rc.d
+cd /etc/rc.d
+for I in rc.modules rc.serial;do
+  if [ -f ./$I ];then
+    if [ -x ./$I ];then
+      ./$I
+    fi
+  fi
+done
+
+action "Mounting local FS:" mount -a -t nonfs 2>/dev/null >/dev/null
+#action "Mounting remote FS:" mount -a -t nfs
+
+## Finish by running rc.local
+#cd /etc/rc.d
+#if [ -f "./rc.local" ];then
+#  if [ -x "./rc.local" ];then
+#    echo "*** Running rc.local"
+#    ./rc.local
+#  fi
+#fi
+
+# /var clean up
+for f in /var/lock/* /var/run/*; do
+    if test -d "$f" ; then
+	rm -f $f/*
+    else
+	rm -f $f
+    fi
+done
+
+# utmp clean up
+>/var/run/utmp
+touch /var/log/wtmp
+chgrp utmp /var/run/utmp /var/log/wtmp
+chmod 0664 /var/run/utmp /var/log/wtmp
+
+# save dmesg
+dmesg > /var/log/dmesg
+rm -f /var/log/messages
+/sbin/syslogd -S
+
+# reconfiguring offline installed packages
+
+if [ ! -f /etc/.ipks_configured ]; then
+    for FILE in /usr/lib/ipkg/info/*.postinst ; do
+	echo "Configuring $FILE"
+	$FILE configure
+	rm -f $FILE
+    done
+fi
+touch /etc/.ipks_configured
+
+if [ -f /usr/bin/lightnpower.py ]; then
+    HOME=/home/root /usr/bin/lightnpower.py --setbackonly
+fi
+
+if [ -f /home/root/zgcc-@GCC_VERSION@.img ]; then
+    if [ ! -d @PTXCONF_PREFIX@ ]; then
+	mkdir -p @PTXCONF_PREFIX@
+    fi
+    mount -o loop /home/root/zgcc-@GCC_VERSION@.img @PTXCONF_PREFIX@
+fi
+
+test -f /etc/sysconfig/keyboard/kernel.map -a -f /usr/bin/loadkeys && /usr/bin/loadkeys /etc/sysconfig/keyboard/kernel.map

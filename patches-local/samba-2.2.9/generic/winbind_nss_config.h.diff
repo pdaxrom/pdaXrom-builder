@@ -1,0 +1,27 @@
+--- samba-2.2.9/source/nsswitch/winbind_nss_config.h~	2004-05-08 01:07:10.000000000 +0000
++++ samba-2.2.9/source/nsswitch/winbind_nss_config.h	2004-05-23 15:39:22.000000000 +0000
+@@ -110,22 +110,12 @@
+ typedef int BOOL;
+ #endif
+ 
+-#if !defined(uint32)
+-#if (SIZEOF_INT == 4)
++#ifndef uint32
+ #define uint32 unsigned int
+-#elif (SIZEOF_LONG == 4)
+-#define uint32 unsigned long
+-#elif (SIZEOF_SHORT == 4)
+-#define uint32 unsigned short
+-#endif
+ #endif
+ 
+-#if !defined(uint16)
+-#if (SIZEOF_SHORT == 4)
+-#define uint16 __ERROR___CANNOT_DETERMINE_TYPE_FOR_INT16;
+-#else /* SIZEOF_SHORT != 4 */
++#ifndef uint16
+ #define uint16 unsigned short
+-#endif /* SIZEOF_SHORT != 4 */
+ #endif
+ 
+ #ifndef uint8

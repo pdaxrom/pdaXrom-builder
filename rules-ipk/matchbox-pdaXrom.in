@@ -1,0 +1,14 @@
+config MATCHBOX-PDAXROM
+	bool
+	prompt "pdaXrom matchbox config files"
+	depends on XFREE430
+
+config MATCHBOX-PDAXROM_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MATCHBOX-PDAXROM
+
+config MATCHBOX-PDAXROM_VENDOR-INSTALL
+	bool
+	prompt "Vendor installation"
+	depends on MATCHBOX-PDAXROM

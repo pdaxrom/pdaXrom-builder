@@ -1,0 +1,20 @@
+--- mozilla/extensions/transformiix/source/base/Double.cpp~	2004-09-26 06:05:45.000000000 +0000
++++ mozilla/extensions/transformiix/source/base/Double.cpp	2004-09-26 06:06:11.000000000 +0000
+@@ -71,7 +71,16 @@
+  */
+ 
+ #if defined(__arm) || defined(__arm32__) || defined(_arm26__) || defined(__arm__)
+-#define CPU_IS_ARM
++# ifdef __VFP_FP__
++#  warning "ARM VFP detected!"
++#  define CPU_IS_ARM_VFP
++# elif __SOFTFP__
++#  error "ARM SOFTFP detected!"
++#  define CPU_IS_ARM_VFP
++# else
++#  warning "ARM FPA detected!"
++#  define CPU_IS_ARM
++# endif
+ #endif
+ 
+ #if (__GNUC__ == 2 && __GNUC_MINOR__ > 95) || __GNUC__ > 2

@@ -1,0 +1,9 @@
+config XPDF
+	bool
+	prompt "xpdf"
+	depends on XFREE430
+
+config XPDF_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XPDF

@@ -1,0 +1,13 @@
+--- m4/lib/regex.c~	2004-09-22 00:46:25.000000000 +0000
++++ m4/lib/regex.c	2004-09-22 00:46:35.000000000 +0000
+@@ -49,8 +49,8 @@
+ #ifdef STDC_HEADERS
+ #include <stdlib.h>
+ #else
+-char *malloc ();
+-char *realloc ();
++//char *malloc ();
++//char *realloc ();
+ #endif
+ 
+ 

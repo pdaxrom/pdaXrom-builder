@@ -1,0 +1,30 @@
+--- fuse/kernel/Makefile.in~	2005-01-23 14:44:12.000000000 +0000
++++ fuse/kernel/Makefile.in	2005-01-23 14:45:41.000000000 +0000
+@@ -46,10 +46,10 @@
+ 
+ ifeq ($(majver), 2.4)
+ 
+-CC = gcc
+-LD = ld
+-CFLAGS = -O2 -Wall -Wstrict-prototypes -fno-strict-aliasing -pipe 
+-CPPFLAGS = -I@kernelsrc@/include -I. -D__KERNEL__ -DMODULE -D_LOOSE_KERNEL_NAMES -DFUSE_VERSION=\"$(VERSION)\" @KERNELCPPFLAGS@
++KERNEL_CC := gcc
++KERNEL_LD := ld
++KERNEL_CFLAGS := -O2 -Wall -Wstrict-prototypes -fno-strict-aliasing -pipe 
++KERNEL_CPPFLAGS := -I@kernelsrc@/include -I. -D__KERNEL__ -DMODULE -D_LOOSE_KERNEL_NAMES -DFUSE_VERSION=\"$(VERSION)\" @KERNELCPPFLAGS@
+ 
+ fuse_objs = dev.o dir.o file.o inode.o util.o compat/parser.o
+ 
+@@ -58,10 +58,10 @@
+ all-spec: fuse.o
+ 
+ .c.o:
+-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
++	$(KERNEL_CC) $(KERNEL_CFLAGS) $(KERNEL_CPPFLAGS) -c $< -o $@
+ 
+ fuse.o: $(fuse_objs)
+-	$(LD) -r -o fuse.o $(fuse_objs)
++	$(KERNEL_LD) -r -o fuse.o $(fuse_objs)
+ 
+ fuse_headers = fuse_i.h fuse_kernel.h
+ 

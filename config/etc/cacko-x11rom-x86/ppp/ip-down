@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# The pppd executes this script every time a PPP connection goes down
+# and passes the following args to it:
+#
+# 	$1	device
+# 	$2	tty
+# 	$3	speed
+# 	$4	local IP addr
+# 	$5	remote IP addr
+#
+# You can then execute special commands (like removing routes)
+# depending on the arguments passed by the pppd.
+#
+
+#if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf ]; then
+if [ -f /etc/ppp/resolv.conf ]; then
+        if [ -f /etc/ppp/resolv.prev ]; then
+                cp -f /etc/ppp/resolv.prev /etc/resolv.conf
+        else
+                rm -f /etc/resolv.conf
+        fi
+fi
+

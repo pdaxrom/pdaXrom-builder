@@ -1,0 +1,62 @@
+#!/bin/sh
+######################################################################
+#
+# Determine the device to be terminated.
+#
+if [ "$1" = "" ]; then
+#	DEVICE=ppp0
+	DEVICES=`(cd /var/run; ls ppp?.pid) 2> /dev/null`
+else
+#	DEVICE=$1
+	DEVICES=$1
+fi
+
+VAL=0
+
+for DEVICE in ${DEVICES}; do
+
+# return .sav 
+cd /etc
+if (test -f resolv.conf.sav); then
+    mv resolv.conf.sav resolv.conf
+# for Auto-DNS
+elif (test -f resolv.conf.save); then
+    mv resolv.conf.save resolv.conf
+fi
+cd /etc/ppp
+if (test -f pap-secrets.sav); then
+    mv pap-secrets.sav pap-secrets
+fi
+if (test -f chap-secrets.sav); then
+    mv chap-secrets.sav chap-secrets
+fi
+
+######################################################################
+#
+# If the ppp0 pid file is present then the program is running. Stop it.
+if [ -r /var/run/$DEVICE ]; then
+        kill -9 `cat /var/run/$DEVICE`
+#
+# If the kill did not work then there is no process running for this
+# pid. It may also mean that the lock file will be left. You may wish
+# to delete the lock file at the same time.
+        if [ ! "$?" = "0" ]; then
+                rm -f /var/run/$DEVICE
+                echo "ERROR: Removed stale pid file"
+		VAL=1
+#                exit 1
+        fi
+#
+# Success. Let pppd clean up its own junk.
+        echo "PPP link to $DEVICE terminated."
+else
+#
+# The ppp process is not running for ppp0
+	echo "ERROR: PPP link is not active on $DEVICE"
+	VAL=1
+fi
+
+done
+
+exit $VAL
+

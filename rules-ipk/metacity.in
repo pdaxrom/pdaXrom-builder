@@ -1,0 +1,9 @@
+config METACITY
+	bool
+	prompt "Compile metacity / X11"
+	depends on XFREE430 && GTK22
+
+config METACITY_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on METACITY

@@ -1,0 +1,9 @@
+config ALSA-UTILS
+	bool
+	prompt "ALSA Utils"
+	depends on ARCH_X86
+
+config ALSA-UTILS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on ALSA-UTILS

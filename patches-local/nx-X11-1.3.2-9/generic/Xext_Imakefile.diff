@@ -1,0 +1,17 @@
+--- nx-X11/lib/Xext/Imakefile.NX.original	2003-07-01 10:55:56.000000000 +0000
++++ nx-X11/lib/Xext/Imakefile	2004-10-04 02:35:42.000000000 +0000
+@@ -59,12 +59,12 @@
+ 		XSecurity.o XAppgroup.o Xcup.o DPMS.o XEVI.o
+      LINTLIBS = $(LINTXLIB)
+ 
++
+ #if NXLibraries
+                                                                                                                                               
+ $(NX_XCOMPLIBEXTTARGET):
+ 	cd ../../../nxcompext && \
+-	./configure && \
+-	make
++	make CC=$(CC) CXX=$(CXX)
+                                                                                                                                               
+ all:: $(NX_XCOMPLIBEXTTARGET)
+                                                                                                                                               

@@ -1,0 +1,28 @@
+--- nx-X11/config/cf/NX-Linux.def.NX.original	2004-03-03 21:40:34.000000000 +0000
++++ nx-X11/config/cf/NX-Linux.def	2004-10-04 03:34:27.000000000 +0000
+@@ -290,9 +290,22 @@
+ 
+ #ifdef NXAgentServer
+ #define BuildRenderLibrary	YES
+-#define SharedLibFreetype2	NO
+-#define NormalLibFreetype2	YES
+-#define FontLibSharedFreeType 	NO
++#define SharedLibFreetype2	YES
++/* #define NormalLibFreetype2	YES */
++#define FontLibSharedFreeType 	NO
++
++#define XserverStaticFontLib	NO
++
++#define HasExpat		YES
++#define HasFreetype2		YES
++#define HasLibpng		YES
++#define HasZlib			YES
++#define HasFontconfig		YES
++
++#define Freetype2Dir               @FREETYPE2DIR@
++#define FontconfigDir              @FONTCONFIGDIR@
++#define ExpatDir                   @EXPATDIR@
++#define LibpngDir                  @LIBPNGDIR@
+ #endif
+ 
+ /*

@@ -1,0 +1,69 @@
+#!/bin/sh
+#
+# Script to initiate a ppp connection. This is the first part of the
+# pair of scripts. This is not a secure pair of scripts as the codes
+# are visible with the 'ps' command.  However, it is simple.
+#
+if (test X$1 != X); then
+    PIPEFD="pipefd $1";
+fi
+
+cd /etc/ppp
+
+# Read options from text file
+. ./SETVAR
+
+cd /etc
+
+# DNS setting
+if (test "X$PRI_DNS" != X); then
+    if (test -f resolv.conf && !(test -f resolv.conf.sav)); then
+	mv resolv.conf resolv.conf.sav
+    else
+	rm resolv.conf
+    fi
+    if (test "X$MYDOMAIN" != X); then
+	echo "search $MYDOMAIN" > resolv.conf
+    fi
+    echo "nameserver $PRI_DNS" >> resolv.conf
+    if (test "X$SEC_DNS" != X); then
+	echo "nameserver $SEC_DNS" >> resolv.conf
+    fi
+fi
+
+cd /etc/ppp
+
+# PAP/CHAP files
+if (test "X$ACCOUNT" != X && test "X$PASSWORD" != X); then
+    if (test -f pap-secrets && !(test -f pap-secrets.sav)); then
+	mv pap-secrets pap-secrets.sav
+    fi
+    if (test -f chap-secrets && !(test -f chap-secrets.sav)); then
+	mv chap-secrets chap-secrets.sav
+    fi
+    echo "$ACCOUNT * $PASSWORD *" > pap-secrets
+    echo "$ACCOUNT * $PASSWORD *" > chap-secrets
+fi
+
+if (test X$DEVICE = X); then
+    DEVICE=/dev/ttyS0
+fi
+if (test X$DEVICE_SPEED = X); then
+    DEVICE_SPEED=115200
+fi
+# 
+# script for serial connection
+#
+DIALER_SCRIPT=/etc/ppp/ppp-on-sldialer
+# 
+# debug mode
+#
+DEBUG='debug kdebug 5 logfile /var/log/ppplog'
+#
+# Initiate the connection
+# 
+# user configrations are written in options.user
+#
+exec /usr/sbin/pppd $DEBUG $PIPEFD \
+	$DEVICE $DEVICE_SPEED \
+	file options.user connect $DIALER_SCRIPT

@@ -1,0 +1,13 @@
+#####
+#
+# Exec 
+# keycode, modifier,     Exec,  Command,          Extra parameters
+#
+#######################################################
+keycode=25,        Control+Shift,  Exec, xterm -fg green2 -bg black -sb -sl 1000 -cr green2, Fork, NoAutoRepeat
+#keycode=49,        Control,  Exec, xmodmap -e "pointer = 1 2 3", NoFork, NoAutoRepeat
+#keycode=50,        Control,  Exec, xmodmap -e "pointer = 2 1 3", NoFork, NoAutoRepeat
+#keycode=51,        Control,  Exec, xmodmap -e "pointer = 3 2 1", NoFork, NoAutoRepeat
+keycode=110,       none,     Exec, chkhinge, NoFork, NoAutoRepeat
+keycode=57,        Control,  Exec, xmodmap /etc/X11/kb/corgi.xmodmap, NoFork, NoAutoRepeat
+keycode=58,        Control,  Exec, xmodmap /etc/X11/kb/corgi.xmodmap_ru, NoFork, NoAutoRepeat

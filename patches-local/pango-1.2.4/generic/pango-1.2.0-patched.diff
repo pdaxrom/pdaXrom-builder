@@ -1,0 +1,23 @@
+diff -Nur pango-1.2.0/Makefile.am pango-1.2.0-patched/Makefile.am
+--- pango-1.2.5/Makefile.am	2003-01-30 21:43:47.000000000 +0000
++++ pango-1.2.5-patched/Makefile.am	2004-02-03 14:27:34.000000000 +0000
+@@ -1,6 +1,6 @@
+ ## Process this file with automake to create Makefile.in.
+ 
+-SUBDIRS= pango modules examples docs tools tests
++SUBDIRS= pango modules examples docs tools
+ 
+ EXTRA_DIST = 		\
+ 	pango.pc.in	\
+diff -Nur pango-1.2.0/Makefile.in pango-1.2.0-patched/Makefile.in
+--- pango-1.2.5/Makefile.in	2003-08-27 15:38:53.000000000 +0000
++++ pango-1.2.5-patched/Makefile.in	2004-02-03 14:27:28.000000000 +0000
+@@ -120,7 +120,7 @@
+ XFT_LIBS = @XFT_LIBS@
+ ms_librarian = @ms_librarian@
+ 
+-SUBDIRS = pango modules examples docs tools tests
++SUBDIRS = pango modules examples docs tools
+ 
+ EXTRA_DIST = \
+ 	pango.pc.in	\

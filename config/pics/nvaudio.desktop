@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=NVAudio
+Comment=NVidia NForce audio mixer
+Exec=nvaudio
+Icon=nvicon.xpm
+Terminal=0
+Type=Application
+Categories=AudioVideo
+StartupNotify=True
+SingleInstance=False

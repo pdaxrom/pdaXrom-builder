@@ -1,0 +1,137 @@
+#!/bin/sh
+#
+# Setup and utility functions for use in hotplug agents
+#
+# $Id: hotplug.functions,v 1.2 2001/10/12 11:15:17 jamey Exp $
+#
+
+# DEBUG=yes export DEBUG
+PATH=/bin:/sbin:/usr/sbin:/usr/bin
+
+KERNEL=`uname -r`
+MODULE_DIR=/lib/modules/$KERNEL
+
+HOTPLUG_DIR=/etc/hotplug
+
+#
+# for diagnostics
+#
+if [ -t -o ! -x /usr/bin/logger ]; then
+    mesg () {
+	echo "$@"
+    }
+else
+    mesg () {
+	/usr/bin/logger -t $0 "$@"
+    }
+fi
+
+#
+# The modules.*map parsing uses BASH ("declare -i") and some version
+# of AWK, typically /bin/gawk.  Most GNU/Linux distros have these,
+# but some specialized ones (floppy based, etc) may not.  ("type -p"
+# is also a bash-ism, more robust than "which".)
+#
+AWK=`type -p gawk`
+if [ "$AWK" = "" ]; then
+    AWK=`type -p awk`
+fi
+
+
+#
+# Not "modprobe --autoclean" ... one driver module can handle many
+# devices.  Unloading should be done when no devices are present.
+# Autocleaning happens if none of the devices are open, once any of
+# them gets opened; wrong timing.
+#
+MODPROBE="/sbin/modprobe"
+
+
+####################################################################
+#
+# usage: load_driver type filename description
+#
+# modprobes driver module(s), and optionally
+# invokes a module-specific setup script.
+#
+# the "modules.*map" format file is guaranteed to exist
+#
+load_drivers ()
+{
+    DRIVERS=""
+
+    # make this routine more readable
+    TYPE=$1
+    FILENAME=$2
+    DESCRIPTION=$3
+
+    # NOTE:  usbmodules isn't currently in the trusted path; also,
+    # something later than "usbutils-0.7" is needed ("--mapfile"
+    # and modutils 2.4.2 support are both needed ... patch avail
+    # as of mid-jan 2001, but isn't in a 'usbutils' distribution)
+
+# FIXME: abstract this logic.  PCI and USB agents should
+# choose which way they use to generate module listings.
+
+    # can we use usbmodules, pcimodules?
+    LISTER=`type -p ${TYPE}modules`
+    if [ "$LISTER" != "" ]; then
+	case $TYPE in
+	usb)
+	    # only works if we have usbdevfs
+	    # ... reads more descriptors than are passed in env
+	    if [ "$DEVICE" = "" ]; then
+# FIXME: at least when "usbmodules" doesn't exist,
+# could use a script to parse this device's "I: " lines
+# in /proc/bus/usb/devices, without native code ...
+		LISTER=
+	    else
+		DRIVERS=`$LISTER --mapfile $FILENAME --device $DEVICE`
+	    fi ;;
+
+	pci)
+# FIXME:  pcimodules has no per-device option !!!
+# (original version, from yggrdasil.com)
+	    mesg "pcimodules is scanning more than $PCI_SLOT ..."
+	    DRIVERS=`$LISTER`
+	    ;;
+	
+	*)	mesg "how to invoke ${TYPE}modules ??"
+	    LISTER=
+	esac
+    fi
+
+    # do it with just shell scripts
+    if [ "$LISTER" = "" ]; then
+	${TYPE}_map_modules < $FILENAME
+    fi
+
+    if [ "$DRIVERS" = "" ]; then
+	return
+    fi
+
+    if [ "$DEBUG" != "" ]; then
+	mesg Modprobe and setup $DRIVERS for $DESCRIPTION
+    fi
+
+    # maybe driver modules need loading and configuring
+    for MODULE in $DRIVERS
+    do
+	if ! lsmod | grep -q "^$MODULE "; then
+	    if grep -q "^$MODULE\$" /etc/hotplug/blacklist >/dev/null 2>&1; then
+		if [ "$DEBUG" != "" ]; then
+		    mesg "... blacklisted module:  $MODULE"
+		fi
+	    elif find $MODULE_DIR -name $MODULE.o >/dev/null 2>&1 &&
+		    ! $MODPROBE $MODULE >/dev/null 2>&1 ; then
+		mesg "... can't load module $MODULE"
+	    elif [ -x /etc/hotplug/$TYPE/$MODULE ]; then
+		if [ "$DEBUG" != "" ]; then
+		    mesg Module setup $MODULE for $DESCRIPTION
+		fi
+		/etc/hotplug/$TYPE/$MODULE
+	    fi
+	fi
+    done
+}
+

@@ -1,0 +1,20 @@
+--- nmap/Makefile.in~	2005-01-31 14:28:56.000000000 +0000
++++ nmap/Makefile.in	2005-01-31 14:29:19.000000000 +0000
+@@ -273,7 +273,7 @@
+ 
+ install-nmap: $(TARGET)
+ 	$(SHTOOL) mkdir -f -p -m 755 $(DESTDIR)$(bindir) $(DESTDIR)$(mandir)/man1 $(DESTDIR)$(nmapdatadir)
+-	$(INSTALL) -c -m 755 nmap -s $(DESTDIR)$(bindir)/nmap
++	$(INSTALL) -c -m 755 nmap $(DESTDIR)$(bindir)/nmap
+ 	$(INSTALL) -c -m 644 docs/$(TARGET).1 $(DESTDIR)$(mandir)/man1/$(TARGET).1
+ 	$(INSTALL) -c -m 644 nmap-services $(DESTDIR)$(nmapdatadir)/
+ 	$(INSTALL) -c -m 644 nmap-rpc $(DESTDIR)$(nmapdatadir)/
+@@ -285,7 +285,7 @@
+ install-nmapfe: $(TARGETNMAPFE)
+ 	$(SHTOOL) mkdir -f -p -m 755 $(DESTDIR)$(bindir) $(DESTDIR)$(mandir)/man1 $(DESTDIR)$(nmapdatadir) $(DESTDIR)$(deskdir)
+ 	@echo "If the next command fails -- you cannot use the X front end"
+-	-test -f nmapfe/nmapfe && $(INSTALL) -c -m 755 -s nmapfe/nmapfe $(DESTDIR)$(bindir)/nmapfe && rm -f $(DESTDIR)$(bindir)/xnmap && $(SHTOOL) mkln -f -s $(DESTDIR)$(bindir)/nmapfe $(DESTDIR)$(bindir)/xnmap && $(INSTALL) -c -m 644 nmapfe.desktop $(DESTDIR)$(deskdir)/nmapfe.desktop && $(INSTALL) -c -m 644 docs/nmapfe.1 $(DESTDIR)$(mandir)/man1/nmapfe.1 && $(INSTALL) -c -m 644 docs/xnmap.1 $(DESTDIR)$(mandir)/man1/xnmap.1
++	-test -f nmapfe/nmapfe && $(INSTALL) -c -m 755 nmapfe/nmapfe $(DESTDIR)$(bindir)/nmapfe && rm -f $(DESTDIR)$(bindir)/xnmap && $(SHTOOL) mkln -f -s $(DESTDIR)$(bindir)/nmapfe $(DESTDIR)$(bindir)/xnmap && $(INSTALL) -c -m 644 nmapfe.desktop $(DESTDIR)$(deskdir)/nmapfe.desktop && $(INSTALL) -c -m 644 docs/nmapfe.1 $(DESTDIR)$(mandir)/man1/nmapfe.1 && $(INSTALL) -c -m 644 docs/xnmap.1 $(DESTDIR)$(mandir)/man1/xnmap.1
+ 
+ install: install-nmap $(INSTALLNMAPFE)
+ 

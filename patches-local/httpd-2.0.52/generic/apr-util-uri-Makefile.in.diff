@@ -1,0 +1,13 @@
+--- httpd/srclib/apr-util/uri/Makefile.in~	2004-11-04 01:55:30.000000000 +0000
++++ httpd/srclib/apr-util/uri/Makefile.in	2004-11-04 01:56:42.000000000 +0000
+@@ -9,8 +9,8 @@
+ @INCLUDE_RULES@
+ 
+ gen_uri_delims_OBJECTS = gen_uri_delims.lo
+-gen_uri_delims: $(gen_uri_delims_OBJECTS)
+-	$(LINK) $(EXTRA_LDFLAGS) $(gen_uri_delims_OBJECTS) $(EXTRA_LIBS)
++gen_uri_delims:
++	gcc -o gen_uri_delims gen_uri_delims.c
+ 
+ apr_uri.lo: uri_delims.h apr_uri.c
+ 

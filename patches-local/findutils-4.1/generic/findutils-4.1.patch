@@ -1,0 +1,86 @@
+diff -urNd findutils-4.1/find/defs.h findutils-4.1-new/find/defs.h
+--- findutils-4.1/find/defs.h	Wed Nov  2 13:59:15 1994
++++ findutils-4.1-new/find/defs.h	Wed Jan 30 18:41:31 2002
+@@ -301,7 +301,6 @@
+ boolean mark_stat P_((struct predicate *tree));
+ 
+ /* util.c */
+-char *basename P_((char *fname));
+ struct predicate *get_new_pred P_((void));
+ struct predicate *get_new_pred_chk_op P_((void));
+ struct predicate *insert_primary P_((boolean (*pred_func )()));
+diff -urNd findutils-4.1/find/fstype.c findutils-4.1-new/find/fstype.c
+--- findutils-4.1/find/fstype.c	Thu Nov  3 09:33:48 1994
++++ findutils-4.1-new/find/fstype.c	Wed Jan 30 18:41:47 2002
+@@ -30,9 +30,6 @@
+ extern int errno;
+ #endif
+ 
+-char *strdup ();
+-char *strstr ();
+-
+ static char *filesystem_type_uncached P_((char *path, char *relpath, struct stat *statp));
+ static int xatoi P_((char *cp));
+ 
+diff -urNd findutils-4.1/find/parser.c findutils-4.1-new/find/parser.c
+--- findutils-4.1/find/parser.c	Wed Nov  2 13:59:19 1994
++++ findutils-4.1-new/find/parser.c	Wed Jan 30 18:42:01 2002
+@@ -52,7 +52,6 @@
+ #define lstat stat
+ #endif
+ 
+-char *strstr ();
+ int lstat ();
+ int stat ();
+ #ifndef atol /* for Linux */
+diff -urNd findutils-4.1/find/util.c findutils-4.1-new/find/util.c
+--- findutils-4.1/find/util.c	Wed Oct 19 22:49:47 1994
++++ findutils-4.1-new/find/util.c	Wed Jan 30 18:42:28 2002
+@@ -21,23 +21,6 @@
+ #include <stdio.h>
+ #include "defs.h"
+ 
+-/* Return the last component of pathname FNAME, with leading slashes
+-   compressed into one slash. */
+-
+-char *
+-basename (fname)
+-     char *fname;
+-{
+-  char *p;
+-
+-  /* For "/", "//", etc., return "/". */
+-  for (p = fname; *p == '/'; ++p)
+-    /* Do nothing. */ ;
+-  if (*p == '\0')
+-    return p - 1;
+-  p = strrchr (fname, '/');
+-  return (p == NULL ? fname : p + 1);
+-}
+ 
+ /* Return a pointer to a new predicate structure, which has been
+    linked in as the last one in the predicates list.
+diff -urNd findutils-4.1/lib/nextelem.c findutils-4.1-new/lib/nextelem.c
+--- findutils-4.1/lib/nextelem.c	Tue Sep 27 07:02:45 1994
++++ findutils-4.1-new/lib/nextelem.c	Wed Jan 30 18:40:22 2002
+@@ -32,7 +32,6 @@
+ #endif
+ #endif
+ 
+-char *strdup ();
+ void free ();
+ 
+ /* Return the next element of a colon-separated path.
+diff -urNd findutils-4.1/xargs/xargs.c findutils-4.1-new/xargs/xargs.c
+--- findutils-4.1/xargs/xargs.c	Fri Oct  7 11:21:39 1994
++++ findutils-4.1-new/xargs/xargs.c	Wed Jan 30 18:36:38 2002
+@@ -60,9 +60,6 @@
+ #define memcpy(dest, source, count) (bcopy((source), (dest), (count)))
+ #endif
+ 
+-char *strstr ();
+-char *strdup ();
+-
+ #ifndef _POSIX_SOURCE
+ #include <sys/param.h>
+ #endif

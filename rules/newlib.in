@@ -1,0 +1,5 @@
+config NEWLIB_INSTALLONLY
+	bool
+	prompt "Install precompiled newlib from crosschain tools, not compile"
+	default n
+	depends on NEWLIB

@@ -1,0 +1,49 @@
+--- scite/gtk/makefile~	2004-05-09 08:11:22.000000000 +0000
++++ scite/gtk/makefile	2004-05-30 20:58:25.000000000 +0000
+@@ -45,7 +45,7 @@
+ bindir=$(prefix)/bin
+ SYSCONF_PATH=$(prefix)/share/scite
+ 
+-INSTALL=install -o root -g root
++INSTALL=install
+ 
+ PROG	= ../bin/SciTE
+ 
+@@ -61,7 +61,7 @@
+ ifdef DEBUG
+ CXXTFLAGS=-DDEBUG -g $(CXXBASEFLAGS)
+ else
+-CXXTFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS)
++CXXTFLAGS=-DNDEBUG -Os -fomit-frame-pointer $(CXXBASEFLAGS)
+ endif
+ 
+ ifndef NO_LUA
+@@ -103,7 +103,7 @@
+ $(PROG): SciTEGTK.o SciTEBase.o SciTEBuffers.o SciTEIO.o Exporters.o \
+ MultiplexExtension.o DirectorExtension.o SciTEProps.o Utf8_16.o \
+ 	$(COMPLIB) $(LUA_OBJS)
+-	$(CC) `$(CONFIGLIB)` `$(CONFIGTHREADS)` -DGTK $^ -o $@
++	$(CC) `$(CONFIGLIB)` `$(CONFIGTHREADS)` -DGTK $(LDFLAGS) $^ -o $@
+ 
+ # Automatically generate header dependencies with "make deps"
+ include deps.mak
+@@ -122,16 +122,14 @@
+ 	done
+ 
+ ifdef gnomeprefix
+-ifndef GTK2
+-	$(INSTALL) -m 644 -D SciTE.desktop $(DESTDIR)$(datadir)/gnome/apps/Applications/SciTE.desktop
+-endif
+-	$(INSTALL) -m 644 -D Sci48M.png $(DESTDIR)$(pixmapdir)/Sci48M.png
++	$(INSTALL) -m 644 -D SciTE.desktop $(DESTDIR)$(datadir)/applications/SciTE.desktop
++	$(INSTALL) -m 644 -D Sci48M.png    $(DESTDIR)$(pixmapdir)/Sci48M.png
+ endif
+ 
+ uninstall:
+ 	rm -f $(DESTDIR)$(bindir)/SciTE
+ 	rm -rf $(DESTDIR)$(SYSCONF_PATH)
+ ifdef gnomeprefix
+-	rm -f $(DESTDIR)$(datadir)/gnome/apps/Applications/SciTE.desktop
++	rm -f $(DESTDIR)$(datadir)/applications/SciTE.desktop
+ 	rm -f $(DESTDIR)$(pixmapdir)/Sci48M.png
+ endif

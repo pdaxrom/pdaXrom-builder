@@ -1,0 +1,16 @@
+menu "termcap          "
+
+config TERMCAP
+	bool "Compile termcap"
+
+config TERMCAP_TERMCAP
+	bool "install termcap data file"
+	default y
+	depends on TERMCAP
+
+config TERMCAP_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on TERMCAP
+
+endmenu

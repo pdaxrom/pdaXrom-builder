@@ -1,0 +1,117 @@
+--- tslib/tests/ts_calibrate.c~	2004-01-29 13:53:35.000000000 +0000
++++ tslib/tests/ts_calibrate.c	2004-08-12 16:53:44.000000000 +0000
+@@ -27,6 +27,8 @@
+ 
+ #include "fbutils.h"
+ 
++#define CAL_DELAY	100
++
+ typedef struct {
+ 	int x[5], xfb[5];
+ 	int y[5], yfb[5];
+@@ -50,11 +52,12 @@
+ {
+ 	return (((struct ts_sample *)a)->y - ((struct ts_sample *)b)->y);
+ }
+-static int getxy(struct tsdev *ts, int *x, int *y)
++static int getxy(struct tsdev *ts, int *x, int *y, unsigned long *t)
+ {
+ #define MAX_SAMPLES 128
+ 	struct ts_sample samp[MAX_SAMPLES];
+ 	int index, middle;
++	long temp;
+ 
+ 	/* Read until we get a touch. */
+ 	do {
+@@ -75,8 +78,12 @@
+ 			close_framebuffer();
+ 			exit(1);
+ 		}
++		temp = samp[index].tv.tv_sec * 1000 + samp[index].tv.tv_usec;
+ 	} while (samp[index].pressure > 0);
+-	printf("Took %d samples...\n",index);
++	
++	*t = temp;
++	
++	printf("Took %d samples (%d)...\n",index, temp);
+ 
+ 	/*
+ 	 * At this point, we have samples in indices zero to (index-1)
+@@ -203,6 +210,7 @@
+ 	char *tsdevice = NULL;
+ 	char *calfile = NULL;
+ 	int i;
++	unsigned long time, newtime;
+ 
+ 	signal(SIGSEGV, sig);
+ 	signal(SIGINT, sig);
+@@ -249,8 +257,12 @@
+ 
+ // Now paint a crosshair on the upper left and start taking calibration
+ // data
++//	sleep(1);
+ 	put_cross(50,50,1);
+-	getxy(ts, &cal.x[0], &cal.y[0]);
++//	do {
++	    getxy(ts, &cal.x[0], &cal.y[0], &time);
++//	} while (newtime - time < CAL_DELAY);
++//	newtime = time;
+ 	put_cross(50,50,0);
+ 
+ 	cal.xfb[0] = 50;
+@@ -258,8 +270,12 @@
+ 
+ 	printf("Top left : X = %4d Y = %4d\n", cal.x[0], cal.y[0]);
+ 
++	sleep(1);
+ 	put_cross(xres - 50, 50, 1);
+-	getxy(ts, &cal.x[1], &cal.y[1]);
++	do {
++	    getxy(ts, &cal.x[1], &cal.y[1], &newtime);
++	} while (newtime - time < CAL_DELAY);
++	time = newtime;
+ 	put_cross(xres - 50, 50, 0);
+ 
+ 	cal.xfb[1] = xres-50;
+@@ -267,8 +283,12 @@
+ 
+ 	printf("Top right: X = %4d Y = %4d\n", cal.x[1], cal.y[1]);
+ 
++	sleep(1);
+ 	put_cross(xres - 50, yres - 50, 1);
+-	getxy(ts, &cal.x[2], &cal.y[2]);
++	do {
++	    getxy(ts, &cal.x[2], &cal.y[2], &newtime);
++	} while (newtime - time < CAL_DELAY);
++	time = newtime;
+ 	put_cross(xres - 50, yres - 50, 0);
+ 
+ 	cal.xfb[2] = xres-50;
+@@ -276,8 +296,12 @@
+ 
+ 	printf("Bot right: X = %4d Y = %4d\n", cal.x[2], cal.y[2]);
+ 
++	sleep(1);
+ 	put_cross(50, yres - 50, 1);
+-	getxy(ts, &cal.x[3], &cal.y[3]);
++	do {
++	    getxy(ts, &cal.x[3], &cal.y[3], &newtime);
++	} while (newtime - time < CAL_DELAY);
++	time = newtime;
+ 	put_cross(50, yres - 50, 0);
+ 
+ 	cal.xfb[3] = 50;
+@@ -285,8 +309,12 @@
+ 
+ 	printf("Bot left : X = %4d Y = %4d\n", cal.x[3], cal.y[3]);
+ 
++	sleep(1);
+ 	put_cross(xres/2, yres/2, 1);
+-	getxy(ts, &cal.x[4], &cal.y[4]);
++	do {
++	    getxy(ts, &cal.x[4], &cal.y[4], &newtime);
++	} while (newtime - time < CAL_DELAY);
++	time = newtime;
+ 	put_cross(xres/2, yres/2, 0);
+ 
+ 	cal.xfb[4] = xres/2;

@@ -1,0 +1,9 @@
+--- gpe/base/gpe-gallery/gpe-gallery.desktop~	2005-02-07 04:06:44.000000000 +0000
++++ gpe/base/gpe-gallery/gpe-gallery.desktop	2005-02-07 04:07:17.000000000 +0000
+@@ -5,5 +5,5 @@
+ Terminal=0
+ Type=Application
+ Icon=gpe-gallery.png
+-Categories=Application;Utility;GPE
++Categories=Application;Graphics;
+ StartupNotify=True

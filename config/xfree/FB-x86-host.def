@@ -1,0 +1,42 @@
+#ifndef OtherIConfigFiles
+# define OtherIConfigFiles $(IRULESRC)/xfree86.cf $(IRULESRC)/xf86.rules
+#endif
+
+/*#define BuildServersOnly	YES*/
+
+#define KDriveXServer              YES
+#define KdriveServerExtraDefines   -DITSY -DMAXSCREENS=2 -DXResExtension -fexpensive-optimizations -ffast-math -fomit-frame-pointer -O3
+#define DefaultGcc2i386Opt	   -O2 -fomit-frame-pointer -fno-strength-reduce
+#define TinyXServer                YES
+#define CrossCompiling             YES
+#undef BuildRandR
+#define BuildRandR                 YES
+#define BuildXInputLib             YES
+
+#define HasExpat		YES
+#define HasFreetype2		YES
+#define HasLibpng		YES
+#define HasZlib			YES
+#define HasFontconfig		YES
+
+#define Freetype2Dir               @FREETYPE2DIR@
+#define FontconfigDir              @FONTCONFIGDIR@
+#define ExpatDir                   @EXPATDIR@
+#define LibpngDir                  @LIBPNGDIR@
+
+
+#define BuildXTrueType             YES
+#define BuildScreenSaverExt        YES
+#define BuildScreenSaverLibrary    YES
+#define SharedLibXss               YES
+#define ServerXdmcpDefines
+#define XfbdevServer               YES
+#define MakeLocalFontDir	   YES
+#define ProjectRoot                /usr/X11R6
+#define BuildXcursorgen		   NO
+#define BuildXResExt               YES
+#define XResExtension              YES
+#define BuildXKB		   YES
+#define BuildXKBlib		   YES
+
+#define BuildXprintLib		   YES

@@ -1,0 +1,8 @@
+config MODULE-INIT-TOOLS
+	bool
+	prompt "module-init-tools"
+
+config MODULE-INIT-TOOLS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MODULE-INIT-TOOLS

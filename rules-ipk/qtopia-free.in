@@ -1,0 +1,393 @@
+config QTOPIA-FREE
+	bool
+	prompt "Qtopia"
+
+config QTOPIA-FREE2
+	bool
+	prompt "enable Qtopia2"
+	depends on QTOPIA-FREE
+
+config QTOPIA-FREE-SL5500
+	bool
+	prompt "compile for Zaurus SL-5500 (SL-5000D)"
+	depends on QTOPIA-FREE && ARM_ARCH_SA1100
+
+config QTOPIA-FREE-IPAQ
+	bool
+	prompt "compile for iPAQ"
+	depends on QTOPIA-FREE && ARM_ARCH_SA1100
+
+config QTOPIA-FREE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on QTOPIA-FREE
+
+config QTOPIA-FREE_BOOTING
+	bool
+	prompt "Enable Qtopia on default"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+menu "Qtopia packages for installation"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL && !QTOPIA-FREE2
+
+config QTOPIA-FREE_INSTALL_ADDRESSBOOK
+	bool
+	prompt "Addressbook"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_APPEARANCE
+	bool
+	prompt "Appearance"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_APPSERVICES
+	bool
+	prompt "Appservices"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_BATTERYAPPLET
+	bool
+	prompt "Battery applet"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_BRIGHTNESSAPPLET
+	bool
+	prompt "Brightness applet"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_CALCULATOR-ADVANCED
+	bool
+	prompt "Calculator advanced"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_CALCULATOR
+	bool
+	prompt "Calculator"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_CARDMON
+	bool
+	prompt "Card monitor"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_CLIPBOARDAPPLET
+	bool
+	prompt "Clipboard applet"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_CLOCK
+	bool
+	prompt "Clock"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_CLOCKAPPLET
+	bool
+	prompt "Clock applet"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_DATEBOOK
+	bool
+	prompt "Datebook"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_EMBEDDEDKONSOLE
+	bool
+	prompt "Embedded konsole"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_FIFTEEN
+	bool
+	prompt "Fifteen"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_FILEBROWSER
+	bool
+	prompt "File browser"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_FLAT
+	bool
+	prompt "Flat"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_FLATSTYLE
+	bool
+	prompt "Flat style"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_FREETYPE
+	bool
+	prompt "Freetype plugin"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_FRESH
+	bool
+	prompt "Fresh"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_HANDWRITING
+	bool
+	prompt "Handwriting"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_HELP-EN
+	bool
+	prompt "Help english"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_HELPBROWSER
+	bool
+	prompt "Help browser"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_I18N-EN
+	bool
+	prompt "i18-en"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_IRRECEIVERAPPLET
+	bool
+	prompt "IR receiver applet"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_JP-TEXTCODEC
+	bool
+	prompt "Japan textcodec"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_KEYBOARD
+	bool
+	prompt "Keyboard"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_KEYPEBBLE
+	bool
+	prompt "Keypebble"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_LANGUAGE
+	bool
+	prompt "Language"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_LAUNCHER-SETTINGS
+	bool
+	prompt "Launcher settings"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_LIGHT-AND-POWER
+	bool
+	prompt "Light & Power"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_MEDIAPLAYER-TECHNO-SKIN
+	bool
+	prompt "Mediaplayer techno skin"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_MEDIARECORDER
+	bool
+	prompt "Mediarecorder"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_MINDBREAKER
+	bool
+	prompt "Mindbreaker"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_MINESWEEP
+	bool
+	prompt "Minesweep"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_MPEGPLAYER
+	bool
+	prompt "Mpegplayer"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_NETMONAPPLET
+	bool
+	prompt "Netmon applet"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_NETSETUP
+	bool
+	prompt "Net setup"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_NOTEPAD-IMAGECODEC
+	bool
+	prompt "Notepad image codec"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_OBEX
+	bool
+	prompt "Obex"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_PARASHOOT
+	bool
+	prompt "Parashoot"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_PICKBOARD
+	bool
+	prompt "Pickboard"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_PIM
+	bool
+	prompt "PIM"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_PLUGINMANAGER
+	bool
+	prompt "Plugin manager"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_POLISHED
+	bool
+	prompt "Polished"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_QASTEROIDS
+	bool
+	prompt "QAsteroids"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_QIPKG
+	bool
+	prompt "Qipkg"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_ROTATION
+	bool
+	prompt "Rotation"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SECURITY
+	bool
+	prompt "Security"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SERVICE-CALENDAR
+	bool
+	prompt "Service calendar"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SERVICE-CONTACTS
+	bool
+	prompt "Service contacts"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SERVICE-EMAIL
+	bool
+	prompt "Service email"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SERVICE-TASKS
+	bool
+	prompt "Service tasks"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SERVICE-TIMEMONITOR
+	bool
+	prompt "Service timemonitor"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SHOWIMG
+	bool
+	prompt "Showimg"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SIMPLE8-TEXTCODEC
+	bool
+	prompt "Simple8 textcodec"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SNAKE
+	bool
+	prompt "Snake"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SOLITAIRE
+	bool
+	prompt "Solitaire"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SOUND
+	bool
+	prompt "SOUND"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SOUNDS
+	bool
+	prompt "Sounds"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SYSINFO
+	bool
+	prompt "Sysinfo"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_SYSTEMTIME
+	bool
+	prompt "System time"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_TEXTEDIT
+	bool
+	prompt "Textedit"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_TODAY-DATEBOOKPLUGIN
+	bool
+	prompt "Today datebook plugin"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_TODAY-TODOPLUGIN
+	bool
+	prompt "Today todo plugin"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_TODAY
+	bool
+	prompt "Today"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_TODO
+	bool
+	prompt "Todo"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_UNIKEYBOARD
+	bool
+	prompt "Unikeyboard"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_VOLUMEAPPLET
+	bool
+	prompt "Volume applet"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_WAVPLUGIN
+	bool
+	prompt "Wav plugin"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_WAVRECORD
+	bool
+	prompt "Wav record"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_WORDGAME
+	bool
+	prompt "Word game"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+config QTOPIA-FREE_INSTALL_WORLDTIME
+	bool
+	prompt "World time"
+	depends on QTOPIA-FREE && QTOPIA-FREE_INSTALL
+
+endmenu

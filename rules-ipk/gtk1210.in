@@ -1,0 +1,9 @@
+config GTK1210
+	bool
+	prompt "gtk+-1.2.10"
+	depends on GLIB1210 && XFREE430
+
+config GTK1210_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on GTK1210

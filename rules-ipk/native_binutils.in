@@ -1,0 +1,8 @@
+config NATIVE_BINUTILS
+	bool
+	prompt "binutils"
+
+config NATIVE_BINUTILS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on NATIVE_BINUTILS

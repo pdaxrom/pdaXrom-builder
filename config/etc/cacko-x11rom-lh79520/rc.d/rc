@@ -1,0 +1,74 @@
+#!/bin/ash
+#
+# rc            This file is responsible for starting/stopping
+#               services when the runlevel changes.
+#
+# Original Author:       
+#               Miquel van Smoorenburg, <miquels@drinkel.nl.mugnet.org>
+# Modified:
+#	2001.12.11	SHARP, for SHARP SL series
+#
+
+
+# Now find out what the current and what the previous runlevel are.
+#argv1="$1"
+#set `/sbin/runlevel`
+#runlevel=$2
+#previous=$1
+#export runlevel previous
+runlevel=$1
+
+# Is there an rc directory for this new runlevel?
+if [ -d /etc/rc.d/rc$runlevel.d ]; then
+    # First, run the KILL scripts.
+    for I in /etc/rc.d/rc$runlevel.d/K*; do
+	# Check if the script is there.
+	[ ! -f $I ] && continue
+    
+	# Check if the subsystem is already up.
+	subsys=${I#/etc/rc.d/rc$runlevel.d/K??}
+	[ ! -f /var/lock/subsys/$subsys ] && \
+	    [ ! -f /var/lock/subsys/${subsys}.init ] && continue
+
+	# Bring the subsystem down.
+	if [ -x $I ];then
+	    $I stop
+	fi
+    done
+
+    # Now run the START scripts.
+    for I in /etc/rc.d/rc$runlevel.d/S*; do
+	# Check if the script is there.
+	[ ! -f $I ] && continue
+
+	# Check if the subsystem is already up.
+	subsys=${I#/etc/rc.d/rc$runlevel.d/S??}
+	[ -f /var/lock/subsys/$subsys ] || \
+	    [ -f /var/lock/subsys/${subsys}.init ] && continue
+
+	# Bring the subsystem up.
+	if [ -x $I ];then
+	    $I start
+	fi
+    done
+fi
+
+# Check for runlevel 0 or 6
+if [ $runlevel -eq 0 -o $runlevel -eq 6 ] ; then
+    for I in /etc/rc.d/rc$runlevel.d/S*; do
+	# Check if the script is there.
+	[ ! -f $I ] && continue
+
+	# Check if the subsystem is already up.
+	subsys=${I#/etc/rc.d/rc$runlevel.d/S??}
+	[ -f /var/lock/subsys/$subsys ] || \
+	    [ -f /var/lock/subsys/${subsys}.init ] && continue
+
+	# Bring the subsystem up.
+	if [ -x $I ]; then
+	    $I start
+	fi
+    done
+fi
+
+exit 0

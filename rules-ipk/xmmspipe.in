@@ -1,0 +1,9 @@
+config XMMSPIPE
+	bool
+	prompt "xmmspipe"
+	depends on XMMS
+
+config XMMSPIPE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XMMSPIPE

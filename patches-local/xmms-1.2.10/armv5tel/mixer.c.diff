@@ -1,0 +1,58 @@
+--- xmms/Output/OSS/mixer.c.orig	2001-06-16 23:05:47.000000000 +0000
++++ xmms/Output/OSS/mixer.c		2003-11-13 01:21:06.000000000 +0000
+@@ -38,7 +38,7 @@
+ 	gchar *devname;
+ 
+ 	devname = get_mixer_device();
+-	fd = open(devname, O_RDONLY);
++	fd = open(devname, O_RDWR);
+ 	g_free(devname);
+ 
+ 	/*
+@@ -47,19 +47,9 @@
+ 	 */
+ 	if (fd != -1)
+ 	{
+-		ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devs);
+-		if ((devs & SOUND_MASK_PCM) && (oss_cfg.use_master==0))
+-			cmd = SOUND_MIXER_READ_PCM;
+-		else if ((devs & SOUND_MASK_VOLUME) && (oss_cfg.use_master==1))
+-			cmd = SOUND_MIXER_READ_VOLUME;
+-		else
+-		{
+-			close(fd);
+-			return;
+-		}
+-		ioctl(fd, cmd, &v);
+-		*r = (v & 0xFF00) >> 8;
++		ioctl(fd, MIXER_READ(0), &v);
+ 		*l = (v & 0x00FF);
++		*r = (v & 0xFF00) >> 8;
+ 		close(fd);
+ 	}
+ }
+@@ -70,22 +60,12 @@
+ 	gchar *devname;
+ 
+ 	devname = get_mixer_device();
+-	fd = open(devname, O_RDONLY);
++	fd = open(devname, O_RDWR);
+ 
+ 	if (fd != -1)
+ 	{
+-		ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devs);
+-		if ((devs & SOUND_MASK_PCM) && (oss_cfg.use_master==0))
+-			cmd = SOUND_MIXER_WRITE_PCM;
+-		else if ((devs & SOUND_MASK_VOLUME) && (oss_cfg.use_master==1))
+-			cmd = SOUND_MIXER_WRITE_VOLUME;
+-		else
+-		{
+-			close(fd);
+-			return;
+-		}
+ 		v = (r << 8) | l;
+-		ioctl(fd, cmd, &v);
++		ioctl(fd, MIXER_WRITE(0), &v);
+ 		close(fd);
+ 	}
+ 	else

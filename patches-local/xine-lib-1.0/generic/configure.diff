@@ -1,0 +1,107 @@
+--- xine-lib/configure~	2005-01-28 12:56:34.000000000 +0000
++++ xine-lib/configure	2005-01-28 13:29:20.000000000 +0000
+@@ -25401,7 +25401,7 @@
+ cat >>conftest.$ac_ext <<_ACEOF
+ /* end confdefs.h.  */
+ $ac_includes_default
+-#include <avcodec.h>
++#include <ffmpeg/avcodec.h>
+ _ACEOF
+ rm -f conftest.$ac_objext
+ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+@@ -25444,7 +25444,7 @@
+ cat confdefs.h >>conftest.$ac_ext
+ cat >>conftest.$ac_ext <<_ACEOF
+ /* end confdefs.h.  */
+-#include <avcodec.h>
++#include <ffmpeg/avcodec.h>
+ _ACEOF
+ if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+   (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+@@ -25544,7 +25544,7 @@
+ cat >>conftest.$ac_ext <<_ACEOF
+ /* end confdefs.h.  */
+ $ac_includes_default
+-#include <postprocess.h>
++#include <ffmpeg/postprocess.h>
+ _ACEOF
+ rm -f conftest.$ac_objext
+ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+@@ -25587,7 +25587,7 @@
+ cat confdefs.h >>conftest.$ac_ext
+ cat >>conftest.$ac_ext <<_ACEOF
+ /* end confdefs.h.  */
+-#include <postprocess.h>
++#include <ffmpeg/postprocess.h>
+ _ACEOF
+ if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+   (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+@@ -25907,8 +25907,8 @@
+             CPPFLAGS="${FFMPEG_CPPFLAGS} ${ac_save_CPPFLAGS}"
+       LDFLAGS="${FFMPEG_LIBS} ${ac_save_LDFLAGS}"
+       cat >conftest.$ac_ext <<_ACEOF
+-#include <avcodec.h>
+-#include <postprocess.h>
++#include <ffmpeg/avcodec.h>
++#include <ffmpeg/postprocess.h>
+ 
+ int main() {
+   register_avcodec((void *)0);
+@@ -28651,6 +28651,9 @@
+ 
+ if test x"$no_x" != "xyes"; then
+ 
++  HAVE_XV_TRUE='#'
++  HAVE_XV_FALSE=
++
+ 
+   # Ensure that AC_PATH_XTRA is executed before this
+ 
+@@ -28792,7 +28795,7 @@
+ _ACEOF
+ 
+ 
+-     ac_have_xv="yes"
++     ac_have_xv="no"
+      case x$XV_LIB in
+       x*.a)
+ 
+@@ -28818,13 +28821,13 @@
+ 
+ 
+ 
+-if test x$ac_have_xv = "xyes"; then
+-  HAVE_XV_TRUE=
+-  HAVE_XV_FALSE='#'
+-else
++#if test x$ac_have_xv = "xyes"; then
++#  HAVE_XV_TRUE=
++#  HAVE_XV_FALSE='#'
++#else
+   HAVE_XV_TRUE='#'
+   HAVE_XV_FALSE=
+-fi
++#fi
+ 
+ 
+         if test x$ac_have_xv = "xyes"; then
+@@ -36506,7 +36509,7 @@
+      echo "*** Or see http://www.freedesktop.org/software/pkgconfig to get pkg-config."
+   else
+      PKG_CONFIG_MIN_VERSION=0.9.0
+-     if $PKG_CONFIG --atleast-pkgconfig-version $PKG_CONFIG_MIN_VERSION; then
++     if false ; then
+         echo "$as_me:$LINENO: checking for gnome-vfs-2.0" >&5
+ echo $ECHO_N "checking for gnome-vfs-2.0... $ECHO_C" >&6
+ 
+@@ -39586,7 +39589,9 @@
+ See \`config.log' for more details." >&5
+ echo "$as_me: error: cannot run test program while cross compiling
+ See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }
++   {
++      bf_lsbf=1
++   }; }
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+ /* confdefs.h.  */

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=FltDj
+Comment=Personal Information Manager
+Exec=fltdj
+Terminal=0
+Type=Application
+Icon=fltdj.png
+Categories=Application;Office;WordProcessor;
+StartupNotify=False
+SingleInstance=False

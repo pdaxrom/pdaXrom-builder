@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Exec=licq 
+Icon=licq.png
+Comment=A Mirabilis ICQ Clone for Unix
+Name=Licq
+Terminal=false
+Categories=Application;Network;
+StartupNotify=True

@@ -1,0 +1,9 @@
+List of audited targets
+-----------------------
+
+T-20040103-1-snapshot			DATE		RESULT		WHO
+---------------------------------------------------------------------------
+i386-generic-glibc_config		2004/01/02	compiles	RSC
+i586-rayonic_config			2004/01/02	compiles	RSC
+i386-frako_config			2004/01/05	compiles	RSC
+

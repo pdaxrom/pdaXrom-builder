@@ -1,0 +1,4 @@
+KERNELCONFIG=$PWD/arm.config
+TARGET=armv5tel-cacko-linux
+GCC_EXTRA_CONFIG=--with-cpu=xscale --enable-cxx-flags=-mcpu=xscale
+TARGET_CFLAGS="-O"

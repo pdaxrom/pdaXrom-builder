@@ -1,0 +1,8 @@
+config JPEG
+	bool
+	prompt "libjpeg"
+
+config JPEG_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on JPEG

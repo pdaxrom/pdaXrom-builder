@@ -1,0 +1,25 @@
+--- linux-original-slc750/drivers/sound/pxa-i2s_corgi.c~	2003-06-18 08:20:59.000000000 +0000
++++ linux-altered-slc750/drivers/sound/pxa-i2s_corgi.c	2004-09-06 18:51:40.000000000 +0000
+@@ -22,8 +22,9 @@
+  * Change Log
+  *	16-Jan-2003 SHARP sleep_on -> interruptible_sleep_on
+  *	14-Apr-2003 SHARP modify resume process & buzzer device
+- *
++ *	25-Jul-2003 IKM adds support for sound mixer source read/write *
+  */
++
+ #include <linux/init.h>
+ #include <linux/module.h>
+ #include <linux/kernel.h>
+@@ -2903,7 +2904,10 @@
+     CorgiSetGain(data);
+   case SOUND_MIXER_READ_MIC:
+     return IOCTL_OUT(arg, CorgiGetGain());
+-
++  case SOUND_MIXER_READ_RECSRC:
++    return IOCTL_OUT( arg, SOUND_MASK_MIC );
++  case SOUND_MIXER_WRITE_RECSRC:
++    return IOCTL_OUT( arg, 0 );
+   }
+ 
+   return -EINVAL;

@@ -1,0 +1,29 @@
+diff -Nur mozilla/security/coreconf/Linux.mk mozilla-patched/security/coreconf/Linux.mk
+--- mozilla/security/coreconf/Linux.mk	2003-11-16 00:10:16.000000000 +0000
++++ mozilla-patched/security/coreconf/Linux.mk	2004-02-27 15:20:59.000000000 +0000
+@@ -44,9 +44,9 @@
+ 	IMPL_STRATEGY = _PTH
+ endif
+ 
+-CC			= gcc
+-CCC			= g++
+-RANLIB			= ranlib
++CC			= i686-linux-gcc
++CCC			= i686-linux-g++
++RANLIB			= i686-linux-ranlib
+ 
+ DEFAULT_COMPILER = gcc
+ 
+@@ -98,8 +98,10 @@
+ 	OS_REL_CFLAGS   = -DLINUX1_2 -D_XOPEN_SOURCE
+ 	CPU_ARCH        = mips
+ else
+-	OS_REL_CFLAGS	= -DLINUX1_2 -Di386 -D_XOPEN_SOURCE
+-	CPU_ARCH	= x86
++	#OS_REL_CFLAGS   = -DLINUX1_2 -D_XOPEN_SOURCE
++	#CPU_ARCH        = armv5tel
++	OS_REL_CFLAGS	= -DLINUX1_2 -Di386 -D_XOPEN_SOURCE
++	CPU_ARCH	= x86
+ endif
+ endif
+ endif

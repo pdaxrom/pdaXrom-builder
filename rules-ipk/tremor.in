@@ -1,0 +1,8 @@
+config TREMOR
+	bool
+	prompt "Tremor"
+
+config TREMOR_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on TREMOR

@@ -1,0 +1,20 @@
+attempt crashes in GConf like apps, because we use it without Gnome
+--- GConf-2.4.0.1/gconf/gconfd.c~	2004-11-12 11:44:36.000000000 +0000
++++ GConf-2.4.0.1/gconf/gconfd.c	2004-11-12 11:45:47.000000000 +0000
+@@ -753,13 +753,15 @@
+   drop_old_clients ();
+   drop_old_databases ();
+ 
++/*
+   if (no_databases_in_use () && client_count () == 0)
+     {
+       gconf_log (GCL_INFO, _("GConf server is not in use, shutting down."));
+       gconf_main_quit ();
+       return FALSE;
+     }
+-  
++ */
++
+   /* expire old locale cache entries */
+   gconfd_locale_cache_expire ();
+ 

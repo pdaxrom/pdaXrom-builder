@@ -1,0 +1,76 @@
+--- mozilla/nsprpub/pr/src/misc/prdtoa.c~	2004-09-26 05:32:19.000000000 +0000
++++ mozilla/nsprpub/pr/src/misc/prdtoa.c	2004-09-26 05:56:07.000000000 +0000
+@@ -134,7 +134,16 @@
+  */
+ #if defined(__arm) || defined(__arm__) || defined(__arm26__) \
+     || defined(__arm32__)
+-#define IEEE_ARM
++# ifdef __VFP_FP__
++#  warning "ARM VFP detected!"
++#  define IEEE_ARM_VFP
++# elif __SOFTFP__
++#  error "ARM SOFTFP detected!"
++#  define IEEE_ARM_VFP
++# else
++#  warning "ARM FPA detected!"
++#  define IEEE_ARM
++# endif
+ #elif defined(IS_LITTLE_ENDIAN)
+ #define IEEE_8087
+ #else
+@@ -178,6 +187,9 @@
+ #ifdef IEEE_ARM
+ #define IEEE_ARITHMETIC
+ #endif
++#ifdef IEEE_ARM_VFP
++#define IEEE_ARITHMETIC
++#endif
+ 
+ #ifdef IEEE_ARITHMETIC
+ #define DBL_DIG 15
+@@ -236,15 +248,15 @@
+ #define Sign_Extend(a,b) /*no-op*/
+ #endif
+ 
+-#if defined(IEEE_8087) + defined(IEEE_MC68k) + defined(IEEE_ARM) + defined(VAX) + defined(IBM)	!= 1
+-Exactly one of IEEE_8087, IEEE_MC68k, IEEE_ARM, VAX, or IBM should be defined.
++#if defined(IEEE_8087) + defined(IEEE_MC68k) + defined(IEEE_ARM) + defined(IEEE_ARM_VFP) + defined(VAX) + defined(IBM)	!= 1
++Exactly one of IEEE_8087, IEEE_MC68k, IEEE_ARM, IEEE_ARM_VFP, VAX, or IBM should be defined.
+ #endif
+ 
+ typedef union { double d; unsigned Long L[2]; } U;
+ 
+ #ifdef YES_ALIAS
+ #define dval(x) x
+-#ifdef IEEE_8087
++#if defined(IEEE_8087) + defined(IEEE_ARM_VFP)
+ #define word0(x) ((unsigned Long *)&x)[1]
+ #define word1(x) ((unsigned Long *)&x)[0]
+ #else
+@@ -252,7 +264,7 @@
+ #define word1(x) ((unsigned Long *)&x)[1]
+ #endif
+ #else
+-#ifdef IEEE_8087
++#if defined(IEEE_8087) + defined(IEEE_ARM_VFP)
+ #define word0(x) ((U*)&x)->L[1]
+ #define word1(x) ((U*)&x)->L[0]
+ #else
+@@ -266,7 +278,7 @@
+  * An alternative that might be better on some machines is
+  * #define Storeinc(a,b,c) (*a++ = b << 16 | c & 0xffff)
+  */
+-#if defined(IEEE_8087) + defined(IEEE_ARM) + defined(VAX)
++#if defined(IEEE_8087) + defined(IEEE_ARM) + defined(IEEE_ARM_VFP) + defined(VAX)
+ #define Storeinc(a,b,c) (((unsigned short *)a)[1] = (unsigned short)b, \
+ ((unsigned short *)a)[0] = (unsigned short)c, a++)
+ #else
+@@ -280,7 +292,7 @@
+ /* Quick_max = floor((P-1)*log(FLT_RADIX)/log(10) - 1) */
+ /* Int_max = floor(P*log(FLT_RADIX)/log(10) - 1) */
+ 
+-#if defined(IEEE_8087) + defined(IEEE_MC68k) + defined(IEEE_ARM)
++#if defined(IEEE_8087) + defined(IEEE_MC68k) + defined(IEEE_ARM) + defined(IEEE_ARM_VFP)
+ #define Exp_shift  20
+ #define Exp_shift1 20
+ #define Exp_msk1    0x100000

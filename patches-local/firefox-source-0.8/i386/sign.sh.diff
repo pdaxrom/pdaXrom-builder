@@ -1,0 +1,19 @@
+diff -Nur mozilla/security/nss/cmd/shlibsign/sign.sh mozilla-patched/security/nss/cmd/shlibsign/sign.sh
+--- mozilla/security/nss/cmd/shlibsign/sign.sh	2003-04-01 22:58:26.000000000 +0000
++++ mozilla-patched/security/nss/cmd/shlibsign/sign.sh	2004-02-27 15:40:27.000000000 +0000
+@@ -34,7 +34,7 @@
+     dcl @$temp2
+     rm $temp $temp2
+     ;;
+-*)
++asd*)
+     LIBPATH=`(cd ${1}/lib; pwd)`:$LIBPATH
+     export LIBPATH
+     SHLIB_PATH=${1}/lib:$SHLIB_PATH
+@@ -48,4 +48,6 @@
+     echo ${2}/shlibsign -v -i ${4}
+     ${2}/shlibsign -v -i ${4}
+     ;;
++*)
++    ;;
+ esac

@@ -1,0 +1,20 @@
+--- frozen-bubble-1.0.0/c_stuff/Makefile.PL~	2002-04-18 09:44:20.000000000 +0000
++++ frozen-bubble-1.0.0/c_stuff/Makefile.PL	2004-09-30 15:30:42.000000000 +0000
+@@ -35,7 +35,7 @@
+           #include <SDL/SDL_mixer.h>',
+ 	 '',
+ 	 `sdl-config --cflags`,
+-	 chomp_(`sdl-config --libs`) . ' -lSDL_mixer')
++	 chomp_(`sdl-config --libs`) . ' -lSDL_mixer' . ' -Wl,-rpath-link,@X11INC@')
+   or
+   die_ 'SDL_mixer is needed (and, by the way, version >= 1.2.2 will be needed)';
+ 
+@@ -44,7 +44,7 @@
+           #include <SDL/SDL_mixer.h>',
+ 	 'Mix_FadeInMusicPos(NULL, 0, 0, 0);',
+ 	 `sdl-config --cflags`,
+-	 chomp_(`sdl-config --libs`) . ' -lSDL_mixer')
++	 chomp_(`sdl-config --libs`) . ' -lSDL_mixer' . ' -Wl,-rpath-link,@X11INC@')
+   or
+   die_ 'SDL_mixer >= 1.2.2 is needed (function Mix_FadeInMusicPos is missing)';
+ 

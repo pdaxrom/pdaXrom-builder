@@ -1,0 +1,8 @@
+config REISER4PROGS
+	bool
+	prompt "reiser4progs"
+
+config REISER4PROGS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on REISER4PROGS

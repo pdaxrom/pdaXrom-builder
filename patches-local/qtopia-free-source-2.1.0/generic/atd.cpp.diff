@@ -1,0 +1,10 @@
+--- qtopia-free-1.7.0/src/3rdparty/tools/atd/atd.cpp~	2004-10-24 14:15:06.000000000 +0000
++++ qtopia-free-1.7.0/src/3rdparty/tools/atd/atd.cpp	2004-10-24 14:18:01.000000000 +0000
+@@ -50,6 +50,7 @@
+ 
+ 
+ #ifdef QT_QWS_SL5XXX
++typedef unsigned int u32;
+ #include <asm/sharp_apm.h>
+ #include <asm/hardware.h>
+ 

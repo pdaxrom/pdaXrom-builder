@@ -1,0 +1,8 @@
+config BLUEZ-UTILS
+	bool
+	prompt "bluez-utils"
+
+config BLUEZ-UTILS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on BLUEZ-UTILS

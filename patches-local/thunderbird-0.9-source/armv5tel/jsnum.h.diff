@@ -1,0 +1,20 @@
+--- mozilla/js/src/jsnum.h~	2004-09-26 06:19:08.000000000 +0000
++++ mozilla/js/src/jsnum.h	2004-09-26 06:19:39.000000000 +0000
+@@ -61,7 +61,16 @@
+  */
+ 
+ #if defined(__arm) || defined(__arm32__) || defined(__arm26__) || defined(__arm__)
+-#define CPU_IS_ARM
++# ifdef __VFP_FP__
++#  warning "ARM VFP detected!"
++#  define CPU_IS_ARM_VFP
++# elif __SOFTFP__
++#  error "ARM SOFTFP detected!"
++#  define CPU_IS_ARM_VFP
++# else
++#  warning "ARM FPA detected!"
++#  define CPU_IS_ARM
++# endif
+ #endif
+ 
+ typedef union jsdpun {

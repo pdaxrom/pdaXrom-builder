@@ -1,0 +1,8 @@
+config OBEXFTP
+	bool
+	prompt "obexftp"
+
+config OBEXFTP_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on OBEXFTP

@@ -1,0 +1,8 @@
+config LICQ
+	bool
+	prompt "licq"
+
+config LICQ_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on LICQ

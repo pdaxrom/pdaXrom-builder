@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#export PATH=$PATH:/usr/sbin.rom:/usr/bin.rom
+
+if [ ! -x /sbin/devfsd ]; then
+    mount -t tmpfs -o size=12m none /dev
+    cd /
+    tar xf /root/.dev_default.tar 2> /dev/null > /dev/null
+    mkdir /dev/shm
+else
+    mount -t tmpfs -o size=12m none /dev/shm
+fi
+
+mount -o remount /
+
+mkdir /dev/shm/tmp
+mkdir /dev/shm/run
+chmod 4777 /var/tmp
+chmod 777 /tmp
+touch /var/run/utmp
+cd /

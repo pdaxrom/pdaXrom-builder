@@ -1,0 +1,13 @@
+diff -Nur pango-1.2.4/pango/opentype/pango-ot-private.h pango-1.2.4.new/pango/opentype/pango-ot-private.h
+--- pango-1.2.4/pango/opentype/pango-ot-private.h	2000-12-20 04:41:36.000000000 +0000
++++ pango-1.2.4.new/pango/opentype/pango-ot-private.h	2004-08-24 04:36:40.000000000 +0000
+@@ -22,7 +22,8 @@
+ #ifndef __PANGO_OT_PRIVATE_H__
+ #define __PANGO_OT_PRIVATE_H__
+ 
+-#include <freetype/freetype.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ 
+ #include <glib-object.h>
+ 

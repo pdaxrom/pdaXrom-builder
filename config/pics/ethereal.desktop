@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Ethereal
+GenericName=Ethereal
+Comment=Ethereal is used by network professionals around the world for troubleshooting, analysis, software and protocol development, and education.
+Exec=ethereal
+Icon=elogo3d48x48.png
+Terminal=false
+Type=Application
+Categories=Application;Network;System;Security;GTK
+StartupNotify=True

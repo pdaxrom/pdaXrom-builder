@@ -1,0 +1,11 @@
+--- nxdesktop/configure~	2004-10-04 11:41:41.000000000 +0000
++++ nxdesktop/configure	2004-10-04 11:42:04.000000000 +0000
+@@ -138,7 +138,7 @@
+ echo "CC          = $cc" >>Makeconf
+ 
+ if $cc -v 2>&1 |grep '^gcc' >/dev/null; then
+-    cflags="$cflags -Wall -O2"
++    cflags="$cflags -Wall -Os -fomit-frame-pointer -mcpu=xscale -mtune=xscale"
+ else
+     cflags="$cflags -O"
+ fi

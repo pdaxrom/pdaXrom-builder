@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# The pppd executes this script every time a PPP connection comes
+# up and passes the following args to it:
+#
+# 	$1	device
+# 	$2	tty
+# 	$3	speed
+# 	$4	local IP addr
+# 	$5	remote IP addr
+#
+# You can then execute special commands (like adding routes)
+# depending on the arguments passed by the pppd.
+#
+#if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf ]; then
+if [ -f /etc/ppp/resolv.conf ]; then
+	rm -f /etc/ppp/resolv.prev
+	if [ -f /etc/resolv.conf ]; then
+		cp /etc/resolv.conf /etc/ppp/resolv.prev
+		grep domain /etc/ppp/resolv.prev > /etc/resolv.conf
+ 		grep search /etc/ppp/resolv.prev >> /etc/resolv.conf
+		cat /etc/ppp/resolv.conf >> /etc/resolv.conf
+	else
+		cp /etc/ppp/resolv.conf /etc
+	fi
+fi
+

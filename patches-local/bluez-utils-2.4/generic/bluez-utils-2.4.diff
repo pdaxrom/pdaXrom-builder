@@ -1,0 +1,558 @@
+diff -Nur bluez-utils-2.4~/hcid/hcid.conf bluez-utils-2.4/hcid/hcid.conf
+--- bluez-utils-2.4~/hcid/hcid.conf	2002-07-18 18:12:46.000000000 +0000
++++ bluez-utils-2.4/hcid/hcid.conf	2004-12-09 16:12:11.000000000 +0000
+@@ -34,7 +34,7 @@
+ 	name "BlueZ (%d)";
+ 
+ 	# Local device class
+-	class 0x100;
++	class 0x120114;
+ 
+ 	# Default packet type
+ 	#pkt_type DH1,DM1,HV1;
+diff -Nur bluez-utils-2.4~/pcmcia/Makefile.am bluez-utils-2.4/pcmcia/Makefile.am
+--- bluez-utils-2.4~/pcmcia/Makefile.am	2002-05-17 01:01:14.000000000 +0000
++++ bluez-utils-2.4/pcmcia/Makefile.am	2004-12-09 16:20:39.000000000 +0000
+@@ -4,11 +4,12 @@
+ 
+ pcmciadir  = /etc/pcmcia
+ 
+-EXTRA_DIST = bluetooth bluetooth.conf
++EXTRA_DIST = bluetooth bluetooth.conf bt-uart.conf
+ 
+ install-data-local: @PCMCIA@
+ 
+ pcmcia:
+ 	$(mkinstalldirs) $(DESTDIR)$(pcmciadir)
+-	$(INSTALL) -m 755 $(srcdir)/bluetooth $(DESTDIR)$(pcmciadir)
+-	$(INSTALL) -m 644 $(srcdir)/bluetooth.conf $(DESTDIR)$(pcmciadir)
++	$(INSTALL) -m 755    $(srcdir)/bluetooth	$(DESTDIR)$(pcmciadir)
++	$(INSTALL) -m 644    $(srcdir)/bluetooth.conf	$(DESTDIR)$(pcmciadir)
++	$(INSTALL) -m 644 -D $(srcdir)/bt-uart.conf	$(DESTDIR)/etc/bluetooth/bt-uart.conf
+diff -Nur bluez-utils-2.4~/pcmcia/Makefile.in bluez-utils-2.4/pcmcia/Makefile.in
+--- bluez-utils-2.4~/pcmcia/Makefile.in	2003-12-18 18:36:57.000000000 +0000
++++ bluez-utils-2.4/pcmcia/Makefile.in	2004-12-09 16:21:31.000000000 +0000
+@@ -92,7 +92,7 @@
+ 
+ pcmciadir = /etc/pcmcia
+ 
+-EXTRA_DIST = bluetooth bluetooth.conf
++EXTRA_DIST = bluetooth bluetooth.conf bt-uart.conf
+ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+ CONFIG_CLEAN_FILES = 
+ DIST_COMMON =  Makefile.am Makefile.in
+@@ -196,8 +196,9 @@
+ 
+ pcmcia:
+ 	$(mkinstalldirs) $(DESTDIR)$(pcmciadir)
+-	$(INSTALL) -m 755 $(srcdir)/bluetooth $(DESTDIR)$(pcmciadir)
+-	$(INSTALL) -m 644 $(srcdir)/bluetooth.conf $(DESTDIR)$(pcmciadir)
++	$(INSTALL) -m 755    $(srcdir)/bluetooth	$(DESTDIR)$(pcmciadir)
++	$(INSTALL) -m 644    $(srcdir)/bluetooth.conf	$(DESTDIR)$(pcmciadir)
++	$(INSTALL) -m 644 -D $(srcdir)/bt-uart.conf	$(DESTDIR)/etc/bluetooth/bt-uart.conf
+ 
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+diff -Nur bluez-utils-2.4~/pcmcia/bluetooth bluez-utils-2.4/pcmcia/bluetooth
+--- bluez-utils-2.4~/pcmcia/bluetooth	2002-08-24 15:57:12.000000000 +0000
++++ bluez-utils-2.4/pcmcia/bluetooth	2004-12-11 14:08:18.000000000 +0000
+@@ -1,58 +1,102 @@
+-#!/bin/sh
++#!/bin/bash
+ #
+-# bluetooth
++# bluetooth    Bluetooth subsystem starting and stopping
+ #
+-# PCMCIA Bluetooth device initialization
+-# Written by Maxim Krasnyanskiy <maxk@qualcomm.com>
+-#
+-# This script requires new cardmgr and expects following
+-# environment variables FUNCTION, VENDORID, CARDNAME
+-#
+-
+-#
+-# $Id: bluetooth,v 1.4 2002/08/24 15:57:12 maxk Exp $
++# chkconfig: 345 25 90
++# description: Bluetooth subsystem
+ #
+ 
+-if [ -r ./shared ]; then . ./shared ; else . /etc/pcmcia/shared ; fi
+-
+-# Get device attributes
+-get_info $DEVICE
+-
+-#
+-# Serial devices
+-#
+-start_serial() {
+-    IRQ=`setserial /dev/$DEVICE | sed -e 's/.*IRQ: //'`
+-    setserial /dev/$DEVICE irq 0 ; setserial /dev/$DEVICE irq $IRQ
+- 
+-    /sbin/hciattach $DEVICE $MANFID > /tmp/pcmcia
++# Source function library.
++. /etc/rc.d/init.d/functions
++
++# Source Bluetooth configuration.
++#. /etc/sysconfig/bluetooth
++
++prog="Bluetooth"
++
++UART_CONF="/etc/bluetooth/bt-uart.conf"
++ID=""
++UART_SET=""
++SERIAL_SET=""
++if [ -f /sbin/hciattach -a -f $UART_CONF ]; then
++        ID=`/sbin/cardctl ident | grep info: | sed 's/^ *product info: *//' | sed 's/"/\\"/g'`
++        UART_SET=`grep "$ID" $UART_CONF | cut -f2 -d":"`
++	SERIAL_SET=`grep "$ID" $UART_CONF | cut -f3 -d":"`
++fi
++
++start_uarts()
++{
++        if [ "$SERIAL_SET" != "" ]; then
++          /sbin/setserial $SERIAL_SET
++	fi
++        if [ "$UART_SET" != "" ]; then
++	  modprobe hci_uart > /dev/null 2>&1
++          /sbin/hciattach $UART_SET
++	  hciconfig hci0 up
++	fi
+ }
+-stop_serial() {
+-    do_fuser -k -HUP /dev/$DEVICE > /dev/null
++
++stop_uarts()
++{
++        if [ "$UART_SET" != "" ]; then
++	  hciconfig hci0 down
++          killproc hciattach > /dev/null 2>&1
++	  sleep 1
++	  modprobe -r hci_uart > /dev/null 2>&1
++	fi
+ }
+-suspend_serial() {
+-    stop_serial
++
++start() 
++{
++    echo -n $"Starting $prog... "
++    #modprobe rfcomm > /dev/null 2>&1
++    #modprobe l2cap  > /dev/null 2>&1
++
++    start_uarts
++    rfcomm release all
++    if [ -f /etc/bluetooth/rfcomm.conf ]; then
++	/bin/rfcomm -f /etc/bluetooth/rfcomm.conf bind all
++    fi
++    
++    echo "Done."
+ }
+-resume_serial() {
+-    start_serial
++
++stop() 
++{
++    echo -n $"Shutting down $prog... "
++    
++    rfcomm release all
++    stop_uarts
++
++    #rmmod rfcomm > /dev/null 2>&1
++    #rmmod l2cap >  /dev/null 2>&1
++    #rmmod bluez >  /dev/null 2>&1
++
++    echo "Done."
+ }
+ 
+-start=
+-stop=
+-suspend=
+-resume=
+-check=
+-cksum=
+-
+-case "$FUNCID" in
+-2)  # Serial
+-    start=start_serial
+-    stop=stop_serial
+-    suspend=suspend_serial
+-    resume=resume_serial
++[ -f /sbin/hcid ] || exit 0
++
++# See how we were called.
++case "$1" in
++  start)
++    start
++        ;;
++  stop)
++    stop
++        ;;
++  restart|reload)
++    stop
++    start
++    ;;
++  condrestart)
++    [ -e /var/lock/subsys/bluetooth ] && (stop; start)
+     ;;
++  check|suspend|resume|cksum)
++        ;;  
++  *)
++        echo $"Usage: $0 {start|stop|restart|reload|condrestart}"
++        exit 1
+ esac
+ 
+-eval \$$ACTION
+-
+ exit 0
+diff -Nur bluez-utils-2.4~/pcmcia/bluetooth.conf bluez-utils-2.4/pcmcia/bluetooth.conf
+--- bluez-utils-2.4~/pcmcia/bluetooth.conf	2002-11-23 18:07:07.000000000 +0000
++++ bluez-utils-2.4/pcmcia/bluetooth.conf	2004-12-09 16:12:11.000000000 +0000
+@@ -13,50 +13,59 @@
+ device "btuart_cs"
+   class "bluetooth" module "btuart_cs"
+ 
++device "serial_cs"
++  class "bluetooth" module "serial_cs"
+ 
+ card "Xircom CreditCard Bluetooth Adapter"
+   version "Xircom", "*", "CBT"
+-  bind "serial_cs" class "bluetooth"
++  bind "serial_cs"
+ 
+ card "Xircom RealPort2 Bluetooth Adapter"
+   version "Xircom", "*", "R2BT"
+-  bind "serial_cs" class "bluetooth"
++  bind "serial_cs"
+ 
+ card "Brain Boxes BL-620 Bluetooth Adapter"
+   version "Brain Boxes", "Bluetooth PC Card"
+-  bind "serial_cs" class "bluetooth"
++  bind "serial_cs"
+ 
+ card "COM One Platinium Bluetooth PC Card"
+   version "COM1 SA", "MC310 CARD"
+-  bind "serial_cs" class "bluetooth"
++  bind "serial_cs"
+ 
+ card "Sphinx PICO Card"
+   version "SPHINX", "BT-CARD"
+-  bind "serial_cs" class "bluetooth"
++  bind "serial_cs"
+ 
+ card "H-Soft blue+Card"
+   version "H-Soft", "Blue+CARD"
+-  bind "serial_cs" class "bluetooth"
++  bind "serial_cs"
+ 
+ card "Compaq iPAQ Bluetooth Sleeve"
+   version "CF CARD", "GENERIC"
+-  bind "serial_cs" class "bluetooth"
+-
++  bind "serial_cs"
+ 
+ card "Nokia Bluetooth Card"
+   version "Nokia Mobile Phones", "DTL-1"
+   bind "dtl1_cs"
+ 
+ card "Socket Bluetooth Card"
+-  version "Socket", "CF+ Personal Network Card"
++#  version "Socket", "CF+ Personal Network Card"
++  manfid  0x0104, 0x009f
+   bind "dtl1_cs"
+ 
++card "Socket Bluetooth Card v2.5"
++#  version "Socket", "CF+ Personal Network Card Rev 2.5"
++  manfid 0x0104, 0x0096 
++  bind "serial_cs"
++
++card "Bluetooth BT0100M"
++  version "Bluetooth BT0100M", "", ""
++  bind "serial_cs"
+ 
+ card "3Com Bluetooth PC Card"
+   version "3COM", "*", "Bluetooth PC Card"
+   bind "bt3c_cs"
+ 
+-
+ card "LSE041 Bluetooth PC Card"
+   version "BlueCard", "LSE041"
+   bind "bluecard_cs"
+@@ -65,6 +74,10 @@
+   version "WSS", "LSE039"
+   bind "bluecard_cs"
+ 
++card "LSE139 Bluetooth Compact Flash Card"
++  version "BTCFCARD", "LSE139"
++  bind "bluecard_cs"
++
+ 
+ card "AmbiCom BT2000E Bluetooth Card"
+   version "AmbiCom,Inc", "BT2000E"
+@@ -76,7 +89,7 @@
+ 
+ card "Billionton Bluetooth Card"
+   version "Compact Flash", "Bluetooth Card"
+-  bind "bt950_cs"
++  bind "serial_cs"
+ 
+ 
+ card "Cyber-blue Compact Flash Card"
+diff -Nur bluez-utils-2.4~/pcmcia/bt-uart.conf bluez-utils-2.4/pcmcia/bt-uart.conf
+--- bluez-utils-2.4~/pcmcia/bt-uart.conf	1970-01-01 00:00:00.000000000 +0000
++++ bluez-utils-2.4/pcmcia/bt-uart.conf	2004-12-09 16:12:11.000000000 +0000
+@@ -0,0 +1,4 @@
++"Socket", "CF+ Personal Network Card Rev 2.5":/dev/ttyS3 bcsp 230400
++"Bluetooth BT0100M", "", "":/dev/ttyS3 bcsp
++"Compact Flash", "Bluetooth Card", "", "":/dev/ttyS3 bcsp:/dev/ttyS3 baud_base 921600
++"UBIQUAM", "UM100 CDMA CF Card", "", ""::/dev/ttyS4 baud_base 921600
+diff -Nur bluez-utils-2.4~/scripts/bluepin bluez-utils-2.4/scripts/bluepin
+--- bluez-utils-2.4~/scripts/bluepin	2003-04-30 21:03:18.000000000 +0000
++++ bluez-utils-2.4/scripts/bluepin	2004-12-09 16:12:11.000000000 +0000
+@@ -1,159 +1,85 @@
+-#!/usr/bin/python
+-#
+-# Bluetooth PIN helper
+-# Written by Maxim Krasnyansky <maxk@qualcomm.com>
+-#
+-import sys, os, string, popen2
+-
+-# X Display initialization.
+-# Find running X Server and parse it's arguments.
+-# Set enviroment variables DISPLAY and XAUTHORITY
+-# using info extracted from X Server args.
+-#
+-def set_display():
+-	disp = ":0"
+-	auth = ""
+-	proc = "-C X -C XFree86"
+-	ps   = "/bin/ps " + proc + " --format args --no-headers"
+-
+-	r,w = popen2.popen2(ps)
+-	arg = string.split(r.read())
+-	for i in range(1, len(arg)):
+-		if arg[i][0] != '-' and i==1:
+-			disp = arg[i]
+-		elif arg[i] == "-auth":
+-			auth = arg[i+1]
+-			break
+-
+-	os.environ['DISPLAY']    = disp 
+-	os.environ['XAUTHORITY'] = auth
+-
+-# Set X display before initializing GTK
+-set_display()
+-
+-from gtk import *
+-
+-# Dialog Class
+-DLG_OK = 1
+-DLG_CANCEL = 2
+-class Dialog(GtkDialog):
+-	result = DLG_CANCEL 
+-	args = {}
+-	def __init__(self, modal=FALSE, mesg=None, args = {}):
+-		GtkDialog.__init__(self)
+-		self.args = args
+-		self.set_modal(modal)
+-		self.set_usize(400, 0)
+-		self.set_uposition(300,300)
+-		
+-		self.connect("destroy", self.quit)
+-		self.connect("delete_event", self.quit)
+-
+-		self.action_area.set_border_width(2)
+-
+-		ok = GtkButton("Accept")
+-		ok.connect("clicked", self.ok)
+-		self.action_area.pack_start(ok, padding = 20)
+-		ok.show()
+-
+-		cl = GtkButton("Reject")
+-		cl.connect("clicked", self.cancel)
+-		self.action_area.pack_start(cl, padding = 20)
+-		cl.show()
+-
+-		if mesg:
+-			msg = GtkLabel()
+-			msg.set_text(mesg)
+-			self.vbox.pack_start(msg, padding = 10)
+-			msg.show()
+-
+-		self.ents = []
+-		for k in self.args.keys():
+-			hbox = GtkHBox()
+-			hbox.set_border_width(5)
+-			self.vbox.pack_start(hbox)
+-			hbox.show()
+-
+-			l = GtkLabel()
+-			e = GtkEntry()
+-			l.set_text( k )
+-			e.set_text( self.args[k] )
+-			e.connect("key_press_event", self.key_press)
+-			hbox.pack_start(l, padding = 10, expand = FALSE)
+-			hbox.pack_start(e)
+-			l.show()
+-			e.show()
+-
+-			self.ents.append( (k, e) )
+-
+-		self.ents[0][1].grab_focus()
+-
+-	def key_press(self, entry, event):
+-		if event.keyval == GDK.Return:
+-			entry.emit_stop_by_name("key_press_event")
+-			self.ok()
+-		elif event.keyval == GDK.Escape:
+-			entry.emit_stop_by_name("key_press_event")
+-			self.cancel()
+-
+-	def ok(self, *args):
+-		self.result = DLG_OK 
+-		for e in self.ents:
+-			k = e[0]
+-			self.args[k] = e[1].get_text() 
+-		self.quit()
+-
+-	def cancel(self, *args):
+-		self.result = DLG_CANCEL 
+-		self.quit()
+-
+-	def quit(self, *args):
+-		self.hide()
+-		self.destroy()
+-		mainquit()
+-
+-def dialog(title, mesg, args, modal = FALSE):
+-	dlg = Dialog(args = args, mesg = mesg, modal = modal)
+-	dlg.set_title(title)
+-	dlg.show()
+-	mainloop()
+-	return dlg.result
++#!/usr/bin/env python
++import os,sys
+ 
+-def main(*args):
+-	if len(sys.argv) < 2:
+-		print "ERR"
+-		sys.exit()
++class bluepin:
++	DEF_PAD = 5
++	EXIT_OK = False
++	if os.name == "nt":
++		PIN_FILENAME = ".\\pin"
++	else:
++		PIN_FILENAME = "/etc/bluetooth/pin"
+ 	
+-	dir    = sys.argv[1]
+-	bdaddr = sys.argv[2]
++	def __init__(self):
++		pin = ""
++		if os.path.isfile(self.PIN_FILENAME):
++			f=open(self.PIN_FILENAME, "r")
++			pin = f.readline()
++			f.close()
++			pin = pin.strip()
++		if (pin != ""):
++			sys.exit("PIN:"+pin);
++		else:
++			global gtk
++			import gtk
+ 
+-	if len(sys.argv) > 3:
+-		name = sys.argv[3]
+-	else:
+-		name = ""
++	        # create a new window
++	        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
++	        self.window.set_title("Enter Bluetooth PIN")
++	        self.window.set_border_width(10)
++	        self.window.set_position(gtk.WIN_POS_CENTER)
++	        self.window.set_resizable(gtk.FALSE)
++	        self.window.connect("delete_event", self.exit_bad)
++	        self.window.connect("destroy", self.exit_bad)
++	        MainBox = gtk.VBox(gtk.FALSE, self.DEF_PAD)
++	        self.window.add(MainBox)
+ 
+-	title = "Bluetooth PIN Code"
++		hbox = gtk.HBox(gtk.FALSE, self.DEF_PAD)
++		MainBox.pack_start(hbox, gtk.FALSE, gtk.TRUE, 0)
++		
++	        label = gtk.Label("Bluetooth PIN:")
++	        hbox.pack_start(label, gtk.FALSE, gtk.TRUE, 0)
+ 
+-	# Bluetooth spec recommends automatic strong random PIN generation.
+-	# So eventually we should implement that. 
+-	pin = { "PIN": "" }
++	        self.blue_pin = gtk.Entry(0)
++	        self.blue_pin.set_text("PIN")
++	        self.blue_pin.set_size_request(160,30)
++		hbox.pack_end(self.blue_pin, gtk.FALSE, gtk.TRUE, 0)
++		
++	# Ok and Cancel buttons
++	        bbox = gtk.HButtonBox()
++		MainBox.pack_start(bbox, gtk.FALSE, gtk.FALSE, 0)
++	        bbox.set_layout(gtk.BUTTONBOX_SPREAD)
++	   	
++	        cancel_button = gtk.Button("Cancel",gtk.STOCK_CANCEL)
++	        cancel_button.connect("clicked", self.exit_bad)
++	        bbox.add(cancel_button)
++
++	        okbutton = gtk.Button("Ok",gtk.STOCK_OK)
++	        okbutton.connect("clicked", self.exit_good)
++	        bbox.add(okbutton)
++	        okbutton.set_flags(gtk.CAN_DEFAULT)
++	        okbutton.grab_default()
+ 
+-	if dir == "out":
+-		mesg = "Outgoing connection to "
+-	else:
+-		mesg = "Incoming connection from "
+-	
+-	mesg = mesg + name + "[" + bdaddr + "]"
++	        self.window.show_all()
+ 
+-	if dialog(title, mesg, pin) == DLG_OK:
+-		pin["PIN"] = string.strip(pin["PIN"])
++	def exit_bad(self,widget):
++		print "ERR"
++		sys.exit()
++		gtk.main_quit()
+ 
+-		if len(pin["PIN"]) >= 1 and len(pin["PIN"]) <= 16:
+-			print "PIN:" + pin["PIN"]
+-		else:
++	def exit_good(self,widget):
++		pin = self.blue_pin.get_text()
++		pin = pin.strip()
++		if (pin == False or pin == ""):
+ 			print "ERR"
+-	else:
+-		print "ERR"
++		else:
++			print "PIN:" + pin
++		sys.exit()
++		gtk.main_quit()
++
++	def main(self):
++        	gtk.main()
++
++if __name__ == "__main__":
++	bluepin = bluepin()
++	bluepin.main()
+ 
+-#
+-main()
+diff -Nur bluez-utils-2.4~/scripts/bluetooth.rc.rh bluez-utils-2.4/scripts/bluetooth.rc.rh
+--- bluez-utils-2.4~/scripts/bluetooth.rc.rh	2003-04-15 19:37:49.000000000 +0000
++++ bluez-utils-2.4/scripts/bluetooth.rc.rh	2004-12-09 16:27:35.000000000 +0000
+@@ -32,6 +32,9 @@
+ start() 
+ {
+         echo -n $"Starting $prog: "
++	#if [ ! -r /dev/.devfsd ]; then
++	    /etc/rc.d/init.d/create_dev
++	#fi
+         daemon /sbin/hcid
+ 
+ 	if [ -x /usr/sbin/sdpd ]; then

@@ -1,0 +1,119 @@
+--- Python/setup.py~	2003-10-21 20:01:21.000000000 +0000
++++ Python/setup.py	2004-05-29 19:07:34.000000000 +0000
+@@ -206,26 +206,29 @@
+         try:
+             imp.load_dynamic(ext.name, ext_filename)
+         except ImportError, why:
+-            self.announce('*** WARNING: renaming "%s" since importing it'
+-                          ' failed: %s' % (ext.name, why), level=3)
+-            assert not self.inplace
+-            basename, tail = os.path.splitext(ext_filename)
+-            newname = basename + "_failed" + tail
+-            if os.path.exists(newname):
+-                os.remove(newname)
+-            os.rename(ext_filename, newname)
+-
+-            # XXX -- This relies on a Vile HACK in
+-            # distutils.command.build_ext.build_extension().  The
+-            # _built_objects attribute is stored there strictly for
+-            # use here.
+-            # If there is a failure, _built_objects may not be there,
+-            # so catch the AttributeError and move on.
+-            try:
+-                for filename in self._built_objects:
+-                    os.remove(filename)
+-            except AttributeError:
+-                self.announce('unable to remove files (ignored)')
++            if os.environ.get('CROSS_COMPILE') != "yes":
++                self.announce('*** WARNING: renaming "%s" since importing it'
++                              ' failed: %s' % (ext.name, why), level=3)
++                assert not self.inplace
++                basename, tail = os.path.splitext(ext_filename)
++                newname = basename + "_failed" + tail
++                if os.path.exists(newname):
++                    os.remove(newname)
++                os.rename(ext_filename, newname)
++
++                # XXX -- This relies on a Vile HACK in
++                # distutils.command.build_ext.build_extension().  The
++                # _built_objects attribute is stored there strictly for
++                # use here.
++                # If there is a failure, _built_objects may not be there,
++                # so catch the AttributeError and move on.
++                try:
++                    for filename in self._built_objects:
++                        os.remove(filename)
++                except AttributeError:
++                    self.announce('unable to remove files (ignored)')
++            else:
++                self.announce('stuff and things')
+         except:
+             exc_type, why, tb = sys.exc_info()
+             self.announce('*** WARNING: importing extension "%s" '
+@@ -241,9 +244,16 @@
+ 
+     def detect_modules(self):
+         # Ensure that /usr/local is always used
+-        add_dir_to_list(self.compiler.library_dirs, '/usr/local/lib')
+-        add_dir_to_list(self.compiler.include_dirs, '/usr/local/include')
+-
++	if os.environ.get('CROSS_COMPILE') == "yes":
++    	    cross_dir = os.environ.get('CROSS_DIR')
++    	    add_dir_to_list(self.compiler.library_dirs, "%s/lib"     % cross_dir )
++    	    add_dir_to_list(self.compiler.include_dirs, "%s/include" % cross_dir )
++    	    add_dir_to_list(self.compiler.library_dirs, "%s/X11R6/lib"     % cross_dir )
++    	    add_dir_to_list(self.compiler.include_dirs, "%s/X11R6/include" % cross_dir )
++	else:
++    	    add_dir_to_list(self.compiler.library_dirs, '/usr/local/lib')
++    	    add_dir_to_list(self.compiler.include_dirs, '/usr/local/include')
++	    
+         # fink installs lots of goodies in /sw/... - make sure we
+         # check there
+         if sys.platform == "darwin":
+@@ -264,8 +274,13 @@
+         # lib_dirs and inc_dirs are used to search for files;
+         # if a file is found in one of those directories, it can
+         # be assumed that no additional -I,-L directives are needed.
+-        lib_dirs = self.compiler.library_dirs + ['/lib', '/usr/lib']
+-        inc_dirs = self.compiler.include_dirs + ['/usr/include']
++        #if os.environ.get('CROSS_COMPILE') == "yes":
++        cross_dir = os.environ.get('CROSS_DIR')
++        lib_dirs = ["%s/lib"     % cross_dir ] + ["%s/X11R6/lib"     % cross_dir ] + self.compiler.library_dirs
++        inc_dirs = ["%s/include" % cross_dir ] + ["%s/X11R6/include" % cross_dir ] + self.compiler.include_dirs
++        #else:
++        #    lib_dirs = self.compiler.library_dirs + ['/lib', '/usr/lib']
++        #    inc_dirs = self.compiler.include_dirs + ['/usr/include']
+         exts = []
+ 
+         platform = self.get_platform()
+@@ -962,11 +977,8 @@
+         if tklib and tcllib:
+             # Check for the include files on Debian, where
+             # they're put in /usr/include/{tcl,tk}X.Y
+-            debian_tcl_include = [ '/usr/include/tcl' + version ]
+-            debian_tk_include =  [ '/usr/include/tk'  + version ] + \
+-                                 debian_tcl_include
+-            tcl_includes = find_file('tcl.h', inc_dirs, debian_tcl_include)
+-            tk_includes = find_file('tk.h', inc_dirs, debian_tk_include)
++            tcl_includes = find_file('tcl.h', inc_dirs, '.')
++            tk_includes = find_file('tk.h', inc_dirs, '.')
+ 
+         if (tcllib is None or tklib is None or
+             tcl_includes is None or tk_includes is None):
+@@ -984,16 +996,6 @@
+         if platform == 'sunos5':
+             include_dirs.append('/usr/openwin/include')
+             added_lib_dirs.append('/usr/openwin/lib')
+-        elif os.path.exists('/usr/X11R6/include'):
+-            include_dirs.append('/usr/X11R6/include')
+-            added_lib_dirs.append('/usr/X11R6/lib')
+-        elif os.path.exists('/usr/X11R5/include'):
+-            include_dirs.append('/usr/X11R5/include')
+-            added_lib_dirs.append('/usr/X11R5/lib')
+-        else:
+-            # Assume default location for X11
+-            include_dirs.append('/usr/X11/include')
+-            added_lib_dirs.append('/usr/X11/lib')
+ 
+         # If Cygwin, then verify that X is installed before proceeding
+         if platform == 'cygwin':

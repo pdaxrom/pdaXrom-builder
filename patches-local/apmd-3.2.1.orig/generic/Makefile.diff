@@ -1,0 +1,23 @@
+diff -Nur apmd-3.2.1.orig/Makefile apmd-3.2.1.orig-patched/Makefile
+--- apmd-3.2.1.orig/Makefile	2004-01-04 08:13:18.000000000 +0000
++++ apmd-3.2.1.orig-patched/Makefile	2004-01-26 16:01:44.000000000 +0000
+@@ -41,8 +41,8 @@
+ PROXY_DIR=/etc
+ DESTDIR=
+ 
+-CC=gcc
+-CFLAGS=-O -g
++#CC=gcc
++#CFLAGS=-O -g
+ XTRACFLAGS=-Wall -pipe -I. -I/usr/src/linux/include \
+ 		-I/usr/src/linux-2.2/include -I /usr/src/linux-2.0/include \
+ 		-DVERSION=\"$(VERSION)\" \
+@@ -58,7 +58,7 @@
+ #CFLAGS=-O3 -m486 -fomit-frame-pointer
+ #LDFLAGS=-s
+ 
+-LIBTOOL=libtool --quiet
++#LIBTOOL=libtool --quiet
+ LT_COMPILE = $(LIBTOOL) --mode=compile $(CC)
+ LT_LINK = $(LIBTOOL) --mode=link $(CC)
+ LT_INSTALL = $(LIBTOOL) --mode=install install

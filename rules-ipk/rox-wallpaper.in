@@ -1,0 +1,9 @@
+config ROX-WALLPAPER
+	bool
+	prompt "Wallpaper"
+	depends on ROX
+
+config ROX-WALLPAPER_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on ROX-WALLPAPER

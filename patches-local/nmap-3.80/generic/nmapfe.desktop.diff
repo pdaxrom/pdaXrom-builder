@@ -1,0 +1,12 @@
+--- nmap/nmapfe.desktop~	2005-01-31 14:39:47.000000000 +0000
++++ nmap/nmapfe.desktop	2005-01-31 14:40:02.000000000 +0000
+@@ -6,7 +6,7 @@
+ Version=1.0
+ TryExec=nmapfe
+ Exec=nmapfe
+-Icon=icon-network
++Icon=icon-network.png
+ Terminal=false
+ Type=Application
+ Categories=Application;Network;System;Security;GTK
+\ No newline at end of file

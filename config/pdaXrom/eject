@@ -1,0 +1,13 @@
+#!/bin/sh
+
+if [ "$@" = "/mnt/cf" ]; then
+    cardctl eject
+    exit 0
+fi
+
+if [ "$@" = "/mnt/card" ]; then
+    /etc/sdcontrol eject
+    exit 0
+fi
+
+umount $@

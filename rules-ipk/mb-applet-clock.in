@@ -1,0 +1,9 @@
+config MB-APPLET-CLOCK
+	bool
+	prompt "Compile mb-applet-clock"
+	depends on XFREE430
+
+config MB-APPLET-CLOCK_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MB-APPLET-CLOCK

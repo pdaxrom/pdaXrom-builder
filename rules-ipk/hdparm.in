@@ -1,0 +1,8 @@
+config HDPARM
+	bool
+	prompt "hdparm"
+
+config HDPARM_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on HDPARM

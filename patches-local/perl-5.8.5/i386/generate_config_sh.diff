@@ -1,0 +1,50 @@
+--- perl-5.8.5/Cross/generate_config_sh~	2003-09-05 08:31:08.000000000 +0000
++++ perl-5.8.5/Cross/generate_config_sh	2004-09-30 09:59:15.000000000 +0000
+@@ -16,29 +16,29 @@
+ my $sys = $ENV{SYS};
+ 
+ my $callbacks = {};
+-$callbacks->{'ar'} = [\&simple_process, ["AR", "arm-linux-ar"]];
+-$callbacks->{'archname'} = [\&simple_process, ["SYS", "armv4l-linux"]];
+-$callbacks->{'cc'} = [\&simple_process, ["CC", "arm-linux-gcc"]];
+-$callbacks->{'cccdlflags'} = [\&simple_process, ["CFLAGS", ""]];
+-$callbacks->{'ccdlflags'} = [\&simple_process, ["CFLAGS", ""]];
++$callbacks->{'ar'} = [\&simple_process, ["AR", "i686-linux-ar"]];
++$callbacks->{'archname'} = [\&simple_process, ["SYS", "i686-linux"]];
++$callbacks->{'cc'} = [\&simple_process, ["CC", "i686-linux-gcc"]];
++$callbacks->{'cccdlflags'} = [\&simple_process, ["CCCDLFLAGS", ""]];
++$callbacks->{'ccdlflags'} = [\&simple_process, ["CCDLFLAGS", ""]];
+ $callbacks->{'ccflags'} = [\&simple_process, ["CFLAGS", "-fno-strict-aliasing -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"]];
+ $callbacks->{'ccflags_uselargefiles'} = [\&simple_process, ["CFLAGS", "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"]];
+-$callbacks->{'ccname'} = [\&simple_process, ["CC", "arm-linux-gcc"]];
+-$callbacks->{'cpp'} = [\&simple_process, ["CCP", "arm-linux-cpp"]];
++$callbacks->{'ccname'} = [\&simple_process, ["CC", "i686-linux-gcc"]];
++$callbacks->{'cpp'} = [\&simple_process, ["CCP", "i686-linux-cpp"]];
+ $callbacks->{'cppflags'} = [\&simple_process, ["CCPFLAGS", "-fno-strict-aliasing"]];
+-$callbacks->{'cpprun'} = [\&simple_process_append, ["CC", "arm-linux-gcc -E", "-E"]];
+-$callbacks->{'cppstdin'} = [\&simple_process_append, ["CC", "arm-linux-gcc -E", "-E"]];
+-$callbacks->{'full_ar'} = [\&backtick, ["AR", "which $ENV{AR}", "/usr/local/arm/2.95.3/bin/arm-linux-ar"]];
+-$callbacks->{'ld'} = [\&simple_process, ["LD", "arm-linux-ld"]];
++$callbacks->{'cpprun'} = [\&simple_process_append, ["CC", "i686-linux-gcc -E", "-E"]];
++$callbacks->{'cppstdin'} = [\&simple_process_append, ["CC", "i686-linux-gcc -E", "-E"]];
++$callbacks->{'full_ar'} = [\&backtick, ["AR", "which $ENV{AR}", "i686-linux-ar"]];
++$callbacks->{'ld'} = [\&simple_process, ["LD", "i686-linux-ld"]];
+ $callbacks->{'ldflags'} = [\&simple_process, ["LDFLAGS", ""]];
+ $callbacks->{'ldflags_uselargefiles'} = [\&simple_process, ["LDFLAGS", ""]];
+-$callbacks->{'myarchname'} = [\&simple_process, ["SYS", "armv4l-linux"]];
+-$callbacks->{'archlib'} = [\&library_munge, ["SYS", "armv4l-linux"]];
+-$callbacks->{'archlibexp'} = [\&library_munge, ["SYS", "armv4l-linux"]];
+-$callbacks->{'installarchlib'} = [\&library_munge, ["SYS", "armv4l-linux"]];
+-$callbacks->{'installsitearch'} = [\&library_munge, ["SYS", "armv4l-linux"]];
+-$callbacks->{'sitearch'} = [\&library_munge, ["SYS", "armv4l-linux"]];
+-$callbacks->{'sitearchexp'} = [\&library_munge, ["SYS", "armv4l-linux"]];
++$callbacks->{'myarchname'} = [\&simple_process, ["SYS", "i686-linux"]];
++$callbacks->{'archlib'} = [\&library_munge, ["SYS", "i686-linux"]];
++$callbacks->{'archlibexp'} = [\&library_munge, ["SYS", "i686-linux"]];
++$callbacks->{'installarchlib'} = [\&library_munge, ["SYS", "i686-linux"]];
++$callbacks->{'installsitearch'} = [\&library_munge, ["SYS", "i686-linux"]];
++$callbacks->{'sitearch'} = [\&library_munge, ["SYS", "i686-linux"]];
++$callbacks->{'sitearchexp'} = [\&library_munge, ["SYS", "i686-linux"]];
+ 
+ if ($config eq "") {
+ 	die("Please run me as generate_config_sh path/to/original/config.sh");

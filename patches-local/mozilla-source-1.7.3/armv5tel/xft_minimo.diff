@@ -1,0 +1,16 @@
+--- mozilla/embedding/browser/gtk/tests/Makefile.in~	2004-09-06 18:40:52.000000000 +0000
++++ mozilla/embedding/browser/gtk/tests/Makefile.in	2004-09-06 18:42:08.000000000 +0000
+@@ -110,11 +110,11 @@
+ endif
+ 
+ EXTRA_LIBS	+= $(MOZ_JS_LIBS)
+-EXTRA_LIBS	+= $(MOZ_COMPONENT_LIBS)
++EXTRA_LIBS	+= $(MOZ_COMPONENT_LIBS) $(MOZ_XFT_LIBS)
+ 
+ include $(topsrcdir)/config/rules.mk
+ 
+-CXXFLAGS	+= $(MOZ_GTK_CFLAGS) $(MOZ_GTK2_CFLAGS)
++CXXFLAGS	+= $(MOZ_GTK_CFLAGS) $(MOZ_GTK2_CFLAGS) $(MOZ_XFT_CFLAGS)
+ 
+ ifdef ENABLE_GNOME
+ CXXFLAGS	+= `gnome-config --cflags gnomeui`

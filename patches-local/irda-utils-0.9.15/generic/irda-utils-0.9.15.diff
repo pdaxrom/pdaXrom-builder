@@ -1,0 +1,60 @@
+diff -Nur irda-utils-0.9.15/irattach/Makefile irda-utils-0.9.15-patched/irattach/Makefile
+--- irda-utils-0.9.15/irattach/Makefile	2002-04-17 21:12:05.000000000 +0000
++++ irda-utils-0.9.15-patched/irattach/Makefile	2004-02-22 04:55:06.000000000 +0000
+@@ -37,9 +37,9 @@
+ #
+ # System stuff
+ #
+-SYS_INCLUDES = -I/usr/include -I/usr/src/linux/include
++SYS_INCLUDES = 
+ SYS_LIBRARIES = 
+-SYS_LIBPATH = -L/usr/lib -L/usr/local/lib 
++SYS_LIBPATH =
+ 
+ CFLAGS= -O2 -W -Wall -Wstrict-prototypes -Wshadow $(SYS_INCLUDES)
+ 
+diff -Nur irda-utils-0.9.15/irdaping/Makefile irda-utils-0.9.15-patched/irdaping/Makefile
+--- irda-utils-0.9.15/irdaping/Makefile	2002-04-04 20:43:01.000000000 +0000
++++ irda-utils-0.9.15-patched/irdaping/Makefile	2004-02-22 04:54:58.000000000 +0000
+@@ -37,9 +37,9 @@
+ #
+ # System stuff
+ #
+-SYS_INCLUDES = -I/usr/src/linux/include -I/usr/include
++SYS_INCLUDES = 
+ SYS_LIBRARIES = 
+-SYS_LIBPATH = -L/usr/lib -L/usr/local/lib 
++SYS_LIBPATH =
+ 
+ CFLAGS= $(RPM_OPT_FLAGS) $(SYS_INCLUDES) -Wall -Wstrict-prototypes
+ 
+diff -Nur irda-utils-0.9.15/irsockets/Makefile irda-utils-0.9.15-patched/irsockets/Makefile
+--- irda-utils-0.9.15/irsockets/Makefile	2002-04-04 02:17:34.000000000 +0000
++++ irda-utils-0.9.15-patched/irsockets/Makefile	2004-02-22 04:54:50.000000000 +0000
+@@ -37,9 +37,9 @@
+ #
+ # System stuff
+ #
+-SYS_INCLUDES = -I/usr/include -I/usr/src/linux/include
++SYS_INCLUDES =
+ SYS_LIBRARIES = 
+-SYS_LIBPATH = -L/usr/lib -L/usr/local/lib 
++SYS_LIBPATH =
+ 
+ CFLAGS= $(SYS_INCLUDES) $(RPM_OPT_FLAGS) -O2 -Wall -Wstrict-prototypes
+ 
+diff -Nur irda-utils-0.9.15/tekram/Makefile irda-utils-0.9.15-patched/tekram/Makefile
+--- irda-utils-0.9.15/tekram/Makefile	2002-04-04 20:45:39.000000000 +0000
++++ irda-utils-0.9.15-patched/tekram/Makefile	2004-02-22 04:54:41.000000000 +0000
+@@ -37,9 +37,9 @@
+ #
+ # System stuff
+ #
+-SYS_INCLUDES = -I/usr/src/linux/include -I/usr/include -I../include
++SYS_INCLUDES = -I../include
+ SYS_LIBRARIES = 
+-SYS_LIBPATH = -L/usr/lib -L/usr/local/lib 
++SYS_LIBPATH = 
+ 
+ CFLAGS= $(RPM_OPT_FLAGS) $(SYS_INCLUDES) -Wall -Wstrict-prototypes
+ 

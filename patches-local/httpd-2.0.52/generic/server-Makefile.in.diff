@@ -1,0 +1,13 @@
+--- httpd/server/Makefile.in~	2004-11-04 02:08:38.000000000 +0000
++++ httpd/server/Makefile.in	2004-11-04 02:09:41.000000000 +0000
+@@ -23,8 +23,8 @@
+ include $(top_srcdir)/build/library.mk
+ 
+ gen_test_char_OBJECTS = gen_test_char.lo util_debug.lo
+-gen_test_char: $(gen_test_char_OBJECTS)
+-	$(LINK) $(EXTRA_LDFLAGS) $(gen_test_char_OBJECTS) $(EXTRA_LIBS)
++gen_test_char: 
++	gcc -o gen_test_char gen_test_char.c -I../srclib/apr/include
+ 
+ test_char.h: gen_test_char
+ 	./gen_test_char > test_char.h

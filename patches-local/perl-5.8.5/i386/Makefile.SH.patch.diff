@@ -1,0 +1,173 @@
+diff -Nur perl-5.8.5/Cross/Makefile.SH.patch perl-5.8.5-new/Cross/Makefile.SH.patch
+--- perl-5.8.5/Cross/Makefile.SH.patch	2004-01-12 20:45:49.000000000 +0000
++++ perl-5.8.5-new/Cross/Makefile.SH.patch	2004-09-28 09:18:07.000000000 +0000
+@@ -1,6 +1,6 @@
+---- ../Makefile.SH	2003-08-22 09:49:04.000000000 -0500
+-+++ Makefile.SH	2003-09-05 02:38:40.000000000 -0500
+-@@ -110,18 +110,7 @@
++--- perl-5.8.5/Makefile.SH~	2004-09-28 08:30:10.000000000 +0000
+++++ perl-5.8.5/Makefile.SH	2004-09-28 08:51:39.000000000 +0000
++@@ -121,18 +121,7 @@
+  	    # INSTALL file, under "Building a shared perl library".
+  	    # If there is no pre-existing $libperl, we don't need
+  	    # to do anything further.
+@@ -20,22 +20,18 @@
+  	    ;;
+  	os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
+  		;;
+-@@ -349,9 +338,21 @@
++@@ -368,9 +357,17 @@
+  .c.s:
+  	$(CCCMDSRC) -S $*.c
+  
+--all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
++-all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
+ -	@echo " ";
+ -	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
+-+#all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
+-+#	@echo " ";
+-+#	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
+-+
+ +all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT)
+ +	mv miniperl miniperl-arm
+ +	ln -s /usr/bin/perl miniperl
+ +
+-+more: extra.pods $(private) $(public)
+++more: extra.pods $(private) $(public) $(unidatafiles)
+ +
+ +more2: $(dynamic_ext)
+ +
+@@ -45,7 +41,7 @@
+  
+  .PHONY: all compile translators utilities
+  
+-@@ -361,10 +362,10 @@
++@@ -380,10 +377,10 @@
+  	cd x2p; $(MAKE) compile;
+  	cd pod; $(MAKE) compile;
+  
+@@ -58,25 +54,43 @@
+  	@echo " "; echo "	Making utilities"; cd utils; $(LDLIBPTH) $(MAKE) all
+  
+  
+-@@ -541,7 +542,7 @@
++@@ -560,7 +557,7 @@
+  	$(CC) -o miniperl $(CLDFLAGS) \
+  	    `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
+  	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perl$(OBJ_EXT) $(libs)
+ -	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+-+#	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+++	#$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+  !NO!SUBS!
+  		;;
+  	beos*|next4*)
+-@@ -549,7 +550,7 @@
++@@ -568,7 +565,7 @@
+  miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
+  	$(CC) -o miniperl `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
+  	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perl$(OBJ_EXT) $(libs)
+ -	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+-+#	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+++	#$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+  !NO!SUBS!
+  		;;
+  	darwin*)
+-@@ -716,7 +717,7 @@
++@@ -589,7 +586,7 @@
++ 	-@rm -f miniperl.xok
++ 	$(CC) $(CLDFLAGS) $(NAMESPACEFLAGS) -o miniperl \
++ 	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(LLIBPERL) $(libs)
++-	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+++	#$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
++ !NO!SUBS!
++ 		;;
++ 	*)
++@@ -598,7 +595,7 @@
++ 	-@rm -f miniperl.xok
++ 	$(LDLIBPTH) $(CC) $(CLDFLAGS) -o miniperl \
++ 	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(LLIBPERL) $(libs)
++-	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+++	#$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
++ !NO!SUBS!
++ 		;;
++ 	esac
++@@ -735,7 +732,7 @@
+  # We need to autosplit in two steps because VOS can't handle so many args
+  #
+  .PHONY: preplibrary
+@@ -85,7 +99,7 @@
+  	@sh ./makedir lib/auto
+  	@echo "	AutoSplitting perl library"
+  	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
+-@@ -728,11 +729,11 @@
++@@ -747,11 +744,11 @@
+  # Take care to avoid modifying lib/Config.pm without reason
+  # (If trying to create a new port and having problems with the configpm script,
+  # try 'make minitest' and/or commenting out the tests at the end of configpm.)
+@@ -99,7 +113,7 @@
+  	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
+  	sh mv-if-diff minimod.tmp $@
+  	-touch lib/ExtUtils/Miniperl.pm
+-@@ -740,18 +741,18 @@
++@@ -759,21 +756,21 @@
+  lib/re.pm: ext/re/re.pm
+  	cp ext/re/re.pm ext/re/re.tmp && sh mv-if-diff ext/re/re.tmp lib/re.pm
+  
+@@ -117,14 +131,18 @@
+  	@-rm -f $@
+  	$(LDLIBPTH) ./miniperl -Ilib lib/lib_pm.PL
+  
++-$(unidatafiles): miniperl$(EXE_EXT) lib/Config.pm lib/unicore/mktables
+++$(unidatafiles):  lib/Config.pm lib/unicore/mktables
++ 	cd lib/unicore && $(LDLIBPTH) ../../miniperl -I../../lib mktables -w
++ 
+ -extra.pods: miniperl$(EXE_EXT)
+-+extra.pods: 
+++extra.pods:
+  	-@test -f extra.pods && rm -f `cat extra.pods`
+  	-@rm -f extra.pods
+  	-@for x in `grep -l '^=[a-z]' README.* | grep -v README.vms` ; do \
+-@@ -798,18 +799,7 @@
++@@ -820,18 +817,7 @@
+  INSTALL_DEPENDENCE = all
+-
++ 
+  install.perl:	$(INSTALL_DEPENDENCE) installperl
+ -	if [ -n "$(COMPILE)" ]; \
+ -	then \
+@@ -142,7 +160,7 @@
+  
+  # XXX Experimental. Hardwired values, but useful for testing.
+  # Eventually Configure could ask for some of these values.
+-@@ -925,16 +915,16 @@
++@@ -947,16 +933,16 @@
+  #
+  # DynaLoader may be needed for extensions that use Makefile.PL.
+  
+@@ -163,21 +181,21 @@
+  	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+  
+  .PHONY: clean _tidy _mopup _cleaner1 _cleaner2 \
+-@@ -1074,7 +1064,7 @@
++@@ -1097,7 +1083,7 @@
+  
+  test_prep_pre: preplibrary utilities $(nonxs_ext)
+  
+--test_prep: test_prep_pre miniperl$(EXE_EXT) perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
+-+test_prep: test_prep_pre perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
++-test_prep: test_prep_pre miniperl$(EXE_EXT) $(unidatafiles) perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
+++test_prep: test_prep_pre $(unidatafiles) perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
+  	PERL=./perl $(MAKE) _test_prep
+  
+  _test_tty:
+-@@ -1167,7 +1157,7 @@
++@@ -1190,7 +1176,7 @@
+  
+  # Can't depend on lib/Config.pm because that might be where miniperl
+  # is crashing.
+ -minitest: miniperl$(EXE_EXT) lib/re.pm
+ +minitest: lib/re.pm
+  	-@test -f lib/lib.pm && test -f lib/Config.pm || \
+- 	  $(MAKE) lib/Config.pm lib/lib.pm
++ 	  $(MAKE) lib/Config.pm lib/lib.pm $(unidatafiles)
+  	@echo " "

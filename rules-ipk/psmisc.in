@@ -1,0 +1,18 @@
+config PSMISC
+	bool
+	prompt "psmisc"
+
+config PSMISC_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PSMISC
+
+menu "psmisc           "
+	depends on PSMISC
+
+config PSMISC_KILLALL
+	bool
+	prompt "killall"
+	depends on PSMISC && !BB_CONFIG_KILLALL
+
+endmenu

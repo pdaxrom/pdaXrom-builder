@@ -1,0 +1,13 @@
+--- gdb-6.0/libiberty/regex.c~	2004-09-21 19:37:22.000000000 +0000
++++ gdb-6.0/libiberty/regex.c	2004-09-21 19:38:22.000000000 +0000
+@@ -129,8 +129,8 @@
+ #  if defined STDC_HEADERS || defined _LIBC
+ #   include <stdlib.h>
+ #  else
+-char *malloc ();
+-char *realloc ();
++//char *malloc ();
++//char *realloc ();
+ #  endif
+ 
+ /* When used in Emacs's lib-src, we need to get bzero and bcopy somehow.

@@ -1,0 +1,9 @@
+config PCMCIA-CS
+	bool
+	prompt "Compile PCMCIA Tools"
+
+config PCMCIA-CS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PCMCIA-CS
+

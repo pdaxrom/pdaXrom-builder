@@ -1,0 +1,11 @@
+--- xc/config/cf/linux.cf~	2004-09-21 17:21:45.000000000 +0000
++++ xc/config/cf/linux.cf	2004-09-21 17:22:28.000000000 +0000
+@@ -759,7 +759,7 @@
+ #ifdef Arm32Architecture
+ # define DefaultCCOptions	-fsigned-char
+ # ifndef OptimizedCDebugFlags
+-#  define OptimizedCDebugFlags	-O3
++#  define OptimizedCDebugFlags	-Os -fomit-frame-pointer -mcpu=xscale -mtune=xscale
+ # endif
+ # define LinuxMachineDefines	-D__arm__ -D__arm32__ -U__arm -Uarm
+ # define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME -DPART_NET

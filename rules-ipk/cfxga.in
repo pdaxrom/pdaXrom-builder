@@ -1,0 +1,9 @@
+config CFXGA
+	bool
+	prompt "CFXGA Linux driver"
+	depends on ARM_ARCH_PXA || ARM_ARCH_SA1100
+
+config CFXGA_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on CFXGA

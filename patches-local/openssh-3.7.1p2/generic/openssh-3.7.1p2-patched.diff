@@ -1,0 +1,69 @@
+diff -Nur openssh-3.7.1p2/contrib/cacko/inetd.conf.sample openssh-3.7.1p2-patched/contrib/cacko/inetd.conf.sample
+--- openssh-3.7.1p2/contrib/cacko/inetd.conf.sample	1970-01-01 00:00:00.000000000 +0000
++++ openssh-3.7.1p2-patched/contrib/cacko/inetd.conf.sample	2004-01-29 17:53:16.000000000 +0000
+@@ -0,0 +1 @@
++ssh	stream	tcp	nowait	root	/usr/sbin/sshd -i
+diff -Nur openssh-3.7.1p2/contrib/cacko/inetd_tcpd.conf.sample openssh-3.7.1p2-patched/contrib/cacko/inetd_tcpd.conf.sample
+--- openssh-3.7.1p2/contrib/cacko/inetd_tcpd.conf.sample	1970-01-01 00:00:00.000000000 +0000
++++ openssh-3.7.1p2-patched/contrib/cacko/inetd_tcpd.conf.sample	2004-01-29 17:31:32.000000000 +0000
+@@ -0,0 +1 @@
++ssh	stream	tcp	nowait	root	/usr/sbin/tcpd	/usr/sbin/sshd -i
+diff -Nur openssh-3.7.1p2/contrib/cacko/rc.ssh openssh-3.7.1p2-patched/contrib/cacko/rc.ssh
+--- openssh-3.7.1p2/contrib/cacko/rc.ssh	1970-01-01 00:00:00.000000000 +0000
++++ openssh-3.7.1p2-patched/contrib/cacko/rc.ssh	2003-12-28 21:08:40.000000000 +0000
+@@ -0,0 +1,55 @@
++#!/bin/bash
++
++#
++# /etc/rc.d/init.d/S15inet - Start/Stop the inetd daemon(s).
++#
++
++# Comment out the following exit line to enable this script.
++# exit 0
++
++# Source function library.
++. /etc/rc.d/init.d/functions
++
++DAEMON="/usr/sbin/sshd"
++
++case "$1" in
++
++    start)
++	if [ ! -f /etc/ssh/ssh_host_rsa_key ] ; then
++	    echo "Generating RSA key for SSH v2"
++	    /usr/bin/ssh-keygen -N ""  -t rsa -f /etc/ssh/ssh_host_rsa_key
++	fi
++
++	if [ ! -f /etc/ssh/ssh_host_dsa_key ] ; then
++	    echo "Generating DSA key for SSH v2"
++	    /usr/bin/ssh-keygen -N ""  -t dsa -f /etc/ssh/ssh_host_dsa_key
++	fi
++
++	test -f /etc/ssh/sshd_not_to_be_run && exit 0
++	msg -n "Starting sshd:"
++	daemon --survive=5 $DAEMON
++	msg
++	;;
++
++    stop)
++	msg -n "Stopping sshd:"
++	killproc $DAEMON
++	msg
++	;;
++
++    restart)
++	test -f /etc/ssh/sshd_not_to_be_run && exit 0
++	$0 stop
++	sleep 1
++	$0 start
++	;;
++
++    *)
++	echo "Usage: $0 (start|stop|restart)"
++	exit 1
++	;;
++
++esac
++
++exit 0
++

@@ -1,0 +1,8 @@
+config NATIVE_AUTOCONF
+	bool
+	prompt "autoconf"
+
+config NATIVE_AUTOCONF_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on NATIVE_AUTOCONF

@@ -1,0 +1,13 @@
+#menu 	"sysvinit            "
+
+config SYSVINIT
+	bool
+	prompt "sysvinit"
+	depends on !BB_CONFIG_INIT && !BB_CONFIG_HALT && !BB_CONFIG_POWEROFF && !BB_CONFIG_REBOOT && !BB_CONFIG_MESG
+
+config SYSVINIT_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on SYSVINIT
+
+#endmenu

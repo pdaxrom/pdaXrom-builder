@@ -1,0 +1,9 @@
+config JUSTREADER
+	bool
+	prompt "JustReader"
+	depends on QT-X11-FREE
+
+config JUSTREADER_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on JUSTREADER

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+export HOME=/home/root
+. /etc/profile
+
+if [ "$1" = "start" ]; then
+    exec /usr/X11R6/bin/startx
+else
+    killall X >/dev/null 2>/dev/null
+fi

@@ -1,0 +1,8 @@
+config NAUTILUS
+	bool
+	prompt "Nautilus"
+
+config NAUTILUS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on NAUTILUS

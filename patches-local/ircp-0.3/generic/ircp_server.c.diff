@@ -1,0 +1,11 @@
+--- ircp-0.3/src/ircp_server.c~	2004-09-21 07:04:24.000000000 +0000
++++ ircp-0.3/src/ircp_server.c	2004-09-21 07:05:04.000000000 +0000
+@@ -231,7 +231,7 @@
+ 	}
+ 
+ 	srv->infocb(IRCP_EV_RECEIVING, name);	
+-	srv->fd = ircp_open_safe("", name);
++	srv->fd = ircp_open_safe(srv->inbox, name);
+ 	
+ 	ret = srv->fd;
+ 

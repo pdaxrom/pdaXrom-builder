@@ -1,0 +1,9 @@
+config MB-APPLET-VOLUME
+	bool
+	prompt "Compile mb-applet-volume"
+	depends on XFREE430
+
+config MB-APPLET-VOLUME_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MB-APPLET-VOLUME

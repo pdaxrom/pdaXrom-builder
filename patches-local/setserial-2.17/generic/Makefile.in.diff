@@ -1,0 +1,23 @@
+--- setserial/Makefile.in~	2004-10-14 14:41:36.000000000 +0000
++++ setserial/Makefile.in	2004-10-14 14:42:20.000000000 +0000
+@@ -17,7 +17,7 @@
+ INCS = -I.
+ TAR = tar
+ 
+-all: setserial setserial.cat
++all: setserial 
+ 
+ setserial: setserial.c
+ 	$(CC) $(CFLAGS) $(DEFS) $(INCS) setserial.c -o setserial
+@@ -25,10 +25,9 @@
+ setserial.cat: setserial.8
+ 	nroff -man setserial.8 > setserial.cat
+ 
+-install: setserial setserial.8
++install: setserial
+ 	$(INSTALL_PROGRAM) setserial $(DESTDIR)/bin
+ 	$(STRIP) $(DESTDIR)/bin/setserial
+-	$(INSTALL_DATA) setserial.8 $(DESTDIR)/usr/man/man8
+ 
+ clean:
+ 	$(RM) setserial setserial.o setserial.cat *~

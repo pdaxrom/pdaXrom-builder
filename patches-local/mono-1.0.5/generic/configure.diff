@@ -1,0 +1,11 @@
+--- mono/configure~	2005-01-31 00:01:18.000000000 +0000
++++ mono/configure	2005-01-31 00:01:37.000000000 +0000
+@@ -27314,7 +27314,7 @@
+ 		JIT_SUPPORTED=yes
+ 		jit_wanted=true
+ 		;;
+-	arm-*-linux-* | armv4l-*-linux-*)
++	arm-*-linux* | armv*-*-linux*)
+ 		TARGET=ARM;
+ 		arch_target=arm;
+ 		ACCESS_UNALIGNED="no"

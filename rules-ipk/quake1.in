@@ -1,0 +1,8 @@
+config QUAKE1
+	bool
+	prompt "Quake 1"
+
+config QUAKE1_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on QUAKE1

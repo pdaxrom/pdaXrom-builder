@@ -1,0 +1,51 @@
+--- ORBit2-2.10.2/src/orb/orb-core/Makefile.in~	2004-05-07 08:34:07.000000000 +0000
++++ ORBit2-2.10.2/src/orb/orb-core/Makefile.in	2004-05-24 03:39:39.000000000 +0000
+@@ -518,7 +518,7 @@
+ %-stubs.c %-skels.c %-common.c %-imodule.c %-skelimpl.c: %.h
+ 	true
+ 
+-%.h: $(IDL_DIR)%.idl $(IDL_COMPILER)
++%.h: $(IDL_DIR)%.idl 
+ 	-(rm -f $(*).h $(*)-stubs.c $(*)-skels.c $(*)-common.c $(*)-imodule.c $(*)-skelimpl.c || true) > /dev/null
+ 	$(IDL_COMPILER) $(IDL_FLAGS) --deps $(*D)/.deps/$(*F).idl.P $<
+ 	for I in $(*).h $(*)-stubs.c $(*)-skels.c $(*)-common.c $(*)-imodule.c $(*)-skelimpl.c; do \
+@@ -534,7 +534,7 @@
+ $(OPS_IDLOUT_C): $(OPS_IDLOUT_H)
+ 	true
+ 
+-$(OPS_IDLOUT_H): corba-ops.idl $(IDL_COMPILER)
++$(OPS_IDLOUT_H): corba-ops.idl 
+ 	-(rm -f $(OPS_IDLOUT_C) $(OPS_IDLOUT_H) || true) > /dev/null
+ 	$(IDL_COMPILER) $(IDL_FLAGS_CORBA_OPS) --deps .deps/corba-ops.idl.P $<
+ 	for I in $(OPS_IDLOUT_C) $(OPS_IDLOUT_H); do								\
+@@ -542,7 +542,7 @@
+ 	done;											\
+ 	sed -e "s,Z,_,g" corba-ops-skels.c > corba-ops-skels.c.out;				\
+ 	mv corba-ops-skels.c.out corba-ops-skels.c;
+-$(IFACE_IDLOUT) : orbit-interface.idl $(IDL_COMPILER)
++$(IFACE_IDLOUT) : orbit-interface.idl
+ 	-(rm -f $(IFACE_IDLOUT) || true) > /dev/null
+ 	$(IDL_COMPILER) $(IDL_FLAGS_INTERFACE) --deps .deps/orbit-interface.idl.P $<
+ 
+--- ORBit2-2.10.2/src/orb/dynamic/Makefile.in~	2004-05-24 03:44:01.000000000 +0000
++++ ORBit2-2.10.2/src/orb/dynamic/Makefile.in	2004-05-24 03:44:13.000000000 +0000
+@@ -407,7 +407,7 @@
+ %-stubs.c %-skels.c %-common.c %-imodule.c %-skelimpl.c: %.h
+ 	true
+ 
+-%.h: $(IDL_DIR)%.idl $(IDL_COMPILER)
++%.h: $(IDL_DIR)%.idl
+ 	-(rm -f $(*).h $(*)-stubs.c $(*)-skels.c $(*)-common.c $(*)-imodule.c $(*)-skelimpl.c || true) > /dev/null
+ 	$(IDL_COMPILER) $(IDL_FLAGS) --deps $(*D)/.deps/$(*F).idl.P $<
+ 	for I in $(*).h $(*)-stubs.c $(*)-skels.c $(*)-common.c $(*)-imodule.c $(*)-skelimpl.c; do \
+--- ORBit2-2.10.2/src/orb/poa/Makefile.in~	2004-05-24 03:45:42.000000000 +0000
++++ ORBit2-2.10.2/src/orb/poa/Makefile.in	2004-05-24 03:45:51.000000000 +0000
+@@ -435,7 +435,7 @@
+ %-stubs.c %-skels.c %-common.c %-imodule.c %-skelimpl.c: %.h
+ 	true
+ 
+-%.h: $(IDL_DIR)%.idl $(IDL_COMPILER)
++%.h: $(IDL_DIR)%.idl
+ 	-(rm -f $(*).h $(*)-stubs.c $(*)-skels.c $(*)-common.c $(*)-imodule.c $(*)-skelimpl.c || true) > /dev/null
+ 	$(IDL_COMPILER) $(IDL_FLAGS) --deps $(*D)/.deps/$(*F).idl.P $<
+ 	for I in $(*).h $(*)-stubs.c $(*)-skels.c $(*)-common.c $(*)-imodule.c $(*)-skelimpl.c; do \

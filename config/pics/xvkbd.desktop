@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=X Virtual Keyboard
+Comment=Virtual keyboard for X window system
+Exec=xvkbdlauncher
+Icon=xvkbd.png
+Terminal=0
+Type=Application
+Categories=Applications
+StartupNotify=False
+SingleInstance=False

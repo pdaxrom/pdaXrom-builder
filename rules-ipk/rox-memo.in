@@ -1,0 +1,9 @@
+config ROX-MEMO
+	bool
+	prompt "Memo"
+	depends on ROX
+
+config ROX-MEMO_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on ROX-MEMO

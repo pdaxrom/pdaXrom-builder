@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=DOSBox
+Comment=A x86 emulator with DOS
+Exec=dosbox
+Icon=dosbox.png
+Terminal=0
+Type=Application
+Categories=Games
+StartupNotify=False
+SingleInstance=False

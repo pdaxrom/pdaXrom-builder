@@ -1,0 +1,12 @@
+--- xmmsctrl/Makefile~	2004-11-17 00:35:14.000000000 +0000
++++ xmmsctrl/Makefile	2004-11-17 00:35:23.000000000 +0000
+@@ -15,8 +15,7 @@
+ all : $(TARGET) HELP
+ 
+ $(TARGET) : xmmsctrl.c removefile.c
+-	$(CC) -o $(TARGET) xmmsctrl.c removefile.c $(CFLAGS) $(LDFLAGS)
+-	strip xmmsctrl
++	$(CC) -s -o $(TARGET) xmmsctrl.c removefile.c $(CFLAGS) $(LDFLAGS)
+ 
+ HELP : xmmsctrl
+ 	./xmmsctrl > HELP || true

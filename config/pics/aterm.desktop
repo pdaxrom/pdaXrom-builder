@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Aterm
+Comment=Aterm
+Exec=aterm -bg black -fg green -geometry 80x25 -fn -misc-fixed-medium-r-normal--14-*
+Terminal=0
+Type=Application
+Icon=konsole.png
+Categories=Applications
+StartupNotify=False
+SingleInstance=False

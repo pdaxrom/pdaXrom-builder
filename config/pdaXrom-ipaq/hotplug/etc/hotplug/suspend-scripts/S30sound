@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# This stuff was orignaly in /sbin/pm_helper before the switch to run-parts
+# 
+rmmod h3600-uda1341 uda-1341 sa1100-audio
+
+
+

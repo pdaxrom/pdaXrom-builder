@@ -1,0 +1,12 @@
+--- tuxpaint-0.9.14/src/tuxpaint.desktop~	2004-10-20 20:15:18.000000000 +0000
++++ tuxpaint-0.9.14/src/tuxpaint.desktop	2004-10-20 20:15:49.000000000 +0000
+@@ -28,7 +28,8 @@
+ Name[zh_tw]=繪畫
+ Type=Application
+ Exec=tuxpaint
+-Icon=tuxpaint
++Icon=tuxpaint.png
++Categories=Application;Graphics;
+ Terminal=false
+ GenericName=Drawing program
+ GenericName[af]=Tekenprogram

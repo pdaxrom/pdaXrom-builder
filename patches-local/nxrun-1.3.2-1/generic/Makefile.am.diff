@@ -1,0 +1,8 @@
+--- nxrun/Makefile.am~	2004-10-04 04:58:35.000000000 +0000
++++ nxrun/Makefile.am	2004-10-04 05:00:18.000000000 +0000
+@@ -7,4 +7,4 @@
+ 				SettingsToParameters.cpp NXConnection.h NXConnection.cpp \
+ 				Options.h Options.cpp
+ 
+-LDADD = ../nxcompsh/.libs/libXcompsh.a -lexpat -L/usr/X11R6/lib -lxkbfile -lXext
++LDADD = ../nxcompsh/.libs/libXcompsh.a @X_LIBS@ -lxkbfile -lXext -lexpat

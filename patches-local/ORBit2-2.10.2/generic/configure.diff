@@ -1,0 +1,45 @@
+--- ORBit2/configure~	2004-05-24 02:50:29.000000000 +0000
++++ ORBit2/configure	2004-05-24 02:53:05.000000000 +0000
+@@ -22314,13 +22314,6 @@
+ 
+ dofus_save_libs="$LIBS"
+ LIBS="$ORBIT_LIBS $LIBS"
+-if test "$cross_compiling" = yes; then
+-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&5
+-echo "$as_me: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }
+-else
+   cat >conftest.$ac_ext <<_ACEOF
+ /* confdefs.h.  */
+ _ACEOF
+@@ -22334,17 +22327,9 @@
+              }
+ _ACEOF
+ rm -f conftest$ac_exeext
+-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+-  (eval $ac_link) 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+-  (eval $ac_try) 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; }; then
+-  :
++if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
++ }; then
++ :
+ else
+   echo "$as_me: program exited with status $ac_status" >&5
+ echo "$as_me: failed program was:" >&5
+@@ -22364,7 +22349,6 @@
+    { (exit 1); exit 1; }; }
+ fi
+ rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+-fi
+ LIBS="$dofus_save_libs"
+ 
+ orig_CPPFLAGS=$CPPFLAGS

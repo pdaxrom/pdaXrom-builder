@@ -1,0 +1,132 @@
+#!/bin/sh
+#
+# ntpd		Start/Stop Network Time Protocol (NTP) daemon.
+#
+
+NAME="ntpd"
+DESC="network time daemon"
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+if [ ! -f /etc/ntp.conf ]; then
+    echo "$0: $NAME not configured, please run System Tools -> Date & Time."
+    exit 1
+fi
+
+if [ ! -f /etc/localtime ]; then
+    echo "$0: timezone not configured.  Please create a symlink from /etc/localtime to your appropriate /usr/share/zoneinfo file."
+    exit 1
+fi
+
+do_ntpdate () {
+	# Use ntpdate if installed
+	if which ntpdate > /dev/null; then
+
+	    echo -n "ntpdate... "
+
+	    SERVERS=$(grep "^server" /etc/ntp.conf | awk '{ print($2) }')
+	    ntpdate -b -t 2 $SERVERS > /dev/null 2> /dev/null
+		# -b (Force the time to be stepped rather than slewed)
+		# -t (Maximum time waiting for a server to respond, in seconds)
+	    RETVAL=$?
+	    if [ $RETVAL -eq 0 ]; then
+		echo "done."
+            else
+		echo "failed."
+            fi
+	    return $RETVAL
+	fi
+
+	# Otherwise use ntpd
+	echo -n "ntpd"
+	ntpd -q -g > /dev/null &
+	    # -q (Execute single query and exit, i.e. act like ntpdate)
+	    # -g (Override 1000 second difference sanity check)
+
+	# Kill ntpd after $i seconds
+	i=30
+	while [ $i -gt 0 ]; do
+	    [ -z "$(pidofproc ntpd)" ] && break
+	    echo -n "."
+	    sleep 1
+	    i=$((i-1))
+	done
+
+	if [ $i -eq 0 ]; then
+	    killproc ntpd
+	    echo " timed out."
+	else
+	    echo " done."
+	fi
+}
+
+network_down () {
+	if route -n | grep "^0\.0\.0\.0" | grep -q "UG"; then
+	    return 1
+	else
+	    return 0
+	fi
+}
+
+start () {
+	if [ -n "$(pidofproc ntpd)" ]; then
+	    echo "Starting $DESC: already started"
+	    exit 0
+	fi
+
+	echo -n "Synchronizing network time: "
+	# Wait up to $i seconds for the network to come up
+	i=10
+	while network_down; do
+	    [ $i -gt 0 ] || break
+	    echo -n "."
+	    sleep 1
+	    i=$((i-1))
+	done
+	if network_down; then
+	    echo "network is down."
+	else
+	    do_ntpdate
+	fi
+
+	echo -n "Starting $DESC: "
+	ntpd
+	RETVAL=$?
+	if [ $RETVAL -eq 0 ]; then
+	    echo -n "$NAME"
+	fi
+	echo
+}
+
+stop () {
+	echo -n "Stopping $DESC: "
+	killproc ntpd
+	RETVAL=$?
+	if [ $RETVAL -eq 0 ]; then
+	    echo -n "$NAME"
+	fi
+	echo
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+        ;;
+  stop)
+	stop
+        ;;
+  restart|reload)
+	stop
+	start
+	;;
+  forcestart)
+	ntpd
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|reload|forcestart}"
+        exit 1
+esac
+
+exit 0

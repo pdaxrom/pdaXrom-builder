@@ -1,0 +1,12 @@
+diff -Nur xc/config/cf/linux.cf xc.new/config/cf/linux.cf
+--- xc/config/cf/linux.cf	2003-02-17 17:07:32.000000000 +0000
++++ xc.new/config/cf/linux.cf	2005-02-04 00:41:54.000000000 +0000
+@@ -759,7 +759,7 @@
+ #ifdef Arm32Architecture
+ # define DefaultCCOptions	-fsigned-char
+ # ifndef OptimizedCDebugFlags
+-#  define OptimizedCDebugFlags	-O3
++#  define OptimizedCDebugFlags	-Os -fomit-frame-pointer
+ # endif
+ # define LinuxMachineDefines	-D__arm__ -D__arm32__ -U__arm -Uarm
+ # define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME -DPART_NET

@@ -1,0 +1,11 @@
+--- xawtv/x11/Subdir.mk~	2005-01-07 12:17:12.000000000 +0000
++++ xawtv/x11/Subdir.mk	2005-01-07 12:17:41.000000000 +0000
+@@ -171,7 +171,7 @@
+ 	cat $< $(srcdir)/x11/MoTV-fixed > $@
+ 
+ x11/MoTV.de_DE.UTF-8.ad: x11/MoTV.de.ad
+-	iconv -f iso-8859-1 -t utf-8 < $< > $@
++	true iconv -f iso-8859-1 -t utf-8 < $< > $@
+ 
+ install-motv-%:
+ 	$(INSTALL_DIR) $(resdir)/$*/app-defaults

@@ -1,0 +1,34 @@
+diff -Nur openbox-3.1/openbox/event.c openbox-3.1-patched/openbox/event.c
+--- openbox-3.1/openbox/event.c	2003-12-22 19:46:08.000000000 +0000
++++ openbox-3.1-patched/openbox/event.c	2004-04-05 21:05:44.000000000 +0000
+@@ -524,6 +524,30 @@
+ #ifdef XRANDR
+         XRRUpdateConfiguration(e);
+ #endif
++	{
++	    Window pan_win = XGetSelectionOwner(ob_display, XInternAtom(ob_display, "_NET_SYSTEM_TRAY_S0", False));
++	    if (pan_win) {
++		XConfigureEvent ce;
++		XWindowAttributes root_attr;
++			  
++		XGetWindowAttributes(ob_display, /*pan_win*/ RootWindow(ob_display, ob_screen), &root_attr);
++
++		ce.type = ConfigureNotify;
++		ce.event = pan_win;
++		ce.window = pan_win;
++   
++		ce.x = 0;
++		ce.y = 0;
++   
++		ce.width  = root_attr.width;
++		ce.height = root_attr.height;
++	        ce.border_width = 0;
++		ce.above = None;
++		ce.override_redirect = 0;
++   
++		XSendEvent(ob_display, pan_win, False, StructureNotifyMask, (XEvent *)&ce);
++	    }
++	}
+         screen_resize();
+         break;
+     default:

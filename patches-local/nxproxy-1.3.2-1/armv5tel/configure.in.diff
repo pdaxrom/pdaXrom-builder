@@ -1,0 +1,13 @@
+--- nxproxy/configure.in~	2004-10-03 22:05:34.000000000 +0000
++++ nxproxy/configure.in	2004-10-03 22:06:34.000000000 +0000
+@@ -7,8 +7,8 @@
+ 
+ dnl Reset default compilation flags.
+ 
+-CXXFLAGS="-O3"
+-CPPFLAGS="-O3"
++CXXFLAGS="-Os -fomit-frame-pointer -mcpu=xscale -mtune=xscale"
++CPPFLAGS="-Os -fomit-frame-pointer -mcpu=xscale -mtune=xscale"
+ 
+ dnl Prefer headers and libraries from nx-X11 if present.
+ 

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Sylpheed
+Comment=Email client
+Exec=sylpheed
+Terminal=0
+Type=Application
+Icon=sylpheed.png
+Categories=Network
+StartupNotify=True
+SingleInstance=False

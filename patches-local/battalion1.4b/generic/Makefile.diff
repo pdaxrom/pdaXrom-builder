@@ -1,0 +1,29 @@
+--- battalion/Makefile~	2005-01-20 02:12:58.000000000 +0000
++++ battalion/Makefile	2005-01-20 02:14:55.000000000 +0000
+@@ -23,7 +23,7 @@
+ # (the program should compile with no warning messages - if you
+ #  see a warning message please let me know about it)
+ # ------------------------------------------------------------
+-CC = cc
++CC := cc
+ 
+ 
+ # STEP 2: IF YOU WANT TO COMPILE WITH THE MESA LIBRARIES THEN
+@@ -91,7 +91,7 @@
+ 
+ # STEP 7: CHOOSE ANY OPTIMIZATIONS OR ADD ANY SPECIAL INCLUSIONS
+ # ------------------------------------------------------------
+-CFLAGS     = -O2  -I/usr/local/X11/include -I/usr/demo/SOUND/ -I./. $(AUDIODEF) $(OS)
++CFLAGS     = -Os -fomit-frame-pointer -I$(X11_INC) -I. $(AUDIODEF) $(OS)
+ 
+ 
+ # STEP 8: ADD ANY SPECIAL LIBRARY PATHS
+@@ -106,7 +106,7 @@
+ TARGET 	= battalion
+ 
+ OBJ 	= battalion.o audio.o net.o gprim.o graphics.o objects.o text.o update.o tk.o font.o soundIt.o
+-LIBS    = -L./. -L/usr/X11R6/lib -lm -lX11 -lXext
++LIBS    = -L$(X11_LIB) -lm -lX11 -lXext -Wl,-rpath-link,$(X11_LIB)
+ 
+ all:	$(TARGET)
+ 

@@ -1,0 +1,8 @@
+config TSLIB
+	bool
+	prompt "Compile tslib"
+
+config TSLIB_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on TSLIB

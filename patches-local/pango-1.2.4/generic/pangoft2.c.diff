@@ -1,0 +1,13 @@
+diff -Nur pango-1.2.4/pango/pangoft2.c pango-1.2.4.new/pango/pangoft2.c
+--- pango-1.2.4/pango/pangoft2.c	2003-08-08 17:05:05.000000000 +0000
++++ pango-1.2.4.new/pango/pangoft2.c	2004-08-24 04:36:11.000000000 +0000
+@@ -28,7 +28,8 @@
+ #include <glib.h>
+ #include <glib/gprintf.h>
+ 
+-#include <freetype/freetype.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ 
+ #include "pango-utils.h"
+ #include "pangoft2.h"

@@ -1,0 +1,9 @@
+config TCL
+	bool
+	prompt "Tcl"
+	depends on XFREE430
+
+config TCL_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on TCL

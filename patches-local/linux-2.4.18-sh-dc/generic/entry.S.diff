@@ -1,0 +1,11 @@
+--- linux/arch/sh/kernel/entry.S~	2004-11-16 11:59:41.000000000 +0000
++++ linux/arch/sh/kernel/entry.S	2004-11-16 12:03:34.000000000 +0000
+@@ -1200,7 +1200,7 @@
+ 	 * entries. Don't panic if you notice that this hasn't
+ 	 * been shrunk every time we add a new system call.
+ 	 */
+-	.rept NR_syscalls-(.-sys_call_table)/4
++	.rept NR_syscalls-225
+ 		.long SYMBOL_NAME(sys_ni_syscall)
+ 	.endr
+ 

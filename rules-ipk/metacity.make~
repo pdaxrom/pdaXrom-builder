@@ -1,0 +1,154 @@
+# -*-makefile-*-
+# $Id: template,v 1.10 2004/01/24 15:50:34 mkl Exp $
+#
+# Copyright (C) 2004 by Alexander Chukov <sash@pdaXrom.org>
+#          
+# See CREDITS for details about who has contributed to this project.
+#
+# For further information about the PTXdist project and license conditions
+# see the README file.
+#
+
+#
+# We provide this package
+#
+ifdef PTXCONF_METACITY
+PACKAGES += metacity
+endif
+
+#
+# Paths and names
+#
+METACITY_VERSION	= 2.8.0
+METACITY		= metacity-$(METACITY_VERSION)
+METACITY_SUFFIX		= tar.bz2
+METACITY_URL		= http://fgo-temp.acc.umu.se/pub/gnome/sources/metacity/2.8/$(METACITY).$(METACITY_SUFFIX)
+METACITY_SOURCE		= $(SRCDIR)/$(METACITY).$(METACITY_SUFFIX)
+METACITY_DIR		= $(BUILDDIR)/$(METACITY)
+
+# ----------------------------------------------------------------------------
+# Get
+# ----------------------------------------------------------------------------
+
+metacity_get: $(STATEDIR)/metacity.get
+
+metacity_get_deps = $(METACITY_SOURCE)
+
+$(STATEDIR)/metacity.get: $(metacity_get_deps)
+	@$(call targetinfo, $@)
+	@$(call get_patches, $(METACITY))
+	touch $@
+
+$(METACITY_SOURCE):
+	@$(call targetinfo, $@)
+	@$(call get, $(METACITY_URL))
+
+# ----------------------------------------------------------------------------
+# Extract
+# ----------------------------------------------------------------------------
+
+metacity_extract: $(STATEDIR)/metacity.extract
+
+metacity_extract_deps = $(STATEDIR)/metacity.get
+
+$(STATEDIR)/metacity.extract: $(metacity_extract_deps)
+	@$(call targetinfo, $@)
+	@$(call clean, $(METACITY_DIR))
+	@$(call extract, $(METACITY_SOURCE))
+	@$(call patchin, $(METACITY))
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Prepare
+# ----------------------------------------------------------------------------
+
+metacity_prepare: $(STATEDIR)/metacity.prepare
+
+#
+# dependencies
+#
+metacity_prepare_deps = \
+	$(STATEDIR)/metacity.extract \
+	$(STATEDIR)/gtk22.targetinstall \
+	$(STATEDIR)/startup-notification.install \
+	$(STATEDIR)/libxml2.install \
+	$(STATEDIR)/GConf.install \
+	$(STATEDIR)/virtual-xchain.install
+
+METACITY_PATH	=  PATH=$(CROSS_PATH)
+METACITY_ENV 	=  $(CROSS_ENV)
+METACITY_ENV	+= PKG_CONFIG_PATH=$(CROSS_LIB_DIR)/lib/pkgconfig:$(CROSS_LIB_DIR)/X11R6/lib/pkgconfig
+#METACITY_ENV	+= LDFLAGS=-Wl,-rpath-link,$(CROSS_LIB_DIR)/X11R6/lib
+#METACITY_ENV	+=
+
+#
+# autoconf
+#
+METACITY_AUTOCONF = \
+	--build=$(GNU_HOST) \
+	--host=$(PTXCONF_GNU_TARGET) \
+	--x-includes=$(CROSS_LIB_DIR)/X11R6/include \
+	--x-libraries=$(CROSS_LIB_DIR)/X11R6/lib \
+	--prefix=/usr \
+	--disable-debug \
+	--sysconfdir=/etc \
+	--libexecdir=/usr/bin \
+	--disable-gconf \
+	--enable-verbose
+
+$(STATEDIR)/metacity.prepare: $(metacity_prepare_deps)
+	@$(call targetinfo, $@)
+	@$(call clean, $(METACITY_DIR)/config.cache)
+	cd $(METACITY_DIR) && \
+		$(METACITY_PATH) $(METACITY_ENV) \
+		./configure $(METACITY_AUTOCONF)
+	cp -f $(PTXCONF_PREFIX)/bin/libtool $(METACITY_DIR)
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Compile
+# ----------------------------------------------------------------------------
+
+metacity_compile: $(STATEDIR)/metacity.compile
+
+metacity_compile_deps = $(STATEDIR)/metacity.prepare
+
+$(STATEDIR)/metacity.compile: $(metacity_compile_deps)
+	@$(call targetinfo, $@)
+	$(METACITY_PATH) $(MAKE) -C $(METACITY_DIR)
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Install
+# ----------------------------------------------------------------------------
+
+metacity_install: $(STATEDIR)/metacity.install
+
+$(STATEDIR)/metacity.install: $(STATEDIR)/metacity.compile
+	@$(call targetinfo, $@)
+	#$(METACITY_PATH) $(MAKE) -C $(METACITY_DIR) install
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Target-Install
+# ----------------------------------------------------------------------------
+
+metacity_targetinstall: $(STATEDIR)/metacity.targetinstall
+
+metacity_targetinstall_deps = $(STATEDIR)/metacity.compile
+
+$(STATEDIR)/metacity.targetinstall: $(metacity_targetinstall_deps)
+	@$(call targetinfo, $@)
+	$(METACITY_PATH) $(MAKE) -C $(METACITY_DIR) install DESTDIR=$(METACITY_DIR)-fuke
+	asd
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Clean
+# ----------------------------------------------------------------------------
+
+metacity_clean:
+	rm -rf $(STATEDIR)/metacity.*
+	rm -rf $(METACITY_DIR)
+
+# vim: syntax=make

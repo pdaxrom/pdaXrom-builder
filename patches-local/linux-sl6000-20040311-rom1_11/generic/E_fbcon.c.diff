@@ -1,0 +1,13 @@
+--- linux/drivers/video/fbcon.c~	2004-08-25 09:28:32.000000000 +0000
++++ linux/drivers/video/fbcon.c		2004-08-25 09:28:47.000000000 +0000
+@@ -131,8 +131,8 @@
+ #define LOGO_H			(320-16)
+ #define LOGO_W			240
+ #else
+-#define LOGO_H			80
+-#define LOGO_W			80
++#define LOGO_H			128
++#define LOGO_W			640
+ #endif
+ #define LOGO_LINE	(LOGO_W/8)
+ #if defined(CONFIG_SHARP_LOGO_SCREEN)

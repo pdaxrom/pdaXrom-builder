@@ -1,0 +1,11 @@
+--- wxscintilla/build/Makefile~	2005-01-30 23:50:20.000000000 +0000
++++ wxscintilla/build/Makefile	2005-01-30 23:50:37.000000000 +0000
+@@ -109,7 +109,7 @@
+ 
+ ifeq ($(MAKECMDGOALS),)
+   WXCONFIG=wx-config
+-  GTKCONFIG=gtk-config
++  GTKCONFIG=pkg-config gtk+-2.0
+ endif
+ ifeq ($(MAKECMDGOALS),release)
+   WXCONFIG=wx-config

@@ -1,0 +1,8 @@
+config UNRAR
+	bool
+	prompt "unrar"
+
+config UNRAR_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on UNRAR

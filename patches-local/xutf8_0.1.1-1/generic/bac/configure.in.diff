@@ -1,0 +1,13 @@
+--- xutf8/configure.in~	2004-06-17 01:28:41.000000000 +0000
++++ xutf8/configure.in	2004-06-17 01:28:55.000000000 +0000
+@@ -69,9 +69,7 @@
+ AC_CHECK_LIB(X11, Xutf8DrawString,  ,)
+ 
+ HAVE_LIBC_ICONV=0
+-AC_CHECK_LIB(c, iconv, \
+-        HAVE_LIBC_ICONV=1 ,\
+-        )
++AC_CHECK_LIB(iconv, iconv, HAVE_LIBC_ICONV=1 ,)
+ AC_SUBST(HAVE_LIBC_ICONV)
+ 
+ AC_OUTPUT(Makefile Xutf8.h)

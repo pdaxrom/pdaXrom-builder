@@ -1,0 +1,9 @@
+config DLUME
+	bool
+	prompt "dlume"
+	depends on LIBXML2 && GTK22
+
+config DLUME_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on DLUME

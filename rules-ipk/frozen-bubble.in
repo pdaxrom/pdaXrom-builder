@@ -1,0 +1,8 @@
+config FROZEN-BUBBLE
+	bool
+	prompt "frozen-bubble"
+
+config FROZEN-BUBBLE_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on FROZEN-BUBBLE

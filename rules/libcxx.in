@@ -1,0 +1,29 @@
+menu	"C++ Library         "
+
+config CXX
+	bool "C++ support"
+
+choice
+	depends on GLIBC || ( UCLIBC && GCC_3 )
+	depends on BUILD_CROSSCHAIN
+
+        bool "Which C++ library do you want to use?"
+        	default LIBSTDCXX
+		depends on CXX
+	
+	config LIBSTDCXX
+ 		bool "libstdc++"
+		depends on GLIBC || ( UCLIBC && GCC_3 )
+endchoice
+
+config LIBSTDCXX_SHARED
+	bool "Build and install shared library"
+	default y
+	depends on CXX && BUILD_CROSSCHAIN
+
+config LIBSTDCXX_SHARED
+	bool "Install shared library"
+	default y
+	depends on CXX && !BUILD_CROSSCHAIN
+
+endmenu

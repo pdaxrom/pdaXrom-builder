@@ -1,0 +1,17 @@
+--- battalion/tk.c~	2002-05-06 13:57:05.000000000 +0000
++++ battalion/tk.c	2005-01-20 13:47:35.000000000 +0000
+@@ -400,6 +400,14 @@
+ 	lastEventType = KeyPress;
+ 	XLookupString(&current.xkey, buf, sizeof(buf), &ks, 0);
+ 	switch (ks) {
++	  case XK_a: 		key = TK_a;		break;
++	  case XK_A: 		key = TK_A;		break;
++	  case XK_z: 		key = TK_z;		break;
++	  case XK_Z: 		key = TK_Z;		break;
++	  case XK_Left:		key = TK_LEFT;		break;
++	  case XK_Up:		key = TK_UP;		break;
++	  case XK_Right:  	key = TK_RIGHT;		break;
++	  case XK_Down:		key = TK_DOWN;		break;
+ 	  case XK_Control_L:	key = TK_CONTROL_L;	break;
+ 	  default: 		key = GL_FALSE;		break;
+ 	}

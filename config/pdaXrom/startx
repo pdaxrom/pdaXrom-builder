@@ -1,0 +1,196 @@
+#!/bin/sh
+
+# $Xorg: startx.cpp,v 1.3 2000/08/17 19:54:29 cpqbld Exp $
+#
+# This is just a sample implementation of a slightly less primitive
+# interface than xinit.  It looks for user .xinitrc and .xserverrc
+# files, then system xinitrc and xserverrc files, else lets xinit choose
+# its default.  The system xinitrc should probably do things like check
+# for .Xresources files and merge them in, startup up a window manager,
+# and pop a clock and serveral xterms.
+#
+# Site administrators are STRONGLY urged to write nicer versions.
+#
+# $XFree86: xc/programs/xinit/startx.cpp,v 3.16 2003/01/24 21:30:02 herrb Exp $
+
+
+userclientrc=$HOME/.xinitrc
+userserverrc=$HOME/.xserverrc
+sysclientrc=/usr/X11R6/lib/X11/xinit/xinitrc
+sysserverrc=/usr/X11R6/lib/X11/xinit/xserverrc
+defaultclient=/usr/X11R6/bin/xterm
+defaultserver=/usr/X11R6/bin/X
+defaultclientargs=""
+defaultserverargs=" -nolisten tcp -kb"
+#defaultserverargs=" -nolisten tcp"
+clientargs=""
+serverargs=""
+
+PATH=/usr/X11R6/bin:$PATH
+LD_LIBRARY_PATH=/usr/X11R6/lib:/usr/local/lib:$LD_LIBRARY_PATH
+
+export TSLIB_TSDEVICE TSLIB_TSEVENTTYPE PATH LD_LIBRARY_PATH
+
+if [ ! -f /etc/pointercal ]; then
+    /usr/bin/ts_calibrate
+fi
+
+if [ -f /etc/sysconfig/x11 ]; then
+    . /etc/sysconfig/x11
+    export X11_RIGHT_MOUSE_BUTTON X11_RIGHT_MOUSE_BUTTON_MOD X11_MIDDLE_MOUSE_BUTTON_MOD
+fi
+
+test -f /etc/sysconfig/keyboard/kernel.map -a -f /usr/bin/loadkeys && /usr/bin/loadkeys /etc/sysconfig/keyboard/kernel.map
+
+FONTS_PATH=""
+if [ -d /usr/X11R6/lib/X11/fonts/cyrillic ]; then
+    FONTS_PATH=$FONTS_PATH"/usr/X11R6/lib/X11/fonts/cyrillic:"
+fi
+if [ -d /usr/X11R6/lib/X11/fonts/misc ]; then
+    FONTS_PATH=$FONTS_PATH"/usr/X11R6/lib/X11/fonts/misc:"
+fi
+if [ -d /usr/X11R6/lib/X11/fonts/100dpi ]; then
+    FONTS_PATH=$FONTS_PATH"/usr/X11R6/lib/X11/fonts/100dpi:"
+fi
+if [ -d /usr/X11R6/lib/X11/fonts/75dpi ]; then
+    FONTS_PATH=$FONTS_PATH"/usr/X11R6/lib/X11/fonts/75dpi:"
+fi
+if [ -d /usr/X11R6/lib/X11/fonts/CID ]; then
+    FONTS_PATH=$FONTS_PATH"/usr/X11R6/lib/X11/fonts/CID:"
+fi
+if [ -d /usr/X11R6/lib/X11/fonts/Speedo ]; then
+    FONTS_PATH=$FONTS_PATH"/usr/X11R6/lib/X11/fonts/Speedo:"
+fi
+if [ ! "$FONTS_PATH" = "" ]; then
+    defaultserverargs="$defaultserverargs -fp $FONTS_PATH"
+fi
+
+if [ -f $userclientrc ]; then
+    defaultclientargs=$userclientrc
+elif [ -f $sysclientrc ]; then
+    defaultclientargs=$sysclientrc
+fi
+
+if [ -f $userserverrc ]; then
+    defaultserverargs=$userserverrc
+elif [ -f $sysserverrc ]; then
+    defaultserverargs=$sysserverrc
+fi
+
+whoseargs="client"
+while [ x"$1" != x ]; do
+    case "$1" in
+    # '' required to prevent cpp from treating "/*" as a C comment.
+    /''*|\./''*)
+	if [ "$whoseargs" = "client" ]; then
+	    if [ x"$clientargs" = x ]; then
+		client="$1"
+	    else
+		clientargs="$clientargs $1"
+	    fi
+	else
+	    if [ x"$serverargs" = x ]; then
+		server="$1"
+	    else
+		serverargs="$serverargs $1"
+	    fi
+	fi
+	;;
+    --)
+	whoseargs="server"
+	;;
+    *)
+	if [ "$whoseargs" = "client" ]; then
+	    clientargs="$clientargs $1"
+	else
+	    # display must be the FIRST server argument
+	    if [ x"$serverargs" = x ] && 		 expr "$1" : ':[0-9][0-9]*$' > /dev/null 2>&1; then
+
+		display="$1"
+	    else
+		serverargs="$serverargs $1"
+	    fi
+	fi
+	;;
+    esac
+    shift
+done
+
+# process client arguments
+if [ x"$client" = x ]; then
+    # if no client arguments either, use rc file instead
+    if [ x"$clientargs" = x ]; then
+	client="$defaultclientargs"
+    else
+	client=$defaultclient
+    fi
+fi
+
+# process server arguments
+if [ x"$server" = x ]; then
+    # if no server arguments or display either, use rc file instead
+    if [ x"$serverargs" = x -a x"$display" = x ]; then
+	server="$defaultserverargs"
+    else
+	server=$defaultserver
+    fi
+fi
+
+if [ x"$XAUTHORITY" = x ]; then
+    XAUTHORITY=$HOME/.Xauthority
+    export XAUTHORITY
+fi
+
+removelist=
+
+
+# set up default Xauth info for this machine
+case `uname` in
+Linux*)
+	if [ -z "`hostname --version 2>&1 | grep GNU`" ]; then
+		hostname=`hostname -f`
+	else
+		hostname=`hostname`
+	fi
+	;;
+*)
+	hostname=`hostname`
+	;;
+esac
+
+authdisplay=${display:-:0}
+mcookie=`mcookie`
+for displayname in $authdisplay $hostname$authdisplay; do
+    if ! xauth list "$displayname" | grep "$displayname " >/dev/null 2>&1; then
+        xauth -q << EOF 
+add $displayname . $mcookie
+EOF
+	removelist="$displayname $removelist"
+    fi
+done
+
+
+xinit $client $clientargs -- $server $display $serverargs
+
+if [ x"$removelist" != x ]; then
+    xauth remove $removelist
+fi
+
+
+
+
+
+if command -v deallocvt > /dev/null 2>&1; then
+    deallocvt
+fi
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,13 @@
+diff -Nur xc/lib/Xft1/XftFreetype.h xc.new/lib/Xft1/XftFreetype.h
+--- xc/lib/Xft1/XftFreetype.h	2002-03-02 22:09:04.000000000 +0000
++++ xc.new/lib/Xft1/XftFreetype.h	2004-08-28 10:38:57.000000000 +0000
+@@ -26,7 +26,8 @@
+ #define _XFTFREETYPE_H_
+ 
+ #include "Xft.h"
+-#include <freetype/freetype.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ 
+ #include <X11/Xfuncproto.h>
+ #include <X11/Xosdefs.h>

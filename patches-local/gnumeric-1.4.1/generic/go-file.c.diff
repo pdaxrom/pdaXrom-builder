@@ -1,0 +1,13 @@
+--- gnumeric-1.4.1/src/cut-n-paste-code/goffice/utils/go-file.c~	2004-12-21 01:55:12.000000000 +0000
++++ gnumeric-1.4.1/src/cut-n-paste-code/goffice/utils/go-file.c	2004-12-21 01:56:28.000000000 +0000
+@@ -493,8 +493,8 @@
+ 			for (i = 1 ; i < argc ; i++)
+ 				if (NULL != (tmp = strstr (argv[i], "%1"))) {
+ 					*tmp = '\0';
+-					tmp = g_strconcat = (argv[i],
+-						(clean_url != NULL) ? (char const *)clean_url : url,
++					tmp = g_strconcat (argv[i],
++						(clean_url != NULL) ? (const char *)clean_url : url,
+ 						tmp+2, NULL);
+ 					g_free (argv[i]);
+ 					argv[i] = tmp;

@@ -1,0 +1,3 @@
+KERNELCONFIG=$PWD/arm.config
+TARGET=armv5tel-cacko-linux
+TARGET_CFLAGS="-O"

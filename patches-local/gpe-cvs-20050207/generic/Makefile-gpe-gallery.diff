@@ -1,0 +1,45 @@
+--- gpe/base/gpe-gallery/Makefile~	2005-02-07 03:52:51.000000000 +0000
++++ gpe/base/gpe-gallery/Makefile	2005-02-07 04:00:54.000000000 +0000
+@@ -1,10 +1,31 @@
+-PREFIX = /usr/local
++PREFIX = /usr
+ PACKAGE = gpe-gallery
+ DEBUG = no
+ CVSBUILD = yes
+ VERSION = 0.95
+ 
+ MEMBERS = main image_tools
++
++CFLAGS = `pkg-config --cflags gtk+-2.0`
++
++CFLAGS += -D_GNU_SOURCE -Wall
++ifeq ($(DEBUG),yes)
++CFLAGS += -O2 -g
++LDFLAGS = -g #-lefence
++else
++CFLAGS += -Os -fomit-frame-pointer
++endif
++
++ifeq ($(CVSBUILD),yes)
++CFLAGS += -I../libgpewidget
++LDFLAGS += -L../libgpewidget
++BUILD = ../build
++else
++CFLAGS += -I/usr/include/gpe
++BUILD = build
++endif
++LDFLAGS += -lgpewidget
++
+ GTKCFLAGS = `pkg-config --cflags gtk+-2.0`
+ GTKLDFLAGS = `pkg-config --libs gtk+-2.0 gdk-2.0`
+ 
+@@ -28,7 +49,8 @@
+ 	$(CC) -o $@ $^ $(LDFLAGS) $(PACKAGE_LDFLAGS)
+ 
+ install-program: all
+-	install -Ds $(PACKAGE) $(DESTDIR)$(PREFIX)/bin/$(PACKAGE)
++	install -D $(PACKAGE) $(DESTDIR)$(PREFIX)/bin/$(PACKAGE)
++	$(STRIP) $(DESTDIR)$(PREFIX)/bin/$(PACKAGE)
+ 	install -D -m 644 $(PACKAGE).png $(DESTDIR)$(PREFIX)/share/pixmaps/$(PACKAGE).png
+ 	install -D -m 644 $(PACKAGE).applications $(DESTDIR)/$(PREFIX)/share/application-registry/$(PACKAGE).applications
+ 	mkdir -p $(DESTDIR)$(PREFIX)/share/applications

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+. /etc/rc.d/init.d/functions
+
+case "$1" in
+  start)
+    modprobe ip_gre
+    ip tunnel add mbnet mode gre \
+	remote 192.168.52.9 \
+	local 192.168.52.10 ttl 255
+    ip link set mbnet up
+    ip addr add 212.192.118.2 dev mbnet
+    ip route add 212.192.116.0/24 dev mbnet
+    ip route add 212.192.117.0/24 dev mbnet
+    route add default dev mbnet
+    ;;
+  stop)
+    ip link set mbnet down
+    ip tunnel del mbnet
+    rmmod ip_gre
+    ;;
+  restart|reload)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|restart|reload}"
+    exit 1
+esac
+ 
+exit 0

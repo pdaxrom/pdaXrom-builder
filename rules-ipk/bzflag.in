@@ -1,0 +1,8 @@
+config BZFLAG
+	bool
+	prompt "bzflag"
+
+config BZFLAG_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on BZFLAG

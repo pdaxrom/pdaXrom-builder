@@ -1,0 +1,9 @@
+config USBUTILS
+	bool
+	prompt "usbutils"
+	depends on ARCH_X86
+
+config USBUTILS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on USBUTILS

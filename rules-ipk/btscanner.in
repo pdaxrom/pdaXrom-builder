@@ -1,0 +1,9 @@
+config BTSCANNER
+	bool
+	prompt "btscanner"
+	depends on BLUEZ-SDP
+
+config BTSCANNER_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on BTSCANNER

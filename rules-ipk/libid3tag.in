@@ -1,0 +1,8 @@
+config LIBID3TAG
+	bool
+	prompt "libid3tag"
+
+config LIBID3TAG_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on LIBID3TAG

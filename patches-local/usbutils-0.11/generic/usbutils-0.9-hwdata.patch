@@ -1,0 +1,59 @@
+--- usbutils-0.9/configure.hwdata	Wed Jan 30 19:45:49 2002
++++ usbutils-0.9/configure	Wed Jan 30 19:46:15 2002
+@@ -1761,18 +1761,18 @@
+ if test "x${datadir}" = 'x${prefix}/share'; then
+   if test "x${prefix}" = "xNONE"; then
+     cat >> confdefs.h <<EOF
+-#define USBIDS_FILE "${ac_default_prefix}/share/usb.ids"
++#define USBIDS_FILE "${ac_default_prefix}/share/hwdata/usb.ids"
+ EOF
+ 
+   else
+     cat >> confdefs.h <<EOF
+-#define USBIDS_FILE "${prefix}/share/usb.ids"
++#define USBIDS_FILE "${prefix}/share/hwdata/usb.ids"
+ EOF
+ 
+   fi
+ else
+   cat >> confdefs.h <<EOF
+-#define USBIDS_FILE "${datadir}/usb.ids"
++#define USBIDS_FILE "${datadir}/hwdata/usb.ids"
+ EOF
+ 
+ fi
+--- usbutils-0.9/libusb/configure.hwdata	Wed Jan 30 19:44:12 2002
++++ usbutils-0.9/libusb/configure	Wed Jan 30 19:44:56 2002
+@@ -2326,18 +2326,18 @@
+ if test "x${datadir}" = 'x${prefix}/share'; then
+   if test "x${prefix}" = "xNONE"; then
+     cat >> confdefs.h <<EOF
+-#define USBIDS_FILE "${ac_default_prefix}/share/usb.ids"
++#define USBIDS_FILE "${ac_default_prefix}/share/hwdata/usb.ids"
+ EOF
+ 
+   else
+     cat >> confdefs.h <<EOF
+-#define USBIDS_FILE "${prefix}/share/usb.ids"
++#define USBIDS_FILE "${prefix}/share/hwdata/usb.ids"
+ EOF
+ 
+   fi
+ else
+   cat >> confdefs.h <<EOF
+-#define USBIDS_FILE "${datadir}/usb.ids"
++#define USBIDS_FILE "${datadir}/hwdata/usb.ids"
+ EOF
+ 
+ fi
+--- usbutils-0.9/lsusb.8.hwdata	Wed Jan 30 19:45:15 2002
++++ usbutils-0.9/lsusb.8	Wed Jan 30 19:45:23 2002
+@@ -47,7 +47,7 @@
+ 
+ .SH FILES
+ .TP
+-.B /usr/share/usb.ids
++.B /usr/share/hwdata/usb.ids
+ A list of all known USB ID's (vendors, products, classes, subclasses and protocols).
+ .TP
+ .B /proc/bus/usb

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#export PATH=$PATH:/usr/sbin.rom:/usr/bin.rom
+
+mount -t tmpfs -o size=5m none /var/tmp
+mount -o remount /
+mkdir /var/tmp/run
+mkdir /var/tmp/tmp
+chmod 4777 /var/tmp
+chmod 4777 /var/tmp/tmp
+touch /var/run/utmp

@@ -1,0 +1,38 @@
+--- perl-5.8.5/Cross/Makefile~	2004-01-12 20:44:01.000000000 +0000
++++ perl-5.8.5/Cross/Makefile	2004-09-30 17:44:31.000000000 +0000
+@@ -7,12 +7,15 @@
+ export CFLAGS
+ export SYS=$(ARCH)-$(OS)
+ export CROSS=$(ARCH)-$(OS)-
+-export FULL_OPTIMIZATION = -fexpensive-optimizations -fomit-frame-pointer -O2
+-export OPTIMIZATION = -O2
++export FULL_OPTIMIZATION = -fexpensive-optimizations -fomit-frame-pointer -O2 -fno-strict-aliasing -pipe -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
++export OPTIMIZATION = -O2 -fno-strict-aliasing -pipe -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
++
++export CCCDLFLAGS='-fpic'
++export CCDLFLAGS='-Wl,-E'
+ 
+ export CC = $(CROSS)gcc
+ export CXX = $(CROSS)g++
+-export LD = $(CROSS)ld
++export LD = $(CROSS)gcc
+ export STRIP = $(CROSS)strip
+ export AR = $(CROSS)ar
+ export RANLIB = $(CROSS)ranlib
+@@ -29,6 +32,16 @@
+  endif
+ endif
+ 
++ifeq ($(ARCH),i686)
++ ifdef CONFIG_TARGET_I686
++   ifndef Architecture
++     Architecture = i686
++   endif
++   FULL_OPTIMIZATION +=
++   OPTIMIZATION +=
++ endif
++endif
++
+ CFLAGS+=$(FULL_OPTIMIZATION)
+ 
+ all:

@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# This stuff was orignaly in /sbin/pm_helper before the switch to run-parts
+# 
+if [ -w /proc/sys/pm/suspend ]; then
+echo > /proc/sys/pm/suspend
+else
+mesg 'Unable to find /proc/sys/pm/suspend'
+fi
+
+

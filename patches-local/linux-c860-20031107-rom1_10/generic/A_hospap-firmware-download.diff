@@ -1,0 +1,12 @@
+--- linux-current/drivers/net/wireless/Config.in	2004-02-27 14:48:20.000000000 +0300
++++ linux/drivers/net/wireless/Config.in	2004-02-27 15:46:24.000000000 +0300
+@@ -8,6 +8,9 @@
+ 
+ tristate '  Hermes chipset 802.11b support (Orinoco/Prism2/Symbol)' CONFIG_HERMES
+ tristate '  Host AP support for Prism2/2.5/3 IEEE 802.11b' CONFIG_HOSTAP
++if [ "$CONFIG_HOSTAP" != "n" ]; then
++    bool '  Host AP firmware download support' CONFIG_HOSTAP_FIRMWARE
++fi
+ 
+ if [ "$CONFIG_ALL_PPC" = "y" ]; then
+    dep_tristate '    Apple Airport support (built-in)' CONFIG_APPLE_AIRPORT $CONFIG_HERMES

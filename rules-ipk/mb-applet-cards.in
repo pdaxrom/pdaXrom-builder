@@ -1,0 +1,9 @@
+config MB-APPLET-CARDS
+	bool
+	prompt "Compile mb-applet-cards"
+	depends on MATCHBOX-PANEL
+
+config MB-APPLET-CARDS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MB-APPLET-CARDS

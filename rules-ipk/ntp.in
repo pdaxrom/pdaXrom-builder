@@ -1,0 +1,13 @@
+config NTP
+	bool
+	prompt "ntpdate"
+
+config NTP_INSTALL
+	bool
+	prompt "install ntpdate in ROM"
+	depends on NTP
+
+config NTP_INSTALL_NTPD
+	bool
+	prompt "install ntpd in ROM"
+	depends on NTP

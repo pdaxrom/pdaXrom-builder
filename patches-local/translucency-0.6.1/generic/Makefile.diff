@@ -1,0 +1,37 @@
+diff -Nur translucency-0.6.0/Makefile translucency-0.6.0-new/Makefile
+--- translucency-0.6.0/Makefile	2003-10-27 21:23:57.000000000 +0000
++++ translucency-0.6.0-new/Makefile	2004-10-10 21:13:23.000000000 +0000
+@@ -1,6 +1,10 @@
++ifeq (config.mk, $(wildcard config.mk))
++include config.mk
++endif
++
+ # Basedir where include files for current kernel are installed
+-KERNELDIR=/usr/src/linux
+-#/lib/modules/$(shell uname -r)/build
++#KERNELDIR=/usr/src/linux
++#KERNELDIR=/lib/modules/$(shell uname -r)/build
+ # Basedir where include files for the UserMode linux reside
+ KERNELDIR_UM=/usr/src/linux-2.4.18-um27
+ 
+@@ -40,7 +44,7 @@
+ 
+ all: $M.o
+ $M.o: $O
+-	ld -i $O -o $M.o
++	$(LD) -i $O -o $M.o
+ 
+ $E.c: redirect.txt makeext.pl
+ 	perl makeext.pl $E redirect.txt
+@@ -57,9 +61,9 @@
+ 	mv $En.c $E.c
+ 
+ %.o: %.c base.h compatibility.h extension.h
+-	gcc -c $(CFLAGS) $<
++	$(CC) -c $(CFLAGS) $<
+ %.s: %.c Makefile
+-	gcc -S -g $(CFLAGS) $<
++	$(CC) -S -g $(CFLAGS) $<
+ install: all
+ 	gzip -c9 $M.8 > $M.8.gz
+ 	install -d $(DESTDIR){/usr/share/man/man8/,/lib/modules/${KERNELVERSION}/kernel/fs/,/sbin/}

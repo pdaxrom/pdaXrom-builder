@@ -1,0 +1,73 @@
+
+config NET-TOOLS
+	bool
+	prompt "net-tools"
+
+config NET-TOOLS_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on NET-TOOLS
+
+menu	"net-tools           "
+	depends on NET-TOOLS
+
+config NET-TOOLS_IFCONFIG
+	bool
+	prompt "ifconfig"
+	depends on NET-TOOLS && !BB_CONFIG_IFCONFIG
+
+config NET-TOOLS_ROUTE
+	bool
+	prompt "route"
+	depends on NET-TOOLS && !BB_CONFIG_ROUTE
+
+config NET-TOOLS_HOSTNAME
+	bool
+	prompt "hostname"
+	depends on NET-TOOLS && !BB_CONFIG_HOSTNAME
+
+config NET-TOOLS_NETSTAT
+	bool
+	prompt "netstat"
+	depends on NET-TOOLS && !BB_CONFIG_NETSTAT
+
+config NET-TOOLS_SLATTACH
+	bool
+	prompt "slattach"
+	depends on NET-TOOLS
+
+config NET-TOOLS_PLIPCONFIG
+	bool
+	prompt "plipconfig"
+	depends on NET-TOOLS
+
+config NET-TOOLS_ARP
+	bool
+	prompt "arp"
+	depends on NET-TOOLS
+
+config NET-TOOLS_RARP
+	bool
+	prompt "rarp"
+	depends on NET-TOOLS
+
+config NET-TOOLS_NAMEIF
+	bool
+	prompt "nameif"
+	depends on NET-TOOLS && !BB_CONFIG_NAMEIF
+
+config NET-TOOLS_IPMADDR
+	bool
+	prompt "ipmaddr"
+	depends on NET-TOOLS
+
+config NET-TOOLS_IPTUNNEL
+	bool
+	prompt "iptunnel"
+	depends on NET-TOOLS && !BB_CONFIG_IPTUNNEL
+
+config NET-TOOLS_MII-TOOL
+	bool
+	prompt "mii-tool"
+	depends on NET-TOOLS
+endmenu

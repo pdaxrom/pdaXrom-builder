@@ -1,0 +1,12 @@
+diff -Nur tcl8.4.6/compat/strtod.c tcl8.4.6-patched/compat/strtod.c
+--- tcl8.4.6/compat/strtod.c	2002-02-25 14:26:12.000000000 +0000
++++ tcl8.4.6-patched/compat/strtod.c	2004-03-31 17:37:57.000000000 +0000
+@@ -63,7 +63,7 @@
+  */
+ 
+ double
+-strtod(string, endPtr)
++strtod__(string, endPtr)
+     CONST char *string;		/* A decimal ASCII floating-point number,
+ 				 * optionally preceded by white space.
+ 				 * Must have form "-I.FE-X", where I is the

@@ -1,0 +1,13 @@
+diff -Nur matchbox-desktop-0.8/modules/tasks.c matchbox-desktop-0.8-patched/modules/tasks.c
+--- matchbox-desktop-0.8/modules/tasks.c	2004-02-03 15:15:32.000000000 +0000
++++ matchbox-desktop-0.8-patched/modules/tasks.c	2004-02-16 17:36:17.000000000 +0000
+@@ -142,7 +142,8 @@
+       if (!XGetWindowAttributes(mbdesktop_xdisplay(mb), wins[i], &winattr))
+ 	continue;
+       
+-      if (winattr.map_state != IsViewable || winattr.override_redirect)
++      if (((winattr.map_state != IsViewable) && (winattr.map_state != IsUnmapped)) ||
++	    winattr.override_redirect)
+ 	{
+ 	  continue;
+ 	}

@@ -1,0 +1,8 @@
+config CURL
+	bool
+	prompt "curl"
+
+config CURL_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on CURL

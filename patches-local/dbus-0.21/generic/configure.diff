@@ -1,0 +1,17 @@
+--- dbus/configure~	2004-05-28 12:16:29.000000000 +0000
++++ dbus/configure	2004-05-28 12:18:32.000000000 +0000
+@@ -23259,10 +23259,11 @@
+ 
+ if test "$cross_compiling" = yes; then
+   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&5
++Default yes." >&5
+ echo "$as_me: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }
++Default yes." >&2;}
++   have_abstract_sockets=yes
++   }
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+ #line $LINENO "configure"

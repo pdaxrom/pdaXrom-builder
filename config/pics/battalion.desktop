@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Battalion
+Comment=Battalaion 3D game
+Exec=battalion
+Icon=Googelonrmesa.png
+Terminal=false
+Type=Application
+Categories=Games
+StartupNotify=false

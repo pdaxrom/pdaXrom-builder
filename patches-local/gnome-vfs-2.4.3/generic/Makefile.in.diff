@@ -1,0 +1,14 @@
+--- gnome-vfs/Makefile.in~	2005-02-07 21:28:07.000000000 +0000
++++ gnome-vfs/Makefile.in	2005-02-07 21:29:07.000000000 +0000
+@@ -189,9 +189,9 @@
+ WARN_CXXFLAGS = @WARN_CXXFLAGS@
+ XML_REQUIRED = @XML_REQUIRED@
+ 
+-SUBDIRS_GNOME = monikers doc schemas
++SUBDIRS_GNOME = monikers schemas
+ 
+-SUBDIRS =  	libgnomevfs					modules						schemas						devel-docs					doc						programs					test						monikers					po
++SUBDIRS =  	libgnomevfs					modules						schemas						programs					test						monikers					po
+ 
+ 
+ EXTRA_DIST =  	HACKING						TODO						autogen.sh					gnome-vfs.spec					gnome-vfs-2.0.pc.in				gnome-vfs-module-2.0.pc.in			intltool-extract.in				intltool-merge.in				intltool-update.in

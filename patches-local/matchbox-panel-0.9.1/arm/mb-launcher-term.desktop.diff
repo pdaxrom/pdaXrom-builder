@@ -1,0 +1,14 @@
+--- matchbox-panel-0.8/applets/dotdesktop/mb-launcher-term.desktop~	2004-02-04 18:17:47.000000000 +0000
++++ matchbox-panel-0.8/applets/dotdesktop/mb-launcher-term.desktop	2004-10-15 15:23:00.000000000 +0000
+@@ -1,8 +1,7 @@
+ [Desktop Entry]
+-Name=Term Launcher
++Name=Aterm Launcher
+ Comment=Panel based Terminal launcher
+-# the '-o -1' makes monolaunch dock to the left
+-Exec=mb-applet-launcher -o -1 -l mbterm.png mb-applet-xterm-wrapper.sh
++Exec=mb-applet-launcher -o -1 --desktop /usr/share/applications/aterm.desktop
+ Type=PanelApp
+-Icon=mbterm.png
++Icon=konsole.png
+ Categories=Panel;Utility;MB

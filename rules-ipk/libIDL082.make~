@@ -1,0 +1,151 @@
+# -*-makefile-*-
+# $Id: libIDL082.make,v 1.2 2004/03/25 15:42:36 mkl Exp $
+#
+# Copyright (C) 2004 by Alexander Chukov <sash@pdaXrom.org>
+#          
+# See CREDITS for details about who has contributed to this project.
+#
+# For further information about the PTXdist project and license conditions
+# see the README file.
+#
+
+#
+# We provide this package
+#
+ifdef PTXCONF_LIBIDL082
+PACKAGES += libidl082
+endif
+
+#
+# Paths and names
+#
+LIBIDL082_VERSION	= 0.8.2
+LIBIDL082		= libIDL-$(LIBIDL082_VERSION)
+LIBIDL082_SUFFIX	= tar.bz2
+LIBIDL082_URL		= http://ftp.gnome.org/pub/GNOME/desktop/2.4/2.4.0/sources/$(LIBIDL082).$(LIBIDL082_SUFFIX)
+LIBIDL082_SOURCE	= $(SRCDIR)/$(LIBIDL082).$(LIBIDL082_SUFFIX)
+LIBIDL082_DIR		= $(BUILDDIR)/$(LIBIDL082)
+
+# ----------------------------------------------------------------------------
+# Get
+# ----------------------------------------------------------------------------
+
+libidl082_get: $(STATEDIR)/libidl082.get
+
+libidl082_get_deps	=  $(LIBIDL082_SOURCE)
+
+$(STATEDIR)/libidl082.get: $(libidl082_get_deps)
+	@$(call targetinfo, $@)
+	touch $@
+
+$(LIBIDL082_SOURCE):
+	@$(call targetinfo, $@)
+	@$(call get, $(LIBIDL082_URL))
+
+# ----------------------------------------------------------------------------
+# Extract
+# ----------------------------------------------------------------------------
+
+libidl082_extract: $(STATEDIR)/libidl082.extract
+
+libidl082_extract_deps	=  $(STATEDIR)/libidl082.get
+
+$(STATEDIR)/libidl082.extract: $(libidl082_extract_deps)
+	@$(call targetinfo, $@)
+	@$(call clean, $(LIBIDL082_DIR))
+	@$(call extract, $(LIBIDL082_SOURCE))
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Prepare
+# ----------------------------------------------------------------------------
+
+libidl082_prepare: $(STATEDIR)/libidl082.prepare
+
+#
+# dependencies
+#
+libidl082_prepare_deps =  \
+	$(STATEDIR)/libidl082.extract \
+	$(STATEDIR)/virtual-xchain.install
+
+LIBIDL082_PATH	=  PATH=$(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/bin:$(CROSS_PATH)
+LIBIDL082_ENV 	=  $(CROSS_ENV)
+LIBIDL082_ENV	+= CFLAGS="-O2 -fomit-frame-pointer"
+LIBIDL082_ENV	+= PKG_CONFIG_PATH=$(CROSS_LIB_DIR)/lib/pkgconfig:$(CROSS_LIB_DIR)/X11R6/lib/pkgconfig
+LIBIDL082_ENV	+= libIDL_cv_long_long_format=ll
+
+#
+# autoconf
+#
+LIBIDL082_AUTOCONF	=  --prefix=/$(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)
+LIBIDL082_AUTOCONF	+= --build=$(GNU_HOST)
+LIBIDL082_AUTOCONF	+= --host=$(PTXCONF_GNU_TARGET)
+##LIBIDL082_AUTOCONF	+= --enable-static
+LIBIDL082_AUTOCONF	+= --disable-shared
+
+ifdef PTXCONF_LIBIDL082_FOO
+LIBIDL082_AUTOCONF	+= --enable-foo
+endif
+
+$(STATEDIR)/libidl082.prepare: $(libidl082_prepare_deps)
+	@$(call targetinfo, $@)
+	@$(call clean, $(LIBIDL082_BUILDDIR))
+	cd $(LIBIDL082_DIR) && \
+		$(LIBIDL082_PATH) $(LIBIDL082_ENV) \
+		./configure $(LIBIDL082_AUTOCONF)
+	cp -f $(PTXCONF_PREFIX)/bin/libtool $(LIBIDL082_DIR)
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Compile
+# ----------------------------------------------------------------------------
+
+libidl082_compile: $(STATEDIR)/libidl082.compile
+
+libidl082_compile_deps =  $(STATEDIR)/libidl082.prepare
+
+$(STATEDIR)/libidl082.compile: $(libidl082_compile_deps)
+	@$(call targetinfo, $@)
+
+	$(LIBIDL082_PATH) $(LIBIDL082_ENV) $(MAKE) -C $(LIBIDL082_DIR)
+
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Install
+# ----------------------------------------------------------------------------
+
+libidl082_install: $(STATEDIR)/libidl082.install
+
+$(STATEDIR)/libidl082.install: $(STATEDIR)/libidl082.compile
+	@$(call targetinfo, $@)
+
+	$(LIBIDL082_PATH) $(LIBIDL082_ENV) $(MAKE) -C $(LIBIDL082_DIR) install
+	rm -f $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libIDL-2.la
+	perl -p -i -e "s/\/usr\/lib/`echo $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib | sed -e '/\//s//\\\\\//g'`/g" $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libIDL-2.la
+	mv -f $(CROSS_LIB_DIR)/bin/libIDL-config-2 $(PTXCONF_PREFIX)/bin
+
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Target-Install
+# ----------------------------------------------------------------------------
+
+libidl082_targetinstall: $(STATEDIR)/libidl082.targetinstall
+
+libidl082_targetinstall_deps	=  $(STATEDIR)/libidl082.compile
+
+$(STATEDIR)/libidl082.targetinstall: $(libidl082_targetinstall_deps)
+	@$(call targetinfo, $@)
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Clean
+# ----------------------------------------------------------------------------
+
+libidl082_clean:
+	rm -rf $(STATEDIR)/libidl082.*
+	rm -rf $(LIBIDL082_DIR)
+
+# vim: syntax=make

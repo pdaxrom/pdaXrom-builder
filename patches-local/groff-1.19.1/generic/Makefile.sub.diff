@@ -1,0 +1,28 @@
+--- groff/contrib/mom/Makefile.sub~	2004-12-02 11:15:48.000000000 +0000
++++ groff/contrib/mom/Makefile.sub	2004-12-02 11:15:55.000000000 +0000
+@@ -83,7 +83,7 @@
+ 
+ .SUFFIXES: .mom .ps
+ .mom.ps:
+-	$(GROFF) -Tps -mom $< >$@
++	$(GROFF_HOST) -Tps -mom $< >$@
+ 
+ 
+ all: $(PROCESSEDEXAMPLEFILES)
+--- groff/doc/Makefile.sub~	2004-12-02 11:18:50.000000000 +0000
++++ groff/doc/Makefile.sub	2004-12-02 11:19:33.000000000 +0000
+@@ -41,13 +41,7 @@
+ FFLAG=-F$(top_builddir)/font -F$(top_srcdir)/font
+ TFLAG=-M$(top_builddir)/tmac -M$(top_srcdir)/tmac
+ 
+-GROFF=\
+-  GROFF_COMMAND_PREFIX=''; \
+-  export GROFF_COMMAND_PREFIX; \
+-  GROFF_BIN_PATH=$(GROFF_BIN_PATH); \
+-  export GROFF_BIN_PATH; \
+-  sed -e "s;@VERSION@;$(version)$(revision);" $< \
+-  | $(GROFFBIN) $(TFLAG) $(FFLAG) -Upet -ww
++GROFF=true
+ 
+ DOCFILES=\
+   meref.me \

@@ -1,0 +1,72 @@
+--- fltdj/Makefile~	2004-03-28 17:09:32.000000000 +0000
++++ fltdj/Makefile	2004-06-17 11:01:44.000000000 +0000
+@@ -2,17 +2,17 @@
+ #Copyright, (c) 2001, 2002, 2003 Kartik Patel, kpatel@hotpop.com
+ #Last modified 27 July, 2003
+ 
+-RM = rm -f
+-CC = g++
++#RM = rm -f
++#CC = g++
+ 
+ SHELL = /bin/sh
+ 
+-CFLAGS = -g
+-LDFLAGS=
+-DEFINES = 
+-INCLUDES = -I. -I/usr/X11R6/include -I/usr/local/include/ 
++#CFLAGS = 
++#LDFLAGS= 
++#DEFINES = 
++INCLUDES = `fltk-config --cflags` -I.
+ #LIBS = -L./. -L/usr/lib -L/usr/X11R6/lib -lfltk_images -lpng -ljpeg -lfltk -lXext -lX11 -lm
+-LIBS = -L/usr/X11R6/lib -lfltk_images -lfltk -lpng -ljpeg -lXext -lX11 -lm
++LIBS = `fltk-config --ldflags` -lfltk-utf8_images $(LDFLAGS)
+ OBJECTFILES = 	fltdj.o \
+ 		fltdjmain.o \
+ 		fltdjnotes.o\
+@@ -76,34 +76,25 @@
+ 	#Normal link sequence. According to user feedback, it may not work
+ 	#under FreeBSD. If that is the case, comment out the next line:
+ 	$(CC) -o $@ $(CFLAGS) $(OBJECTFILES) $(LIBS)
+-
+ 	#and uncomment the line below. Suggested by Jean-Phillipe for FreeBSD.
+ 	#$(CC) -o $@ $(CFLAGS) $(LIBS) $(OBJECTFILES)
+-	
+-	@if test -d ~/.fltdj; then \
+-		echo "====Directory .fltdj exists"; \
+-	else \
+-		echo "====Creating directory .fltdj"; mkdir $(HOME)/.fltdj; \
+-	fi;
+-	cp doc/* $(HOME)/.fltdj/.
+-	cp COPYING $(HOME)/.fltdj/COPYING
+ 
+ static:  $(OBJECTFILES)
+ 	$(RM) fltdj
+ 	$(CC) -static -o fltdj $(CFLAGS) $(OBJECTFILES) $(LIBS) -lpthread -lz
+-
+-	@if test -d ~/.fltdj; then \
+-		echo "====Directory .fltdj exists"; \
+-	else \
+-		echo "====Creating directory .fltdj"; mkdir $(HOME)/.fltdj; \
+-	fi;
+-	cp doc/* $(HOME)/.fltdj/.
+-	cp COPYING $(HOME)/.fltdj/COPYING
+      
+ clean:
+ 	rm -f *.o core fltdj
+ 
+ install:
+ 	make all
+-	strip fltdj
+-	cp fltdj /usr/local/bin/fltdj
++	mkdir -p $(DESTDIR)/usr/bin
++	cp fltdj $(DESTDIR)/usr/bin/fltdj
++	
++	@if test -d $(DESTDIR)/home/root/.fltdj; then \
++		echo "====Directory .fltdj exists"; \
++	else \
++		echo "====Creating directory .fltdj"; mkdir -p $(DESTDIR)/home/root/.fltdj; \
++	fi;
++	cp -a doc/*   $(DESTDIR)/home/root/.fltdj/.
++	cp -a COPYING $(DESTDIR)/home/root/.fltdj/COPYING

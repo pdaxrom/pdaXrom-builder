@@ -1,0 +1,9 @@
+config INPUTCONFIG
+	bool
+	prompt "inputconfig"
+	depends on LIBXML2 && GTK22
+
+config INPUTCONFIG_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on INPUTCONFIG

@@ -1,0 +1,20 @@
+config INITSCRIPTS
+	bool
+	prompt "initscripts"
+
+config INITSCRIPTS_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on INITSCRIPTS
+
+config INITSCRIPTS_INITLOG
+	bool
+	prompt "initlog"
+	default n
+	depends on INITSCRIPTS
+
+config INITSCRIPTS_USLEEP
+	bool
+	prompt "usleep"
+	default n
+	depends on INITSCRIPTS

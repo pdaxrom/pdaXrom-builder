@@ -1,0 +1,4 @@
+KERNELCONFIG=$PWD/arm.config
+TARGET=arm-cacko-linux
+GCC_EXTRA_CONFIG="--with-cpu=arm7500fe --enable-cxx-flags=-mcpu=arm7500fe"
+TARGET_CFLAGS="-O"

@@ -1,0 +1,10 @@
+--- nxrun/configure.in~	2004-10-04 05:04:56.000000000 +0000
++++ nxrun/configure.in	2004-10-04 05:04:44.000000000 +0000
+@@ -13,4 +13,7 @@
+ 
+ AC_PROG_LIBTOOL
+ 
++AC_PATH_X
++AC_PATH_XTRA
++
+ AC_OUTPUT(Makefile)

@@ -1,0 +1,8 @@
+config IPUTILS
+	bool
+	prompt "iputils"
+
+config IPUTILS_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on IPUTILS

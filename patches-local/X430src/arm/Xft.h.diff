@@ -1,0 +1,13 @@
+diff -Nur xc/lib/Xft/Xft.h xc.new/lib/Xft/Xft.h
+--- xc/lib/Xft/Xft.h	2003-02-25 21:57:53.000000000 +0000
++++ xc.new/lib/Xft/Xft.h	2004-08-28 10:38:57.000000000 +0000
+@@ -32,7 +32,8 @@
+ #define XftVersion	XFT_VERSION
+ 
+ #include <stdarg.h>
+-#include <freetype/freetype.h>
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ #include <fontconfig/fontconfig.h>
+ #include <X11/extensions/Xrender.h>
+ 

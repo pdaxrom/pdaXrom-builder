@@ -1,0 +1,8 @@
+--- gpdf-2.8.1/Makefile.am~	2004-12-12 11:44:40.000000000 +0000
++++ gpdf-2.8.1/Makefile.am	2004-12-12 11:44:57.000000000 +0000
+@@ -1,4 +1,4 @@
+-SUBDIRS = goo lib test-files fofi splash xpdf shell po help
++SUBDIRS = goo lib test-files fofi splash xpdf shell
+ 
+ WIN32_EXTRA =
+ 

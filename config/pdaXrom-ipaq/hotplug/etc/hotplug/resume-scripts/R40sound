@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# Reload Modules
+modprobe h3600-uda1341
+
+

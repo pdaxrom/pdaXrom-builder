@@ -1,0 +1,8 @@
+config QIV
+	bool
+	prompt "qiv"
+
+config QIV_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on QIV

@@ -1,0 +1,135 @@
+# /etc/modules.devfs
+# Richard Gooch  <rgooch@atnf.csiro.au>		24-MAR-2002
+#
+# THIS IS AN AUTOMATICALLY GENERATED FILE. DO NOT EDIT!!!
+# THIS FILE WILL BE OVERWRITTEN EACH TIME YOU INSTALL DEVFSD!!!
+# Modify /etc/modules.conf instead.
+# This file comes with devfsd-vDEVFSD-VERSION which is available from:
+# http://www.atnf.csiro.au/~rgooch/linux/
+# or directly from:
+# ftp://ftp.atnf.csiro.au/pub/people/rgooch/linux/daemons/devfsd-vDEVFSD-VERSION.tar.gz
+
+###############################################################################
+#   Sample configurations that you may want to place in /etc/modules.conf
+#
+#alias		sound-slot-0		sb
+#alias		/dev/v4l		bttv
+#alias		/dev/misc/watchdog	pcwd
+#alias		gen-md			raid0
+#alias		/dev/joysticks		joystick
+#probeall	scsi_hostadapter	sym53c8xx
+
+###############################################################################
+#                   Generic section: do not change or copy
+#
+# All HDDs
+probeall  /dev/discs		scsi_hostadapter sd_mod ide-probe-mod ide-disk ide-floppy DAC960
+alias     /dev/discs/*		/dev/discs
+
+# All CD-ROMs
+probeall  /dev/cdroms		scsi_hostadapter sr_mod ide-probe-mod ide-cd cdrom
+alias     /dev/cdroms/*		/dev/cdroms
+alias     /dev/cdrom		/dev/cdroms
+
+# All tapes
+probeall  /dev/tapes		scsi_hostadapter st ide-probe-mod ide-tape
+alias     /dev/tapes/*		/dev/tapes
+
+# All SCSI devices
+probeall  /dev/scsi		scsi_hostadapter sd_mod sr_mod st sg
+
+# All IDE devices
+probeall  /dev/ide		ide-probe-mod ide-disk ide-cd ide-tape ide-floppy
+
+# IDE CD-ROMs
+alias     /dev/ide/*/cd		ide-cd
+
+# SCSI HDDs
+probeall  /dev/sd		scsi_hostadapter sd_mod
+alias     /dev/sd*		/dev/sd
+
+# SCSI CD-ROMs
+probeall  /dev/sr		scsi_hostadapter sr_mod
+alias     /dev/sr*		/dev/sr
+alias     /dev/scsi/*/cd	sr_mod
+
+# SCSI tapes
+probeall  /dev/st		scsi_hostadapter st
+alias     /dev/st*		/dev/st
+alias     /dev/nst*		/dev/st
+
+# SCSI generic
+probeall  /dev/sg		scsi_hostadapter sg
+alias     /dev/sg*		/dev/sg
+alias     /dev/scsi/*/generic	/dev/sg
+alias     /dev/pg		/dev/sg
+alias     /dev/pg*		/dev/sg
+
+# Floppies
+alias     /dev/floppy		floppy
+alias     /dev/fd*		floppy
+
+# RAMDISCs
+alias     /dev/rd		rd
+alias     /dev/ram*		rd
+
+# Loop devices
+alias     /dev/loop*		loop
+
+# Meta devices
+alias     /dev/md*		gen-md
+
+# Parallel port printers
+alias     /dev/printers*	lp
+alias     /dev/lp*		/dev/printers
+
+# Soundcard
+alias     /dev/sound		sound-slot-0
+alias     /dev/audio		/dev/sound
+alias     /dev/mixer		/dev/sound
+alias     /dev/dsp		/dev/sound
+alias     /dev/dspW		/dev/sound
+alias     /dev/midi		/dev/sound
+
+# Joysticks
+alias     /dev/js*		/dev/joysticks
+
+# Serial ports
+alias     /dev/tts*		serial
+alias     /dev/ttyS*		/dev/tts
+alias     /dev/cua*		/dev/tts
+
+# Input devices
+alias     /dev/input/mouse*	mousedev
+
+# Miscellaneous devices
+alias     /dev/misc/atibm	atixlmouse
+alias     /dev/misc/inportbm	msbusmouse
+alias     /dev/misc/logibm	busmouse
+alias     /dev/misc/rtc		rtc
+alias     /dev/misc/agpgart	agpgart
+alias     /dev/rtc		/dev/misc/rtc
+
+# PPP devices
+alias     /dev/ppp*		ppp_generic
+
+# Video capture devices
+alias     /dev/video*		/dev/v4l
+alias     /dev/vbi*		/dev/v4l
+
+# agpgart
+alias     /dev/agpgart		agpgart
+alias     /dev/dri*		agpgart
+
+# Irda devices
+alias     /dev/ircomm		ircomm-tty
+alias     /dev/ircomm*		/dev/ircomm
+
+# Raw I/O devices
+alias	/dev/rawctl		/dev/raw
+
+
+# Pull in the configuration file. Do this last because modprobe(8) processes in
+# per^H^H^Hreverse order and the sysadmin may want to over-ride what is in the
+# generic file
+include /etc/modules.conf

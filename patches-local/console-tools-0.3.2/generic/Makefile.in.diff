@@ -1,0 +1,11 @@
+--- console-tools/Makefile.in~	2004-10-20 00:05:51.000000000 +0000
++++ console-tools/Makefile.in	2004-10-20 00:06:03.000000000 +0000
+@@ -114,7 +114,7 @@
+ 
+ AUTOMAKE_OPTIONS = foreign
+ 
+-SUBDIRS = lib fontfiletools vttools kbdtools screenfonttools contrib doc 	compat include examples po intl
++SUBDIRS = lib fontfiletools vttools kbdtools screenfonttools contrib compat include examples po intl
+ 
+ 
+ EXTRA_DIST = BUGS RELEASE CREDITS COPYING.kbd local-scripts/* debian/* *.lsm

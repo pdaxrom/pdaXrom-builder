@@ -1,0 +1,11 @@
+--- gnome-icon-theme/Makefile.in~	2004-05-26 00:29:43.000000000 +0000
++++ gnome-icon-theme/Makefile.in	2004-05-26 00:29:49.000000000 +0000
+@@ -525,7 +525,7 @@
+ @ENABLE_HICOLOR_CHECK_TRUE@	echo "You can get a copy from http://freedesktop.org/Software/icon-theme/releases" ;	\
+ @ENABLE_HICOLOR_CHECK_TRUE@	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" ;	\
+ @ENABLE_HICOLOR_CHECK_TRUE@	echo ;											\
+-@ENABLE_HICOLOR_CHECK_TRUE@	exit 1
++@ENABLE_HICOLOR_CHECK_TRUE@	exit 0
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+ .NOEXPORT:

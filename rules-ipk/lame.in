@@ -1,0 +1,13 @@
+config LAME
+	bool
+	prompt "Lame encoder & GUI"
+
+config LAME_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on LAME
+
+config LAME_FRONT_INSTALL
+	bool
+	prompt "Install GUI in ROM"
+	depends on LAME

@@ -1,0 +1,9 @@
+config BLUEZ-SDP
+	bool
+	prompt "bluez-sdp"
+	depends on BLUEZ-UTILS
+
+config BLUEZ-SDP_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on BLUEZ-SDP

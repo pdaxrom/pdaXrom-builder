@@ -1,0 +1,11 @@
+--- xawtv/Makefile.in~	2005-01-07 12:14:26.000000000 +0000
++++ xawtv/Makefile.in	2005-01-07 12:14:37.000000000 +0000
+@@ -38,7 +38,7 @@
+ # various libraries
+ ATHENA_LIBS	:= @X_LIBS@ @XFT_LIBS@ @LIBS@ @ATHENA@
+ MOTIF_LIBS	:= @X_LIBS@ @XFT_LIBS@ @LIBS@ -lXm -lXmu -lXt @X_PRE_LIBS@ \
+-		   -lXp -lXpm -lXext -lX11 @X_EXTRA_LIBS@
++		   -lXpm -lXext -lX11 @X_EXTRA_LIBS@
+ THREAD_LIBS	:= @LIBPTHREAD@
+ CURSES_LIBS	:= @LIBCURSES@
+ LIRC_LIBS	:= @LIRC@

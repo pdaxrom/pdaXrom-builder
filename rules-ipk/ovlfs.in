@@ -1,0 +1,7 @@
+config OVLFS
+	bool "ovlfs module and utils"
+
+config OVLFS_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on OVLFS

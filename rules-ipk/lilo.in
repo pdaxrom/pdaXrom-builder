@@ -1,0 +1,8 @@
+config LILO
+	bool "LILO"
+	depends on ARCH_X86
+
+config LILO_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on LILO

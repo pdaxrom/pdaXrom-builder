@@ -1,0 +1,17 @@
+--- nx-X11/lib/X11/Imakefile~	2004-10-04 03:58:30.000000000 +0000
++++ nx-X11/lib/X11/Imakefile	2004-10-04 03:58:57.000000000 +0000
+@@ -1135,12 +1135,12 @@
+ #ifdef SunArchitecture
+ $(NX_XCOMPLIBTARGET):
+ 	cd ../../../nxcomp && \
+-	./configure && \
++	./configure CC=$(CC) CXX=$(CXX) && \
+ 	gmake
+ #else
+ $(NX_XCOMPLIBTARGET):
+ 	cd ../../../nxcomp && \
+-	./configure && \
++	./configure CC=$(CC) CXX=$(CXX) && \
+ 	make
+ #endif
+                                                                                                                                               

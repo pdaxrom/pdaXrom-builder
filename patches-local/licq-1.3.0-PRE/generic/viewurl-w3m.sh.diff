@@ -1,0 +1,18 @@
+diff -Nur licq-1.3.0-PRE/bin/viewurl-w3m.sh licq-1.3.0-PRE.new/bin/viewurl-w3m.sh
+--- licq-1.3.0-PRE/bin/viewurl-w3m.sh	2000-07-06 01:47:18.000000000 +0000
++++ licq-1.3.0-PRE.new/bin/viewurl-w3m.sh	1970-01-01 00:00:00.000000000 +0000
+@@ -1,14 +0,0 @@
+-#!/bin/sh
+-#
+-# A shell script to view a url using w3m and xterm
+-# Set the XTERM variable to where your xterm binary is and 
+-# the W3M variable to where your w3m binary is or
+-# leave them as is if the binaries are in your path.
+-# 
+-# Graham Roff, October 1999.
+-#
+-
+-XTERM=xterm
+-W3M=w3m
+-
+-${XTERM} -title "Licq URL View" -e ${W3M} "$1"

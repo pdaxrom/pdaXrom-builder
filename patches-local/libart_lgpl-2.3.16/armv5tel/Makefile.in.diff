@@ -1,0 +1,13 @@
+diff -Nur libart_lgpl-2.3.16/Makefile.in libart_lgpl-2.3.16-patched/Makefile.in
+--- libart_lgpl-2.3.16/Makefile.in	2003-09-09 23:32:25.000000000 +0000
++++ libart_lgpl-2.3.16-patched/Makefile.in	2004-05-24 14:56:07.000000000 +0000
+@@ -698,9 +698,6 @@
+ maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+ 
+ 
+-art_config.h:	gen_art_config
+-	./gen_art_config > art_config.h
+-
+ @OS_WIN32_TRUE@install-libtool-import-lib:
+ @OS_WIN32_TRUE@	$(INSTALL) .libs/libart_lgpl_2.dll.a $(DESTDIR)$(libdir)
+ @OS_WIN32_TRUE@uninstall-libtool-import-lib:

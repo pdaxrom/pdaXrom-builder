@@ -1,0 +1,24 @@
+--- tuxpaint-0.9.14/Makefile~	2004-10-20 20:04:57.000000000 +0000
++++ tuxpaint-0.9.14/Makefile	2004-10-20 20:06:05.000000000 +0000
+@@ -146,7 +146,7 @@
+ 		install-icon install-gettext install-importscript \
+ 		install-default-config install-example-stamps \
+ 		install-example-starters \
+-		install-gnome install-kde install-kde-icons
++		install-gnome
+ 	@echo
+ 	@echo "--------------------------------------------------------------"
+ 	@echo
+@@ -322,9 +322,9 @@
+ 	 install -d $(GNOME_PREFIX)/share/pixmaps; \
+ 	 cp data/images/icon.png $(GNOME_PREFIX)/share/pixmaps/tuxpaint.png; \
+ 	 chmod 644 $(GNOME_PREFIX)/share/pixmaps/tuxpaint.png; \
+-	 install -d $(GNOME_PREFIX)/share/gnome/apps/Graphics; \
+-	 cp src/tuxpaint.desktop $(GNOME_PREFIX)/share/gnome/apps/Graphics/; \
+-	 chmod 644 $(GNOME_PREFIX)/share/gnome/apps/Graphics/tuxpaint.desktop; \
++	 install -d $(GNOME_PREFIX)/share/applications; \
++	 cp src/tuxpaint.desktop $(GNOME_PREFIX)/share/applications/; \
++	 chmod 644 $(GNOME_PREFIX)/share/applications/tuxpaint.desktop; \
+ 	else \
+ 	 make install-gnome GNOME_PREFIX=/usr; \
+ 	fi

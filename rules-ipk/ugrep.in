@@ -1,0 +1,8 @@
+config UGREP
+	bool
+	prompt "grep"
+
+config UGREP_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on UGREP

@@ -1,0 +1,8 @@
+config KDEPIM
+	bool
+	prompt "kdepim"
+
+config KDEPIM_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on KDEPIM

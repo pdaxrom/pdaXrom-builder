@@ -1,0 +1,48 @@
+diff -Nur xine-lib/src/libffmpeg/dvaudio_decoder.c xine-lib.new/src/libffmpeg/dvaudio_decoder.c
+--- xine-lib/src/libffmpeg/dvaudio_decoder.c	2004-12-16 13:58:57.000000000 +0000
++++ xine-lib.new/src/libffmpeg/dvaudio_decoder.c	2005-01-28 13:25:24.000000000 +0000
+@@ -57,7 +57,7 @@
+ #endif
+ 
+ #ifdef HAVE_FFMPEG
+-#  include <avcodec.h>
++#  include <ffmpeg/avcodec.h>
+ #  include "libavcodec/dvdata.h"
+ #else
+ #  include "libavcodec/avcodec.h"
+diff -Nur xine-lib/src/libffmpeg/video_decoder.c xine-lib.new/src/libffmpeg/video_decoder.c
+--- xine-lib/src/libffmpeg/video_decoder.c	2004-12-16 19:26:34.000000000 +0000
++++ xine-lib.new/src/libffmpeg/video_decoder.c	2005-01-28 13:26:12.000000000 +0000
+@@ -48,7 +48,7 @@
+ #include "mpeg_parser.h"
+ 
+ #ifdef HAVE_FFMPEG
+-#  include <postprocess.h>
++#  include <ffmpeg/postprocess.h>
+ #else
+ #  include "libavcodec/libpostproc/postprocess.h"
+ #endif
+diff -Nur xine-lib/src/libffmpeg/xine_decoder.h xine-lib.new/src/libffmpeg/xine_decoder.h
+--- xine-lib/src/libffmpeg/xine_decoder.h	2004-09-26 22:54:52.000000000 +0000
++++ xine-lib.new/src/libffmpeg/xine_decoder.h	2005-01-28 13:25:35.000000000 +0000
+@@ -29,7 +29,7 @@
+ #endif
+ 
+ #ifdef HAVE_FFMPEG
+-#  include <avcodec.h>
++#  include <ffmpeg/avcodec.h>
+ #else
+ #  include "libavcodec/avcodec.h"
+ #endif
+diff -Nur xine-lib/src/libffmpeg/xine_encoder.c xine-lib.new/src/libffmpeg/xine_encoder.c
+--- xine-lib/src/libffmpeg/xine_encoder.c	2004-12-12 22:01:09.000000000 +0000
++++ xine-lib.new/src/libffmpeg/xine_encoder.c	2005-01-28 13:25:30.000000000 +0000
+@@ -41,7 +41,7 @@
+ #include "video_out_dxr3.h"
+ 
+ #ifdef HAVE_FFMPEG
+-#  include <avcodec.h>
++#  include <ffmpeg/avcodec.h>
+ #else
+ #  include "libavcodec/avcodec.h"
+ #endif

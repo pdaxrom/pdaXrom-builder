@@ -1,0 +1,11 @@
+--- scite/src/SciTEGlobal.properties~	2004-05-30 22:02:57.000000000 +0000
++++ scite/src/SciTEGlobal.properties	2004-05-30 22:03:26.000000000 +0000
+@@ -13,7 +13,7 @@
+ 	position.left=5
+ 	position.top=22
+ position.width=576
+-position.height=740
++position.height=420
+ #position.tile=1
+ #full.screen.hides.menu=1
+ #minimize.to.tray=1

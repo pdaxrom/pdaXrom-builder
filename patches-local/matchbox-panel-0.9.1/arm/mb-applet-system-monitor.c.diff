@@ -1,0 +1,103 @@
+--- matchbox-panel-0.8.3/applets/mb-applet-system-monitor.c~	2004-07-27 17:09:11.000000000 +0000
++++ matchbox-panel-0.8.3/applets/mb-applet-system-monitor.c	2004-10-24 10:40:33.000000000 +0000
+@@ -69,28 +69,34 @@
+ 
+ char *ThemeName;
+ 
++char kistat[17];
++
+ /* returns current CPU load in percent, 0 to 100 */
+ int system_cpu(void)
+ {
+     unsigned int cpuload;
+     u_int64_t load, total, oload, ototal;
+     u_int64_t ab, ac, ad, ae;
++    u_int64_t kiload, kiu, kis;
+     int i;
+     FILE *stat;
+ 
+-    if ((stat = fopen("/proc/stat", "r")) == NULL)
+-      {
+-	fprintf(stderr, "mb-applet-system-monitor: failed to open /proc/stat. Exiting\n");
+-	exit(1);
+-      }
++    stat = fopen(kistat, "r");
++    fscanf(stat, "%*d %*s %*s %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %Ld %Ld", &kiu, &kis);
++    fclose(stat);
++
++    /* Find out the CPU load of the kapm-idled process */
++    /* user + sys = load */
++    kiload = kiu + kis;
+ 
++    stat = fopen("/proc/stat", "r");
+     fscanf(stat, "%*s %Ld %Ld %Ld %Ld", &ab, &ac, &ad, &ae);
+     fclose(stat);
+ 
+     /* Find out the CPU load */
+-    /* user + sys = load
++    /* user + sys - idle = load
+      * total = total */
+-    load = ab + ac + ad;	/* cpu.user + cpu.sys; */
++    load = ab + ac + ad - kiload; /* cpu.user + cpu.sys - (kapm-idled load); */
+     total = ab + ac + ad + ae;	/* cpu.total; */
+ 
+     /* "i" is an index into a load history */
+@@ -124,14 +130,7 @@
+     static char not_needed[2048];
+ 
+     if (mem_delay-- <= 0) {
+-      if ((mem = fopen("/proc/meminfo", "r")) == NULL)
+-	{
+-	  fprintf(stderr, "mb-applet-system-monitor: failed to open /proc/meminfo. Exiting.\n");
+-	  exit(1);
+-      }
+-
+-
+-
++	mem = fopen("/proc/meminfo", "r");
+ 	fgets(not_needed, 2048, mem);
+ 	
+ 	/* 
+@@ -207,13 +206,12 @@
+ 
+   mb_pixbuf_img_composite(pb, img_backing, ImgIconScaled, 0, 0);
+ 
+-  cpubox_x = (mb_pixbuf_img_get_width(img_backing)/4) - (mb_pixbuf_img_get_width(img_backing)/16);
+-  cpubox_y = cpubox_x;
+-  cpubox_w = (mb_pixbuf_img_get_width(img_backing)/16) * 2;
+-
+-  membox_x = ((mb_pixbuf_img_get_width(img_backing)/4) * 3) - (mb_pixbuf_img_get_width(img_backing)/16);
+-  membox_y = cpubox_y;
+-  membox_w = cpubox_w;
++  membox_x = (mb_pixbuf_img_get_width(img_backing)/4) - (mb_pixbuf_img_get_width(img_backing)/16);
++  membox_y = membox_x;
++  membox_w = (mb_pixbuf_img_get_width(img_backing)/16) * 2;
++  cpubox_x = ((mb_pixbuf_img_get_width(img_backing)/4) * 3) - (mb_pixbuf_img_get_width(img_backing)/16);
++  cpubox_y = membox_y;
++  cpubox_w = membox_w;
+ 
+   /* clear boxes */
+ 
+@@ -327,6 +325,22 @@
+   int i;
+   u_int64_t load = 0, total = 0;
+ 
++  FILE *pidof_fp = NULL;
++  int kipid = -1;
++
++  if ((pidof_fp = popen("pidof kapm-idled", "r")) == NULL) {
++    printf("Error executing pidof\n");
++    exit(1);
++  }
++  fscanf(pidof_fp, "%d", &kipid);
++  pclose(pidof_fp);
++  if (kipid == -1) {
++    printf("Could not execute pidof or no pid found for kapm-idled\n");
++    exit(1);
++  }
++
++  sprintf(kistat, "/proc/%d/stat", kipid);
++
+ #if ENABLE_NLS
+   setlocale (LC_ALL, "");
+   bindtextdomain (PACKAGE, DATADIR "/locale");

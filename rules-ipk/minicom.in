@@ -1,0 +1,8 @@
+config MINICOM
+	bool
+	prompt "minicom"
+
+config MINICOM_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on MINICOM

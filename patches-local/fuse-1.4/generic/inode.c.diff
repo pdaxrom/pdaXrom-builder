@@ -1,0 +1,13 @@
+--- fuse/kernel/inode.c~	2005-01-23 15:49:32.000000000 +0000
++++ fuse/kernel/inode.c	2005-01-23 15:49:36.000000000 +0000
+@@ -27,6 +27,10 @@
+ #define FS_BINARY_MOUNTDATA 0
+ #endif
+ 
++#ifndef MAX_LFS_FILESIZE
++#define MAX_LFS_FILESIZE (((u64)PAGE_CACHE_SIZE << (BITS_PER_LONG-1))-1) 
++#endif
++
+ static void fuse_read_inode(struct inode *inode)
+ {
+ 	/* No op */

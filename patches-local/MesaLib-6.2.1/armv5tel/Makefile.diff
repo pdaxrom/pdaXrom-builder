@@ -1,0 +1,78 @@
+--- mesa/progs/demos/Makefile~	2005-01-20 00:00:25.000000000 +0000
++++ mesa/progs/demos/Makefile	2005-01-20 00:03:05.000000000 +0000
+@@ -67,7 +67,7 @@
+ 
+ # make executable from .c file:
+ .c: $(LIB_DEP)
+-	$(CC) -I$(INCDIR) $(CFLAGS) $< $(APP_LIB_DEPS) -o $@
++	$(CC) -I$(INCDIR) $(CFLAGS) $< $(APP_LIB_DEPS) -o $@ -Wl,-rpath-link,$(X11_LIB)
+ 
+ 
+ ##### TARGETS #####
+@@ -89,9 +89,9 @@
+ 
+ # special case: need the -lOSMesa library:
+ osdemo: osdemo.c
+-	$(CC) -I$(INCDIR) $(CFLAGS) osdemo.c $(OSMESA_LIBS) -o $@
++	$(CC) -I$(INCDIR) $(CFLAGS) osdemo.c $(OSMESA_LIBS) -o $@ -Wl,-rpath-link,$(X11_LIB)
+ 
+ # another special case: need the -lOSMesa32 library:
+ osdemo32: osdemo32.c
+-	$(CC) -I$(INCDIR) $(CFLAGS) osdemo32.c $(OSMESA32_LIBS) -o $@
++	$(CC) -I$(INCDIR) $(CFLAGS) osdemo32.c $(OSMESA32_LIBS) -o $@ -Wl,-rpath-link,$(X11_LIB)
+ 
+--- mesa/progs/redbook/Makefile~	2004-03-26 23:58:08.000000000 +0000
++++ mesa/progs/redbook/Makefile	2005-01-20 00:04:38.000000000 +0000
+@@ -24,7 +24,7 @@
+ .SUFFIXES: .c
+ 
+ .c: $(LIB_DEP)
+-	$(CC) -I$(INCDIR) $(CFLAGS) $< $(APP_LIB_DEPS) -o $@
++	$(CC) -I$(INCDIR) $(CFLAGS) $< $(APP_LIB_DEPS) -o $@ -Wl,-rpath-link,$(X11_LIB)
+ 
+ 
+ 
+--- mesa/progs/samples/Makefile~	2005-01-20 00:07:04.000000000 +0000
++++ mesa/progs/samples/Makefile	2005-01-20 00:07:12.000000000 +0000
+@@ -18,7 +18,7 @@
+ .SUFFIXES: .c
+ 
+ .c: $(LIB_DEP)
+-	$(CC) -I$(INCDIR) $(CFLAGS) $< $(APP_LIB_DEPS) -o $@
++	$(CC) -I$(INCDIR) $(CFLAGS) $< $(APP_LIB_DEPS) -o $@ -Wl,-rpath-link,$(X11_LIB)
+ 
+ 
+ 
+--- mesa/progs/xdemos/Makefile~	2005-01-20 00:08:33.000000000 +0000
++++ mesa/progs/xdemos/Makefile	2005-01-20 00:09:25.000000000 +0000
+@@ -33,7 +33,7 @@
+ .SUFFIXES: .c
+ 
+ .c: $(LIB_DEP)
+-	$(CC) -I$(INCDIR) $(CFLAGS) $< $(APP_LIB_DEPS) -o $@
++	$(CC) -I$(INCDIR) $(CFLAGS) $< $(APP_LIB_DEPS) -o $@ -Wl,-rpath-link,$(X11_LIB)
+ 
+ 
+ ##### TARGETS #####
+@@ -48,10 +48,10 @@
+ 
+ # special cases
+ pbinfo: pbinfo.o pbutil.o
+-	$(CC) pbinfo.o pbutil.o $(APP_LIB_DEPS) -o $@
++	$(CC) pbinfo.o pbutil.o $(APP_LIB_DEPS) -o $@ -Wl,-rpath-link,$(X11_LIB)
+ 
+ pbdemo: pbdemo.o pbutil.o
+-	$(CC) pbdemo.o pbutil.o $(APP_LIB_DEPS) -o $@
++	$(CC) pbdemo.o pbutil.o $(APP_LIB_DEPS) -o $@ -Wl,-rpath-link,$(X11_LIB)
+ 
+ pbinfo.o: pbinfo.c pbutil.h
+ 	$(CC) -c -I. -I$(INCDIR) $(CFLAGS) pbinfo.c
+@@ -64,7 +64,7 @@
+ 
+ 
+ xrotfontdemo: xrotfontdemo.o xuserotfont.o
+-	$(CC) xrotfontdemo.o xuserotfont.o $(APP_LIB_DEPS) -o $@
++	$(CC) xrotfontdemo.o xuserotfont.o $(APP_LIB_DEPS) -o $@ -Wl,-rpath-link,$(X11_LIB)
+ 
+ xuserotfont.o: xuserotfont.c xuserotfont.h
+ 	$(CC) -c -I. -I$(INCDIR) $(CFLAGS) xuserotfont.c

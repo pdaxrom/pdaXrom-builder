@@ -1,0 +1,9 @@
+config XFREE-SVGA
+	bool
+	prompt "XFree SVGA server"
+	depends on XFREE430
+
+config XFREE-SVGA_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XFREE-SVGA

@@ -1,0 +1,38 @@
+--- stella/src/build/makefile~	2004-12-20 03:49:47.000000000 +0000
++++ stella/src/build/makefile	2004-12-20 03:50:13.000000000 +0000
+@@ -48,13 +48,13 @@
+ ## No configurable options below this line ...
+ ##============================================================================
+ 
+-CXX	= g++
+-LD	= g++
++CXX	:= $(CXX)
++LD	= $(CXX)
+ 
+ LDFLAGS  = `sdl-config --cflags`
+-LDLIBS   = `sdl-config --libs`
++LDLIBS   = `sdl-config --libs` $(OPTLIB)
+ OBJECTS  =  mainSDL.o SoundSDL.o FrameBufferSDL.o FrameBufferSoft.o
+-OPTIONS  =
++OPTIONS  :=
+ EXE_NAME =
+ SMP      =
+ 
+@@ -70,7 +70,7 @@
+   ifdef CXXFLAGS
+     OPTIMIZATIONS = $(CXXFLAGS)
+   else
+-    OPTIMIZATIONS = -O2
++    OPTIMIZATIONS = -Os -fomit-frame-pointer -fno-rtti
+   endif
+ endif
+ 
+@@ -156,7 +156,7 @@
+ 
+ stella: $(CORE_OBJS) $(OBJS)
+ 	$(LD) -o $(EXE_NAME) $(CORE_OBJS) $(OBJS) $(LDFLAGS) $(LDLIBS)
+-	strip $(EXE_NAME)
++	$(STRIP) $(EXE_NAME)
+ 
+ M6502Low.ins: $(CORE)/m6502/src/M6502Low.m4 $(CORE)/m6502/src/M6502.m4
+ 	m4 $(CORE)/m6502/src/M6502Low.m4 $(CORE)/m6502/src/M6502.m4 > $(CORE)/m6502/src/M6502Low.ins

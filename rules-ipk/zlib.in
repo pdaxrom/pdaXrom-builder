@@ -1,0 +1,8 @@
+config ZLIB
+	bool
+	prompt "Compile libz"
+
+config ZLIB_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on ZLIB

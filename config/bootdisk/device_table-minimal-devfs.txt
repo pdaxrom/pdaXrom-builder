@@ -1,0 +1,4 @@
+/etc/busybox.conf f	400	0	0	-	-	-	-
+/bin/busybox	  f	4755	0	0	-	-	-	-
+/sbin/cardctl	  f	4755	0	0	-	-	-	-
+/usr/bin/apm	  f	4755	0	0	-	-	-	-

@@ -1,0 +1,8 @@
+config M4
+	bool
+	prompt "m4"
+
+config M4_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on M4

@@ -1,0 +1,15 @@
+#menu	"BusyBox             "
+
+config BUSYBOX
+	bool
+	prompt "Compile Busybox"
+
+config BUSYBOX_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on BUSYBOX
+
+#source "config/busybox-1.0.0-pre5/sysdeps/linux/Config.in"
+source "config/busybox-1.0.0/sysdeps/linux/Config.in"
+
+#endmenu

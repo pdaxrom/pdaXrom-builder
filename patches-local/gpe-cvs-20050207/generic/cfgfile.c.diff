@@ -1,0 +1,16 @@
+--- gpe/base/gpe-conf/cfgfile.c~	2005-02-07 11:18:48.000000000 +0000
++++ gpe/base/gpe-conf/cfgfile.c	2005-02-07 11:19:03.000000000 +0000
+@@ -517,9 +517,10 @@
+ {
+ 	if (openon){
+ 		configfile = fopen(NET_CONFIGFILE,"r");
+-		if (configfile)
+-			configlen = get_file_text();
+-		fclose(configfile);
++		if (configfile) {
++		    configlen = get_file_text();
++		    fclose(configfile);
++		}
+ 	}
+ 	else
+ 	{

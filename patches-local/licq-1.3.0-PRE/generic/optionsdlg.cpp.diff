@@ -1,0 +1,17 @@
+diff -Nur licq-1.3.0-PRE/plugins/qt-gui/src/optionsdlg.cpp licq-1.3.0-PRE.new/plugins/qt-gui/src/optionsdlg.cpp
+--- licq-1.3.0-PRE/plugins/qt-gui/src/optionsdlg.cpp	2004-07-12 01:36:17.000000000 +0000
++++ licq-1.3.0-PRE.new/plugins/qt-gui/src/optionsdlg.cpp	2004-09-18 16:22:30.000000000 +0000
+@@ -1391,12 +1391,7 @@
+                                   "as a parameter."));
+   cmbUrlViewer = new QComboBox(true, boxExtensions);
+   cmbUrlViewer->insertItem(DEFAULT_URL_VIEWER);
+-  cmbUrlViewer->insertItem("viewurl-lynx.sh");
+-  cmbUrlViewer->insertItem("viewurl-mozilla.sh");
+-  cmbUrlViewer->insertItem("viewurl-ncftp.sh");
+-  cmbUrlViewer->insertItem("viewurl-netscape.sh");
+-  cmbUrlViewer->insertItem("viewurl-opera.sh");
+-  cmbUrlViewer->insertItem("viewurl-w3m.sh");
++  cmbUrlViewer->insertItem("viewurl-auto.sh");
+ 
+   lblTerminal = new QLabel(tr("Terminal:"), boxExtensions);
+   edtTerminal = new QLineEdit(tr("Terminal:"), boxExtensions);

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Virtual keyboard
+Comment=Xvkbd virtual keyboard
+Exec=xvkbdlauncher
+Type=PanelApp
+Icon=xvkbd.png
+Categories=Panel;Utility;MB

@@ -1,0 +1,9 @@
+config TTF-BITSTREAM-VERA
+	bool
+	prompt "TTF bitstream vera fonts"
+	depends on XFREE430
+
+config TTF-BITSTREAM-VERA_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on TTF-BITSTREAM-VERA

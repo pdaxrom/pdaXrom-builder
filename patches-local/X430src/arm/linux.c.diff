@@ -1,0 +1,12 @@
+diff -Nur xc/programs/Xserver/hw/kdrive/linux/linux.c xc.new/programs/Xserver/hw/kdrive/linux/linux.c
+--- xc/programs/Xserver/hw/kdrive/linux/linux.c	2002-10-08 21:27:55.000000000 +0000
++++ xc.new/programs/Xserver/hw/kdrive/linux/linux.c	2005-02-04 00:41:54.000000000 +0000
+@@ -334,7 +334,7 @@
+     /*
+      * Open the APM driver
+      */
+-    LinuxApmFd = open ("/dev/apm_bios", 2);
++    LinuxApmFd = open ("/dev/apm_biosZ", 2);
+     if (LinuxApmFd >= 0)
+     {
+ 	LinuxApmRunning = TRUE;

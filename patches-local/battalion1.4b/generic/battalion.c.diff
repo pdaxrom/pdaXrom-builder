@@ -1,0 +1,212 @@
+--- battalion/battalion.c~	2004-03-28 03:08:53.000000000 +0000
++++ battalion/battalion.c	2005-01-20 14:17:07.000000000 +0000
+@@ -2902,7 +2902,7 @@
+     /* see if this machine can play sounds */
+     /***************************************/
+ 
+-    checkSound(dataPath);
++    //checkSound(dataPath);
+ 
+ 
+     /************************************/
+@@ -2924,16 +2924,19 @@
+     hiScoreFile = NULL;
+ 
+     dataPtr = getenv("BATTALIONSCOREDIR");
++
++    if (dataPtr == NULL) dataPtr = getenv("HOME");
++    
+     if (dataPtr != NULL)
+ 	strcpy(scoredataPath, dataPtr);
+     else
+-	strcpy(scoredataPath, "/usr/tmp");
++	strcpy(scoredataPath, "/tmp");
+ 
+     if (scoredataPath[strlen(scoredataPath)-1] != '/')
+ 	strcat(scoredataPath, "/");
+     
+     strcpy(scorefullPath, scoredataPath);
+-    strcat(scorefullPath, "battalion_hiscore");
++    strcat(scorefullPath, ".battalion_hiscore");
+     hiScoreFile = fopen(scorefullPath, "r");
+ 
+     if (hiScoreFile == NULL)
+@@ -3285,37 +3288,79 @@
+ 
+ /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+ 
++#define F_KeyUp		0x0001
++#define F_KeyDown	0x0002
++#define F_KeyLeft	0x0004
++#define F_KeyRight	0x0008
++#define F_KeyA		0x0010
++#define	F_KeyZ		0x0020
++#define F_KeyCtrl	0x0040
++
++static unsigned int keyBuffer = 0;
++
+ void playNoPauseKeys(int key)
+     {
+     switch(key)
+ 	{
+-	case TK_LEFT:	offsetX = -0.5;
+-			    Googelon.headHorzRotate -= (int) (offsetX * Googelon.xspeed);
+-			    Gturn = 1; 
++	case TK_LEFT:	keyBuffer |= F_KeyLeft;
+ 			    break;
+ 
+-	case TK_RIGHT:	offsetX = 0.5;
+-			    Googelon.headHorzRotate -= (int) (offsetX * Googelon.xspeed);
+-			    Gturn = 1;
++	case TK_RIGHT:	keyBuffer |= F_KeyRight;
+ 			    break;
+ 
+-	case TK_UP:	Gfor = 1;
++	case TK_UP:	keyBuffer |= F_KeyUp;
+ 			    break;
+ 
+-	case TK_DOWN:	Gbak = 1;
++	case TK_DOWN:	keyBuffer |= F_KeyDown;
+ 			    break;
+ 
+-
+ 	case TK_a:
+-	case TK_A:	Googelon.headVertRotate += 15;
++	case TK_A:	keyBuffer |= F_KeyA;
+ 			    break;
+ 
+ 	case TK_z:
+-	case TK_Z:	Googelon.headVertRotate -= 15;
++	case TK_Z:	keyBuffer |= F_KeyZ;
+ 			    break;
+ 	}
+     }
+ 
++static void doPlayerAction(void)
++    {
++    if ( keyBuffer & F_KeyLeft )
++	{
++		offsetX = -0.5;
++		Googelon.headHorzRotate -= (int) (offsetX * Googelon.xspeed);
++		Gturn = 1; 
++	}
++	
++    if ( keyBuffer & F_KeyRight )
++	{
++		offsetX = 0.5;
++		Googelon.headHorzRotate -= (int) (offsetX * Googelon.xspeed);
++		Gturn = 1;
++	}
++	
++    if ( keyBuffer & F_KeyUp )
++	{
++		Gfor = 1;
++	}
++	
++    if ( keyBuffer & F_KeyDown )
++	{
++		Gbak = 1;
++	}
++	
++    if ( keyBuffer & F_KeyA )
++	{
++		Googelon.headVertRotate += 15;
++	}
++	
++    if ( keyBuffer & F_KeyZ )
++	{
++		Googelon.headVertRotate -= 15;
++	}
++    }
++
+ /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+ 
+ GLenum processKey(int key, GLenum mask)
+@@ -3431,11 +3476,32 @@
+ 
+ GLenum processKeyRelease(int key)
+     {
+-    int garbage;
+-    
+-    garbage = key; /* to avoid compiler warning */
++    switch(key)
++	{
++	case TK_LEFT:	keyBuffer &= ~F_KeyLeft;
++			    break;
++
++	case TK_RIGHT:	keyBuffer &= ~F_KeyRight;
++			    break;
++
++	case TK_UP:	keyBuffer &= ~F_KeyUp;
++			    break;
++
++	case TK_DOWN:	keyBuffer &= ~F_KeyDown;
++			    break;
++
++	case TK_a:
++	case TK_A:	keyBuffer &= ~F_KeyA;
++			    break;
++
++	case TK_z:
++	case TK_Z:	keyBuffer &= ~F_KeyZ;
++			    break;
++	case TK_CONTROL_L:
++			Googelon.beamOn = 0;
++			    break;
++	}
+ 
+-    Googelon.beamOn = 0;
+     return GL_TRUE;
+     }
+ 
+@@ -5222,6 +5288,8 @@
+     struct tank * ttank;
+     struct targetInfo * temptarget;
+ 
++    doPlayerAction();
++    
+     if (targets->next != NULL)
+ 	{
+ 	for(temptarget = targets->next; temptarget != NULL; temptarget = temptarget->next)
+@@ -5472,6 +5540,7 @@
+     register int argument;
+     int port;
+     char portName[40];
++    int disableAudio = 0;
+ 
+ #if defined SGIVERSION || defined SOLARIS || defined LINUXVERSION
+     
+@@ -5489,10 +5558,22 @@
+ 	    (strcmp(argv[argument], "-s") == 0) )&& !noSound)
+ 	    turnSoundOn();
+ 
++	else if (((strcmp(argv[argument], "-nosound") == 0) ||
++	    (strcmp(argv[argument], "-ns") == 0)) && !noSound)
++	    turnSoundOff();
++
+ 	else if (((strcmp(argv[argument], "-music") == 0) ||
+ 	    (strcmp(argv[argument], "-m") == 0)) && !noSound)
+ 	    turnMusicOn();
+ 
++	else if (((strcmp(argv[argument], "-nomusic") == 0) ||
++	    (strcmp(argv[argument], "-nm") == 0)) && !noSound)
++	    turnMusicOff();
++
++	else if (((strcmp(argv[argument], "-noaudio") == 0) ||
++	    (strcmp(argv[argument], "-na") == 0)) && !noSound)
++	    disableAudio = 1;
++
+ 	else if ((strcmp(argv[argument], "-alone") == 0) ||
+ 	    (strcmp(argv[argument], "-a") == 0))
+ 	    alone = 1;
+@@ -5557,7 +5638,9 @@
+ 	    showCommands(argv[0]);
+ 	    }
+ 	}
+-	
++
++    if (!disableAudio) checkSound(dataPath);
++    
+     /**********************************************/
+     /* set starting conditions for chosen monster */
+     /* (here so network options are used          */

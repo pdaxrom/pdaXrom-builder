@@ -1,0 +1,12 @@
+#menu	"vlc                 "
+
+config VLC
+	bool
+	prompt "vlc"
+
+config VLC_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on VLC
+
+#endmenu

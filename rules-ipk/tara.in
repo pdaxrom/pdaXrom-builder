@@ -1,0 +1,9 @@
+config TARA
+	bool
+	prompt "tar"
+	depends on !BB_CONFIG_TAR
+
+config TARA_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on TARA

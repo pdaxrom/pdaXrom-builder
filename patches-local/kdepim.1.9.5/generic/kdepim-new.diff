@@ -1,0 +1,409 @@
+diff -Nur kdepim/gammu/emb/gammu/gammu.pro kdepim-new/gammu/emb/gammu/gammu.pro
+--- kdepim/gammu/emb/gammu/gammu.pro	2004-08-30 20:17:19.000000000 +0000
++++ kdepim-new/gammu/emb/gammu/gammu.pro	2004-09-19 04:59:56.000000000 +0000
+@@ -46,7 +46,7 @@
+            depend/nokia/dct3trac/wmx-util.c \
+            depend/nokia/dct3trac/wmx.c
+ 
+-LIBS +=      ../../../bin/libmicrogammu.so /usr/lib/libbluetooth.so  /usr/lib/libsdp.so  /usr/lib/libpthread.so
++LIBS +=      ../../../bin/libmicrogammu.so -lbluetooth  -lsdp  -lpthread
+ DESTDIR = ../../../bin
+ OBJECTS_DIR = obj/unix
+ TARGET = kammu
+\ В конце файла нет новой строки
+diff -Nur kdepim/kaddressbook/addresseditwidget.cpp kdepim-new/kaddressbook/addresseditwidget.cpp
+--- kdepim/kaddressbook/addresseditwidget.cpp	2004-06-26 19:02:17.000000000 +0000
++++ kdepim-new/kaddressbook/addresseditwidget.cpp	2004-09-19 05:20:48.000000000 +0000
+@@ -357,9 +357,9 @@
+   bool state = (mAddressList.count() > 0);
+   mRemoveButton->setEnabled( state );
+   mChangeTypeButton->setEnabled( state );
+-#ifndef DESKTOP_VERSION
++//#ifndef DESKTOP_VERSION
+   showMaximized();
+-#endif
++//#endif
+ }
+ 
+ AddressEditDialog::~AddressEditDialog()
+diff -Nur kdepim/kaddressbook/geowidget.cpp kdepim-new/kaddressbook/geowidget.cpp
+--- kdepim/kaddressbook/geowidget.cpp	2004-06-26 19:02:13.000000000 +0000
++++ kdepim-new/kaddressbook/geowidget.cpp	2004-09-19 05:20:19.000000000 +0000
+@@ -279,9 +279,9 @@
+            SLOT( sexagesimalInputChanged() ) );
+   mLongitude = 0.0;
+   mLatitude  = 0.0;
+-#ifndef DESKTOP_VERSION
++//#ifndef DESKTOP_VERSION
+       showMaximized();
+-#endif
++//#endif
+ }
+ 
+ GeoDialog::~GeoDialog()
+diff -Nur kdepim/kaddressbook/kabcore.cpp kdepim-new/kaddressbook/kabcore.cpp
+--- kdepim/kaddressbook/kabcore.cpp	2004-09-12 08:49:44.000000000 +0000
++++ kdepim-new/kaddressbook/kabcore.cpp	2004-09-19 05:20:13.000000000 +0000
+@@ -78,6 +78,7 @@
+ //US
+ #include <libkdepim/addresseeview.h>
+ 
++#include <qregexp.h>
+ #include <qapp.h>
+ #include <qmenubar.h>
+ //#include <qtoolbar.h>
+@@ -1283,9 +1284,9 @@
+     connect( ConfigureDialog, SIGNAL( okClicked() ),
+              this, SLOT( configurationChanged() ) );
+     saveSettings();
+-#ifndef DESKTOP_VERSION
++//#ifndef DESKTOP_VERSION
+     ConfigureDialog->showMaximized();
+-#endif
++//#endif
+     if ( ConfigureDialog->exec() )
+         KMessageBox::information( this,  i18n("Some changes are only\neffective after a restart!\n") );
+     delete ConfigureDialog;
+diff -Nur kdepim/kaddressbook/kaddressbook.pro kdepim-new/kaddressbook/kaddressbook.pro
+--- kdepim/kaddressbook/kaddressbook.pro	2004-09-12 20:29:37.000000000 +0000
++++ kdepim-new/kaddressbook/kaddressbook.pro	2004-09-19 05:13:09.000000000 +0000
+@@ -5,6 +5,8 @@
+ 
+ include( ../variables.pri )
+ 
++QMAKE_CXXFLAGS += `pkg-config libstartup-notification-1.0 --cflags`
++LIBS   += `pkg-config libstartup-notification-1.0 --libs`
+ 
+ INCLUDEPATH += . ./details  ./features  ./xxport ../libkdepim ../microkde ../microkde/kdecore ../microkde/kutils ../microkde/kio/kfile ../microkde/kio/kio ../microkde/kdeui ../microkde/kresources ../kabc  ../ interfaces 
+ DEFINES += KAB_EMBEDDED KAB_NOSPLITTER DESKTOP_VERSION
+@@ -14,7 +16,7 @@
+ LIBS += ../bin/libmicrokde.so
+ LIBS += ../bin/libmicrokabc.so
+ LIBS += ../bin/libmicrokcal.so
+-LIBS += -lldap
++#LIBS += -lldap
+ OBJECTS_DIR = obj/unix
+ MOC_DIR = moc/unix
+ }
+diff -Nur kdepim/kaddressbook/mainembedded.cpp kdepim-new/kaddressbook/mainembedded.cpp
+--- kdepim/kaddressbook/mainembedded.cpp	2004-09-03 19:43:39.000000000 +0000
++++ kdepim-new/kaddressbook/mainembedded.cpp	2004-09-19 05:41:28.000000000 +0000
+@@ -15,6 +15,13 @@
+ #include "kaddressbookmain.h"
+ #include "externalapphandler.h"
+ 
++#ifdef DESKTOP_VERSION
++
++#define SN_API_NOT_YET_FROZEN 1
++#include <libsn/sn.h>
++
++#endif
++
+ int main( int argc, char **argv )
+ {
+ #ifndef DESKTOP_VERSION
+@@ -38,6 +45,17 @@
+        if ( !app_dir.exists("C:\\kdepim\\apps\\kaddressbook") )
+            app_dir.mkdir ("C:\\kdepim\\apps\\kaddressbook");
+   }
++
++    SnDisplay *sn_dpy;
++    SnLauncheeContext *context;
++
++    sn_dpy = sn_display_new (QPaintDevice::x11AppDisplay(), NULL, NULL);
++    context = sn_launchee_context_new_from_environment (sn_dpy, DefaultScreen (QPaintDevice::x11AppDisplay()));
++
++    if (context != NULL) {
++	sn_launchee_context_complete (context);
++    }
++
+ #endif
+ 
+   bool exitHelp = false;
+diff -Nur kdepim/kaddressbook/viewmanager.cpp kdepim-new/kaddressbook/viewmanager.cpp
+--- kdepim/kaddressbook/viewmanager.cpp	2004-09-09 20:41:24.000000000 +0000
++++ kdepim-new/kaddressbook/viewmanager.cpp	2004-09-19 05:20:26.000000000 +0000
+@@ -311,11 +311,11 @@
+   if ( wdg ) {
+      dlg->setWidget( wdg );
+ 
+-#ifndef DESKTOP_VERSION
++//#ifndef DESKTOP_VERSION
+     //dlg.setMaximumSize( 640, 480 );
+     //dlg->setGeometry( 40,40, 400, 300);
+     dlg->showMaximized();
+-#endif
++//#endif
+ 
+     KConfigGroupSaver saver( mCore->config(), mActiveView->caption() );
+ 
+diff -Nur kdepim/kmicromail/kmicromail.pro kdepim-new/kmicromail/kmicromail.pro
+--- kdepim/kmicromail/kmicromail.pro	1970-01-01 00:00:00.000000000 +0000
++++ kdepim-new/kmicromail/kmicromail.pro	2004-09-19 04:59:56.000000000 +0000
+@@ -0,0 +1,66 @@
++CONFIG        += qt warn_on 
++TEMPLATE	= app
++HEADERS         = defines.h \
++               editaccounts.h \
++               composemail.h \
++               accountview.h \
++               accountitem.h \
++               mainwindow.h \
++               viewmail.h \
++               viewmailbase.h \
++               opiemail.h \
++               mailistviewitem.h \
++               settingsdialog.h \
++               statuswidget.h \
++               newmaildir.h \
++               selectstore.h \
++               selectsmtp.h \
++               nntpgroups.h \
++               nntpgroupsdlg.h
++
++SOURCES         = main.cpp  \
++               opiemail.cpp \
++               mainwindow.cpp \
++               accountview.cpp \
++               accountitem.cpp \
++               composemail.cpp \
++               editaccounts.cpp \
++               viewmail.cpp \
++               viewmailbase.cpp \
++               mailistviewitem.cpp \
++               settingsdialog.cpp \
++               statuswidget.cpp \
++               newmaildir.cpp \
++               selectstore.cpp \
++               selectsmtp.cpp \
++               nntpgroups.cpp \
++               nntpgroupsdlg.cpp
++
++INTERFACES     = editaccountsui.ui \
++               selectmailtypeui.ui \
++               imapconfigui.ui \
++               pop3configui.ui \
++               nntpconfigui.ui \
++               smtpconfigui.ui \
++               composemailui.ui \
++               settingsdialogui.ui \
++               statuswidgetui.ui \
++               newmaildirui.ui \
++               selectstoreui.ui \
++               nntpgroupsui.ui
++
++
++INCLUDEPATH += . $(KDEPIMDIR)  $(KDEPIMDIR)/qtcompat $(KDEPIMDIR)/microkde $(KDEPIMDIR)/microkde/kdecore libetpan/include $(KDEPIMDIR)/microkde/kdeui
++LIBS        += -L$(QPEDIR)/lib -lkmicromailwrapper -lqpe -lkmicrolibetpan  -lmicrokde -lmicroqtcompat -lssl -lcrypto -ljpeg -lmicrokde -lmicroqtcompat -lmicrokabc -lmicrokcal -lmicrokdepim
++LIBS += $(QTOPIALIB)
++#LIBS += -lqtopia 
++#next line for Zaurus only
++#LIBS +=  -luuid
++
++#
++OBJECTS_DIR = obj/$(PLATFORM)
++MOC_DIR = moc/$(PLATFORM)
++DESTDIR=$(QPEDIR)/bin
++TARGET       = ompi
++
++
+diff -Nur kdepim/korganizer/calprintdayconfig_base.ui kdepim-new/korganizer/calprintdayconfig_base.ui
+--- kdepim/korganizer/calprintdayconfig_base.ui	2004-06-26 19:02:56.000000000 +0000
++++ kdepim-new/korganizer/calprintdayconfig_base.ui	2004-09-19 04:59:56.000000000 +0000
+@@ -1,4 +1,4 @@
+-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
++<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+ <class>CalPrintDayConfig_Base</class>
+ <comment>Configuration page for the print day mode.</comment>
+ <author>Reinhold Kainhofer &lt;reinhold@kainhofer.com&gt;</author>
+diff -Nur kdepim/korganizer/calprintmonthconfig_base.ui kdepim-new/korganizer/calprintmonthconfig_base.ui
+--- kdepim/korganizer/calprintmonthconfig_base.ui	2004-06-26 19:03:10.000000000 +0000
++++ kdepim-new/korganizer/calprintmonthconfig_base.ui	2004-09-19 04:59:56.000000000 +0000
+@@ -1,4 +1,4 @@
+-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
++<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+ <class>CalPrintMonthConfig_Base</class>
+ <comment>Configuration page for the print day mode.</comment>
+ <author>Reinhold Kainhofer &lt;reinhold@kainhofer.com&gt;</author>
+diff -Nur kdepim/korganizer/calprinttodoconfig_base.ui kdepim-new/korganizer/calprinttodoconfig_base.ui
+--- kdepim/korganizer/calprinttodoconfig_base.ui	2004-06-26 19:03:02.000000000 +0000
++++ kdepim-new/korganizer/calprinttodoconfig_base.ui	2004-09-19 04:59:56.000000000 +0000
+@@ -1,4 +1,4 @@
+-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
++<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+ <class>CalPrintTodoConfig_Base</class>
+ <comment>Configuration page for the print day mode.</comment>
+ <author>Reinhold Kainhofer &lt;reinhold@kainhofer.com&gt;</author>
+diff -Nur kdepim/korganizer/calprintweekconfig_base.ui kdepim-new/korganizer/calprintweekconfig_base.ui
+--- kdepim/korganizer/calprintweekconfig_base.ui	2004-06-26 19:03:07.000000000 +0000
++++ kdepim-new/korganizer/calprintweekconfig_base.ui	2004-09-19 04:59:56.000000000 +0000
+@@ -1,4 +1,4 @@
+-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
++<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+ <class>CalPrintWeekConfig_Base</class>
+ <comment>Configuration page for the print week mode.</comment>
+ <author>Reinhold Kainhofer &lt;reinhold@kainhofer.com&gt;</author>
+diff -Nur kdepim/korganizer/filteredit_base.ui kdepim-new/korganizer/filteredit_base.ui
+--- kdepim/korganizer/filteredit_base.ui	2004-06-26 19:03:13.000000000 +0000
++++ kdepim-new/korganizer/filteredit_base.ui	2004-09-19 04:59:56.000000000 +0000
+@@ -1,4 +1,4 @@
+-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
++<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+ <class>FilterEdit_base</class>
+ <widget class="QWidget">
+     <property name="name">
+diff -Nur kdepim/korganizer/korganizer.pro kdepim-new/korganizer/korganizer.pro
+--- kdepim/korganizer/korganizer.pro	2004-08-30 09:07:43.000000000 +0000
++++ kdepim-new/korganizer/korganizer.pro	2004-09-19 05:09:39.000000000 +0000
+@@ -7,6 +7,9 @@
+ 
+ include( ../variables.pri )
+ 
++QMAKE_CXXFLAGS += `pkg-config libstartup-notification-1.0 --cflags`
++LIBS   += `pkg-config libstartup-notification-1.0 --libs`
++
+ INCLUDEPATH += ../microkde  ../ interfaces ../microkde/kdecore ../microkde/kdeui ../microkde/kio/kfile ../microkde/kio/kio ../libkdepim
+ #../qtcompat
+ DEFINES += KORG_NODND KORG_NOPLUGINS KORG_NOARCHIVE KORG_NOMAIL
+@@ -22,7 +25,7 @@
+ #LIBS += -lbluetooth
+ #LIBS += -lsdp
+ 
+-LIBS += -lldap
++#LIBS += -lldap
+ OBJECTS_DIR = obj/unix
+ MOC_DIR = moc/unix
+ }
+diff -Nur kdepim/korganizer/main.cpp kdepim-new/korganizer/main.cpp
+--- kdepim/korganizer/main.cpp	2004-09-03 19:43:40.000000000 +0000
++++ kdepim-new/korganizer/main.cpp	2004-09-19 05:39:36.000000000 +0000
+@@ -18,6 +18,13 @@
+ #include <stdio.h>
+ #include "mainwindow.h"
+ 
++#ifdef DESKTOP_VERSION
++
++#define SN_API_NOT_YET_FROZEN 1
++#include <libsn/sn.h>
++
++#endif
++
+ int main( int argc, char **argv )
+ {
+ #ifndef DESKTOP_VERSION
+@@ -41,7 +48,19 @@
+        if ( !app_dir.exists("C:\\kdepim\\apps\\korganizer") )
+            app_dir.mkdir ("C:\\kdepim\\apps\\korganizer");
+   }
++
++  SnDisplay *sn_dpy;
++  SnLauncheeContext *context;
++
++  sn_dpy = sn_display_new (QPaintDevice::x11AppDisplay(), NULL, NULL);
++  context = sn_launchee_context_new_from_environment (sn_dpy, DefaultScreen (QPaintDevice::x11AppDisplay()));
++
++  if (context != NULL) {
++    sn_launchee_context_complete (context);
++  }
++
+ #endif
++
+   bool exitHelp = false;
+   if ( argc > 1 ) {
+       QString command = argv[1];
+diff -Nur kdepim/korganizer/mainwindow.cpp kdepim-new/korganizer/mainwindow.cpp
+--- kdepim/korganizer/mainwindow.cpp	2004-09-12 20:29:43.000000000 +0000
++++ kdepim-new/korganizer/mainwindow.cpp	2004-09-19 05:03:20.000000000 +0000
+@@ -110,9 +110,7 @@
+     QLabel* splash  = new QLabel(i18n("KO/Pi is starting ... "), this );
+     splash->setAlignment ( AlignCenter );
+     setCentralWidget( splash );
+-#ifndef DESKTOP_VERSION
+     showMaximized();
+-#endif
+     //qDebug("Mainwidget x %d y %d w %d  h %d",  x(), y(), width(), height ());
+     setDefaultPreferences();
+     mCalendar = new CalendarLocal();
+@@ -1075,11 +1073,7 @@
+     QTextBrowser tb ( &dia );
+     lay->addWidget( &tb );
+     tb.setText( text );
+-#ifdef DESKTOP_VERSION
+-    dia.resize( 640, 480);
+-#else
+     dia.showMaximized();
+-#endif
+     dia.exec();
+ }
+ void MainWindow::displayFile( QString fn, QString cap )
+diff -Nur kdepim/microkde/kapplication.cpp kdepim-new/microkde/kapplication.cpp
+--- kdepim/microkde/kapplication.cpp	2004-08-06 22:10:10.000000000 +0000
++++ kdepim-new/microkde/kapplication.cpp	2004-09-19 05:22:57.000000000 +0000
+@@ -74,11 +74,11 @@
+     QTextBrowser tb ( &dia );
+     lay->addWidget( &tb ); 
+     tb.setText( text );
+-#ifdef DESKTOP_VERSION
+-    dia.resize( 640, 480);
+-#else
++//#ifdef DESKTOP_VERSION
++//    dia.resize( 640, 480);
++//#else
+     dia.showMaximized();
+-#endif
++//#endif
+     dia.exec();
+ 
+ }
+diff -Nur kdepim/microkde/kresources/kcmkresources.cpp kdepim-new/microkde/kresources/kcmkresources.cpp
+--- kdepim/microkde/kresources/kcmkresources.cpp	2004-06-26 19:02:46.000000000 +0000
++++ kdepim-new/microkde/kresources/kcmkresources.cpp	2004-09-19 05:23:15.000000000 +0000
+@@ -48,9 +48,9 @@
+ 
+ 
+   connect( mConfigPage, SIGNAL( changed( bool ) ), SLOT( changed( bool ) ) );
+-#ifndef DESKTOP_VERSION
++//#ifndef DESKTOP_VERSION
+     showMaximized();
+-#endif
++//#endif
+ }
+ 
+ void KCMKResources::changed( bool changed)
+diff -Nur kdepim/microkde/kutils/kcmultidialog.cpp kdepim-new/microkde/kutils/kcmultidialog.cpp
+--- kdepim/microkde/kutils/kcmultidialog.cpp	2004-08-10 01:34:28.000000000 +0000
++++ kdepim-new/microkde/kutils/kcmultidialog.cpp	2004-09-19 05:24:57.000000000 +0000
+@@ -49,13 +49,13 @@
+   _baseGroup = baseGroup;
+   mMainWidget = new KJanusWidget( this, "JanusWidget", KJanusWidget::Tabbed );
+   setMainWidget(mMainWidget );
+-#ifdef DESKTOP_VERSION
+-    resize(640,480);
+-#else
+-    resize(640,480);
+-    setMaximumSize( KMIN(KGlobal::getDesktopWidth()-5, 640), KMIN(KGlobal::getDesktopHeight()-20, 480));
+-    //showMaximized();
+-#endif
++//#ifdef DESKTOP_VERSION
++//    resize(640,480);
++//#else
++//    resize(640,480);
++//    setMaximumSize( KMIN(KGlobal::getDesktopWidth()-5, 640), KMIN(KGlobal::getDesktopHeight()-20, 480));
++  showMaximized();
++//#endif
+ 
+ }
+ 
+diff -Nur kdepim/variables.pri kdepim-new/variables.pri
+--- kdepim/variables.pri	2004-06-29 11:59:47.000000000 +0000
++++ kdepim-new/variables.pri	2004-09-19 04:59:56.000000000 +0000
+@@ -2,8 +2,7 @@
+ # variables settings for compilation for Linux desktop and Qt 3.x.x
+ 
+ unix {
+-CONFIG +=  debug
+-#release
++CONFIG +=  release
+ }
+ win32 {
+ CONFIG +=  release

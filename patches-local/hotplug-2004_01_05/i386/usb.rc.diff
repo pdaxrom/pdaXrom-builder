@@ -1,0 +1,11 @@
+--- hotplug-2004_01_05/etc/hotplug/usb.rc~	2005-01-10 12:17:23.000000000 +0000
++++ hotplug-2004_01_05/etc/hotplug/usb.rc	2005-01-10 12:17:42.000000000 +0000
+@@ -140,7 +140,7 @@
+ 	    else
+ 		# NOTE: name is changing to "usbfs" from "usbdevfs"
+ 		# NOTE: some versions don't create empty 'devices' files
+-		mount -t usbdevfs usbdevfs /proc/bus/usb
++		mount -t usbfs usbfs /proc/bus/usb
+ 	    fi
+ 	fi
+     fi

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+export QTDIR=/usr/lib/qt
+export KDEDIR=/usr/lib/kde
+
+export PATH=/usr/local/arm/3.3.1/bin:/root/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/X11R6/bin:$QTDIR/bin:$KDEDIR/bin
+export TSLIB_TSDEVICE=/dev/ts
+export TSLIB_TSEVENTTYPE=CORGI
+
+if [ -f $HOME/Choices/common/backlight ]; then
+    setfl `cat $HOME/Choices/common/backlight`
+else
+    setfl 3
+fi
+
+if [ ! -f /etc/pointercal ]; then
+    /usr/bin/ts_calibrate >/dev/null 2>/dev/null
+fi
+/usr/X11R6/bin/xdm -nodaemon

@@ -1,0 +1,12 @@
+#menu    "dhcpcd              "
+
+config DHCPD
+        bool
+        prompt "dhcpd"
+
+config DHCPD_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on DHCPD
+
+#endmenu

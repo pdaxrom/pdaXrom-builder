@@ -1,0 +1,13 @@
+--- coreutils-5.0/lib/putenv.c~	2004-09-21 16:07:19.000000000 +0000
++++ coreutils-5.0/lib/putenv.c	2004-09-21 16:07:41.000000000 +0000
+@@ -31,8 +31,8 @@
+    with a non-const argument.  That would conflict with the declaration of
+    rpl_putenv below (due to the #define putenv rpl_putenv from config.h).  */
+ 
+-char *malloc ();
+-void free ();
++//char *malloc ();
++//void free ();
+ 
+ #if defined (__GNU_LIBRARY__) || defined (HAVE_STRING_H)
+ # include <string.h>

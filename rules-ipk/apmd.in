@@ -1,0 +1,20 @@
+#menu	"apmd                "
+config APMD
+	bool
+	prompt "apmd"
+
+config APMD_APM_PCMCIA_FIX
+	bool
+	prompt "APM PCMCIA wrapper"
+	depends on APMD && ARCH_ARM
+
+config APMD_APM_INSTALL
+	bool
+	prompt "Install apm in ROM"
+	depends on APMD
+
+#config APMD_APMD_INSTALL
+#	bool
+#	prompt "Install apmd in ROM"
+#	depends on APMD
+#endmenu

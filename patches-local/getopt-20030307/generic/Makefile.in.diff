@@ -1,0 +1,11 @@
+--- getopt/Makefile.in~	2005-01-04 16:43:56.000000000 +0000
++++ getopt/Makefile.in	2005-01-04 16:44:08.000000000 +0000
+@@ -42,7 +42,7 @@
+ 
+ install:
+ 	$(SHTOOL) mkdir -f -p -m 755 $(DESTDIR)$(bindir)
+-	$(SHTOOL) install -c -s -m 755 getopt $(DESTDIR)$(bindir)/
++	$(SHTOOL) install -c  -m 755 getopt $(DESTDIR)$(bindir)/
+ 	$(SHTOOL) install -c -m 755 getopt-config $(DESTDIR)$(bindir)/
+ 	$(SHTOOL) mkdir -f -p -m 755 $(DESTDIR)$(libdir)
+ 	$(SHTOOL) install -c -m 644 libgetopt.a $(DESTDIR)$(libdir)/

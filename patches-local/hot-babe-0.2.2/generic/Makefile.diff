@@ -1,0 +1,24 @@
+--- hot-plug/Makefile~	2004-12-04 23:49:30.000000000 +0000
++++ hot-plug/Makefile	2005-01-18 12:46:00.000000000 +0000
+@@ -3,10 +3,10 @@
+ VERSION := 0.2.2
+ 
+ # optimization cflags
+-CFLAGS += -O2 -Wall -g `pkg-config gdk-2.0 gdk-pixbuf-2.0  --cflags` -DPREFIX=\"$(PREFIX)\" -DVERSION=\"$(VERSION)\"
++CFLAGS += -O2 -Wall -fomit-frame-pointer `pkg-config gdk-2.0 gdk-pixbuf-2.0  --cflags` -DPREFIX=\"$(PREFIX)\" -DVERSION=\"$(VERSION)\"
+ 
+ OBJS = hot-babe.o loader.o
+-CC = gcc
++CC := gcc
+ LIBS = `pkg-config gdk-2.0 gdk-pixbuf-2.0  --libs`
+ 
+ DOC = ChangeLog NEWS TODO LICENSE CONTRIBUTORS copyright config.example
+@@ -14,7 +14,7 @@
+ all: hot-babe
+ 
+ hot-babe: $(OBJS)
+-	$(CC) -o hot-babe $(OBJS) $(LIBS)
++	$(CC) -o hot-babe $(OBJS) $(LIBS) $(OPT_LIBS)
+ 
+ clean:
+ 	rm -f hot-babe *.o

@@ -1,0 +1,9 @@
+config ROX-ARCHIVE
+	bool
+	prompt "Archive"
+	depends on ROX
+
+config ROX-ARCHIVE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on ROX-ARCHIVE

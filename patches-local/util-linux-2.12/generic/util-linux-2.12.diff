@@ -1,0 +1,16 @@
+diff -Nur util-linux-2.12/MCONFIG util-linux-2.12-patched/MCONFIG
+--- util-linux-2.12/MCONFIG	2002-11-25 10:29:48.000000000 +0000
++++ util-linux-2.12-patched/MCONFIG	2004-01-22 05:08:11.000000000 +0000
+@@ -7,12 +7,6 @@
+ #  - set USE_TTY_GROUP=no
+ #  - define DESTDIR
+ 
+-# Select for ARCH one of intel, alpha, sparc, arm, m68k, mips
+-# Select for CPU i386 if the binaries must be able to run on an intel 386
+-# (by default i486 code is generated, see below)
+-CPU=$(shell uname -m)
+-ARCH=$(shell echo $(CPU) | sed 's/i.86/intel/;s/arm.*/arm/')
+-
+ # If HAVE_PAM is set to "yes", then login, chfn, chsh, and newgrp
+ # will use PAM for authentication. Additionally, passwd will not be
+ # installed as it is not PAM aware.

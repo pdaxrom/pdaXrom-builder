@@ -1,0 +1,9 @@
+config GETTEXT
+	bool
+	depends on GCC_SHARED
+	prompt "Compile GNU gettext"
+
+config GETTEXT_INSTALL
+	bool
+	depends on GETTEXT
+	prompt "Install in ROM"

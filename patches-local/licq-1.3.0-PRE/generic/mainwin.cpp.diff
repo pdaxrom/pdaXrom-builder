@@ -1,0 +1,34 @@
+diff -Nur licq-1.3.0-PRE/plugins/qt-gui/src/mainwin.cpp licq-1.3.0-PRE-new/plugins/qt-gui/src/mainwin.cpp
+--- licq-1.3.0-PRE/plugins/qt-gui/src/mainwin.cpp	2004-08-10 14:56:08.000000000 +0000
++++ licq-1.3.0-PRE-new/plugins/qt-gui/src/mainwin.cpp	2004-09-18 14:29:26.000000000 +0000
+@@ -117,6 +117,11 @@
+ 
+ }
+ 
++#ifdef USE_LIBSN
++#define SN_API_NOT_YET_FROZEN 1
++#include <libsn/sn.h>
++#endif 
++
+ #undef Bool
+ #undef None
+ #undef KeyPress
+@@ -340,6 +345,18 @@
+ 
+   connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(slot_aboutToQuit()));
+ 
++#ifdef USE_LIBSN
++    static SnDisplay *sn_dpy;
++    SnLauncheeContext *context;
++
++    sn_dpy = sn_display_new (QPaintDevice::x11AppDisplay(), NULL, NULL);
++    context = sn_launchee_context_new_from_environment (sn_dpy, DefaultScreen (QPaintDevice::x11AppDisplay()));
++
++    if (context != NULL) {
++	sn_launchee_context_complete (context);
++    }
++#endif
++
+   // read in info from file
+   char szTemp[MAX_FILENAME_LEN];
+ 

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=DDD
+Comment=Data display debugger
+Exec=ddd
+Terminal=0
+Type=Application
+Icon=ddd.xpm
+Categories=Applications
+StartupNotify=False
+SingleInstance=False

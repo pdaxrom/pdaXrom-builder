@@ -1,0 +1,9 @@
+config PRBOOM
+	bool
+	prompt "prboom"
+	depends on SDL && SDL_MIXER && SDL_NET
+
+config PRBOOM_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on PRBOOM

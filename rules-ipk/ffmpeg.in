@@ -1,0 +1,18 @@
+config FFMPEG
+	bool
+	prompt "ffmpeg"
+
+config FFMPEG_INSTALL
+	bool
+	prompt "Install libffmpeg in ROM"
+	depends on FFMPEG
+
+config FFMPEG_INSTALL_FFMPEG
+	bool
+	prompt "Install ffmpeg in ROM"
+	depends on FFMPEG && FFMPEG_INSTALL
+
+config FFMPEG_INSTALL_FFPLAY
+	bool
+	prompt "Install ffplay in ROM"
+	depends on FFMPEG && FFMPEG_INSTALL

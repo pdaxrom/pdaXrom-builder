@@ -1,0 +1,12 @@
+TIMEOUT		3
+ABORT		'\nBUSY\r'
+ABORT		'\nNO ANSWER\r'
+ABORT		'\nRINGING\r\n\r\nRINGING\r'
+''		AT
+'OK-+++\c-OK'	ATH0
+OK		'AT+CGDCONT=1,\"IP\",\"@5\"'
+OK		'AT+CGQMIN=1,2,4,3,9,1'
+@1
+TIMEOUT		@2
+OK		'ATD*98*1#'
+CONNECT						

@@ -1,0 +1,8 @@
+config ROX-SESSION
+	bool
+	prompt "ROX Session manager"
+
+config ROX-SESSION_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on ROX-SESSION

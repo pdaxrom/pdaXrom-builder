@@ -1,0 +1,8 @@
+config TCPDUMP
+	bool
+	prompt "tcpdump"
+
+config TCPDUMP_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on TCPDUMP

@@ -1,0 +1,9 @@
+config ROX-EDIT
+	bool
+	prompt "Edit"
+	depends on ROX
+
+config ROX-EDIT_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on ROX-EDIT

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Thunderbird
+Comment=Email client
+Exec=thunderbird
+Terminal=0
+Type=Application
+Icon=thunderbird.xpm
+Categories=Network
+StartupNotify=True
+SingleInstance=False

@@ -1,0 +1,103 @@
+!
+! 'Fn' key setup for c700 
+!
+
+clear Mod1
+clear Mod2
+clear Mod3
+clear Mod4
+clear Mod5
+
+!keycode 49 = 1 exclam     F1
+!keycode 50 = 2 quotedbl   F2
+!keycode 51 = 3 numbersign F3
+!keycode 52 = 4 dollar     F4
+!keycode 53 = 5 percent    F5
+!keycode 54 = 6 ampersand  F6
+!keycode 55 = 7 apostrophe F7
+!keycode 56 = 8 parenleft  F8
+!keycode 57 = 9 parenright F9
+!keycode 58 = 0 asciitilde F10
+
+keycode 25 = q Q aring Aring
+keycode 31 = w W asciicircum asciicircum
+keycode 13 = e E equal equal
+keycode 26 = r R plus plus
+keycode 28 = t T bracketleft bracketleft
+keycode 33 = y Y bracketright bracketright
+keycode 29 = u U braceleft braceleft
+keycode 17 = i I braceright braceright
+keycode 23 = o O oslash Ooblique
+keycode 24 = p P sterling
+
+keycode 9  = a A ae AE
+keycode 27 = s S EuroSign
+keycode 12 = d D period period
+keycode 14 = f F backslash backslash
+keycode 15 = g G semicolon semicolon
+keycode 16 = h H colon colon
+keycode 18 = j J asterisk asterisk
+keycode 19 = k K yen
+keycode 20 = l L bar bar
+
+keycode 34 = z Z
+keycode 32 = x X
+keycode 11 = c C
+keycode 30 = v V
+keycode 10 = b B underscore underscore
+keycode 22 = n N
+keycode 21 = m M grave grave
+
+keycode 66 = minus minus at at
+keycode 71 = slash comma less less
+keycode 72 = period question greater greater
+
+keycode 38  = Mode_switch
+
+! Cursor
+keycode 44  = Up    Up    Prior Prior
+keycode 45  = Down  Down  Next  Next
+keycode 43  = Left  Left  Home  Home
+keycode 46  = Right Right End   End
+
+keycode 39  = BackSpace BackSpace Delete Delete
+
+! pdaXrom silkscreen
+keycode 118 = XF86Launch0
+keycode 119 = XF86Launch1
+keycode 120 = XF86Launch2
+keycode 121 = XF86Launch3
+keycode 122 = XF86Launch4
+
+! R-Shift
+keycode 111 = Shift_R
+
+! Menu
+keycode 37 = XF86Start
+
+! side buttons
+
+keycode 117 = XF86PowerDown
+keycode 131 = Return
+keycode 132 = Escape
+
+! CE-RH1 Remote
+
+keycode 104 = XF86AudioRaiseVolume
+keycode 105 = XF86AudioLowerVolume
+keycode 106 = XF86AudioNext
+keycode 107 = XF86AudioPrev
+keycode 108 = XF86AudioStop
+keycode 109 = XF86AudioPlay
+
+! This is the screen swivel sensor
+
+keycode 110 = XF86RotateWindows
+
+! clear Lock
+! remove Lock = Tab
+! keycode 73 = Tab Tab Caps_Lock Caps_Lock
+! add Lock = Caps_Lock
+
+add mod1    = Alt_L Alt_L Alt_L
+add mod2    = Mode_switch

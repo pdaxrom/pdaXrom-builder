@@ -1,0 +1,9 @@
+config XKEYMOUSE
+	bool
+	prompt "xkeymouse"
+	depends on XFREE430
+
+config XKEYMOUSE_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XKEYMOUSE

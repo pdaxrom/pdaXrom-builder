@@ -1,0 +1,20 @@
+--- mozilla/config/mklinkscript.pl~	2002-01-24 23:07:46.000000000 +0000
++++ mozilla/config/mklinkscript.pl	2004-05-05 10:29:20.000000000 +0000
+@@ -15,7 +15,7 @@
+ $tmpFile = "$linkScript.tmp";
+ $orderFile = $ARGV[0];
+ 
+-open(LD, "ld --verbose|") || die("ld: $!");
++open(LD, "armv5tel-linux-ld --verbose|") || die("armv5tel-linux-ld: $!");
+ 
+ #
+ # Initial output is to a temp file so that if we fail there won't be
+@@ -50,7 +50,7 @@
+     }
+     print TMP "$line\n";
+     if ($line =~ /^[\s]*.text[\s]*:[\s]*$/) {
+-        defined($line = <LD>) || die("Premature end of ld input");
++        defined($line = <LD>) || die("Premature end of armv5tel-linux-ld input");
+         print TMP "$line";
+ 	print TMP "*(.text)\n";
+         &PrintOrder();

@@ -1,0 +1,9 @@
+config DATENTIME2
+	bool
+	prompt "datentime (GPE version)"
+	depends on GTK22 && GPE-CVS
+
+config DATENTIME2_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on DATENTIME2

@@ -1,0 +1,9 @@
+config XRESIZEWINDOW
+	bool
+	prompt "xresizewindow"
+	depends on XFREE430
+
+config XRESIZEWINDOW_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XRESIZEWINDOW

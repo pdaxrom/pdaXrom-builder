@@ -1,0 +1,9 @@
+config LOOKANDFEEL
+	bool
+	prompt "LookAndFeel"
+	depends on ROX-SESSION
+
+config LOOKANDFEEL_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on LOOKANDFEEL

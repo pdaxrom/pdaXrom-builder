@@ -1,0 +1,8 @@
+config UBZIP2
+	bool
+	prompt "bzip2"
+
+config UBZIP2_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on UBZIP2

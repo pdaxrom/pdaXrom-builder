@@ -1,0 +1,81 @@
+diff -urNd glibc-2.2.5-ct28/config.make.in glibc-2.2.5/config.make.in
+--- glibc-2.2.5-ct28/config.make.in	2001-11-16 02:03:15.000000000 +0100
++++ glibc-2.2.5/config.make.in	2004-07-15 17:44:30.608048000 +0200
+@@ -47,6 +47,7 @@
+ with-cvs = @with_cvs@
+ old-glibc-headers = @old_glibc_headers@
+ unwind-find-fde = @libc_cv_gcc_unwind_find_fde@
++fno-unit-at-a-time = @fno_unit_at_a_time@
+ 
+ static-libgcc = @libc_cv_gcc_static_libgcc@
+ 
+diff -urNd glibc-2.2.5-ct28/configure glibc-2.2.5/configure
+--- glibc-2.2.5-ct28/configure	2004-07-15 17:15:52.337296000 +0200
++++ glibc-2.2.5/configure	2004-07-15 17:44:22.316124800 +0200
+@@ -2910,6 +2910,35 @@
+ fi
+ 
+ 
++echo "$as_me:$LINENO: checking for -fno-unit-at-a-time" >&5
++echo $ECHO_N "checking for -fno-unit-at-a-time... $ECHO_C" >&6
++if test "${libc_cv_fno_unit_at_a_time+set}" = set; then
++  echo $ECHO_N "(cached) $ECHO_C" >&6
++else
++  cat > conftest.c <<EOF
++int foo;
++EOF
++if { ac_try='${CC-cc} $CFLAGS $CPPFLAGS -S -fno-unit-at-a-time
++			    conftest.c 1>&5'
++  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
++  (eval $ac_try) 2>&5
++  ac_status=$?
++  echo "$as_me:$LINENO: \$? = $ac_status" >&5
++  (exit $ac_status); }; }
++then
++  libc_cv_fno_unit_at_a_time=yes
++else
++  libc_cv_fno_unit_at_a_time=no
++fi
++rm -f conftest*
++fi
++echo "$as_me:$LINENO: result: $libc_cv_fno_unit_at_a_time" >&5
++echo "${ECHO_T}$libc_cv_fno_unit_at_a_time" >&6
++if test $libc_cv_fno_unit_at_a_time = yes; then
++  fno_unit_at_a_time=-fno-unit-at-a-time
++fi
++
++
+ if test $elf != yes; then
+   echo $ac_n "checking for .init and .fini sections""... $ac_c" 1>&6
+ echo "configure:2916: checking for .init and .fini sections" >&5
+@@ -3897,6 +3926,7 @@
+ s%@LIBGD@%$LIBGD%g
+ s%@sizeof_long_double@%$sizeof_long_double%g
+ s%@libc_cv_gcc_unwind_find_fde@%$libc_cv_gcc_unwind_find_fde%g
++s%@fno_unit_at_a_time@%$fno_unit_at_a_time%g
+ s%@uname_sysname@%$uname_sysname%g
+ s%@uname_release@%$uname_release%g
+ s%@uname_version@%$uname_version%g
+diff -urNd glibc-2.2.5-ct28/csu/Makefile glibc-2.2.5/csu/Makefile
+--- glibc-2.2.5-ct28/csu/Makefile	2001-07-06 06:54:45.000000000 +0200
++++ glibc-2.2.5/csu/Makefile	2004-07-15 17:44:22.326139200 +0200
+@@ -92,7 +92,7 @@
+ $(objpfx)crt%.o: $(objpfx)crt%.S $(objpfx)defs.h
+ 	$(compile.S) -g0 $(ASFLAGS-.os) -o $@
+ 
+-CFLAGS-initfini.s = -g0 -fPIC -fno-inline-functions
++CFLAGS-initfini.s = -O1 -g0 -fPIC -fno-inline-functions $(fno-unit-at-a-time)
+ 
+ vpath initfini.c $(full_config_sysdirs)
+ 
+diff -urNd glibc-2.2.5-ct28/locale/Makefile glibc-2.2.5/locale/Makefile
+--- glibc-2.2.5-ct28/locale/Makefile	2001-08-15 00:37:31.000000000 +0200
++++ glibc-2.2.5/locale/Makefile	2004-07-15 17:44:22.326139200 +0200
+@@ -97,6 +97,7 @@
+ CFLAGS-charmap.c = -Wno-write-strings -Wno-char-subscripts
+ CFLAGS-locfile.c = -Wno-write-strings -Wno-char-subscripts
+ CFLAGS-charmap-dir.c = -Wno-write-strings
++CFLAGS-loadlocale.c = $(fno-unit-at-a-time)
+ 
+ # Depend on libc.so so a DT_NEEDED is generated in the shared objects.
+ # This ensures they will load libc.so for needed symbols if loaded by

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+BinaryPattern=
+GenericName=Multimedia Player
+Exec=timidity -ig
+Icon=timidity.xpm
+MimeType=audio/x-mid;audio/x-rmi
+Name=TiMidity 
+Terminal=0
+Type=Application
+Categories=AudioVideo
+StartupNotify=True
+SingleInstance=False

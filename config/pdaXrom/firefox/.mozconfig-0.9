@@ -1,0 +1,53 @@
+
+# This file specifies the build flags for Firefox.  You can use it by adding:
+#  . $topsrcdir/browser/config/mozconfig
+# to the top of your mozconfig file.
+
+export CROSS_COMPILE=1
+
+export MOZ_PHOENIX=1
+mk_add_options MOZ_PHOENIX=1
+
+ac_add_options --enable-default-toolkit=gtk2
+ac_add_options --disable-freetype2
+ac_add_options --enable-xft
+
+ac_add_options --with-system-zlib
+ac_add_options --with-system-jpeg
+ac_add_options --with-system-png
+
+ac_add_options --enable-crypto
+
+ac_add_options --disable-ldap
+ac_add_options --disable-postscript
+ac_add_options --disable-mathml
+ac_add_options --disable-jsd
+ac_add_options --disable-installer
+ac_add_options --disable-xprint
+
+ac_add_options --disable-mailnews
+ac_add_options --disable-composer
+
+ac_add_options --enable-single-profile
+ac_add_options --disable-profilesharing
+
+ac_add_options --disable-gnomevfs
+
+ac_add_options --disable-logging
+ac_add_options --disable-gtktest
+ac_add_options --disable-tests
+
+ac_add_options --disable-necko-disk-cache
+ac_add_options --enable-necko-small-buffers
+
+ac_add_options --enable-necko-protocols=http,ftp,file,res,jar
+ac_add_options --enable-image-decoders=png,gif,jpeg
+ac_add_options --enable-extensions=cookie,pref,universalchardet,typeaheadfind
+#ac_add_options --enable-extensions=cookie,xml-rpc,xmlextras,pref,transformiix,universalchardet,typeaheadfind,webservices,inspector,gnomevfs,negotiateauth
+
+ac_add_options --enable-reorder
+ac_add_options --enable-elf-dynstr-gc
+
+ac_add_options --enable-optimize="-Os -fomit-frame-pointer -mcpu=xscale -mtune=xscale -fsigned-char -fno-strict-aliasing"
+ac_add_options --disable-debug
+ac_add_options --enable-strip

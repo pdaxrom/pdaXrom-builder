@@ -1,0 +1,156 @@
+diff -Nur nforce/Configure nforce.new/Configure
+--- nforce/Configure	1970-01-01 00:00:00.000000000 +0000
++++ nforce.new/Configure	2004-10-03 06:10:35.000000000 +0000
+@@ -0,0 +1,46 @@
++#!/bin/sh
++
++CONFIG=config.new
++CONFIG_H=autoconf.h
++CONFIG_MK=config.mk
++
++arg () {
++    VALUE="`echo X"$2" | sed -e 's/^X--[a-zA-Z_]*=//'`"
++    eval $1=\"$VALUE\"
++}
++
++version () {
++    expr $1 \* 65536 + $2 \* 256 + $3
++}
++
++write_str () {
++    value=`eval echo '$'$1`
++    echo "$1"=\"$value\" >> $CONFIG
++    echo "$1=$value" >> $CONFIG_MK
++    echo "#define $1 \"$value\"" >> $CONFIG_H
++}
++
++while [ $# -gt 0 ] ; do
++    case "$1" in
++    --kernel=*)		arg LINUX $1 		;;
++    --target=*)		arg PREFIX $1		;;
++    *)			usage			;;
++    esac
++    shift
++done
++
++echo $LINUX
++
++for TAG in VERSION PATCHLEVEL SUBLEVEL EXTRAVERSION ; do
++    eval `sed -ne "/^$TAG/s/[ 	]//gp" $LINUX/Makefile`
++done
++if [ "$EXTRAVER" != "" ] ; then
++    EXTRAVERSION=$EXTRAVER
++fi
++SRC_RELEASE=$VERSION.$PATCHLEVEL.$SUBLEVEL$EXTRAVERSION
++SRC_BASE=$VERSION.$PATCHLEVEL.$SUBLEVEL
++VERSION_CODE=`version $VERSION $PATCHLEVEL $SUBLEVEL`
++rm -rf root/lib/modules/*
++echo "The kernel source tree is version $SRC_RELEASE."
++echo "SRC_RELEASE=$SRC_RELEASE" >config.mk
++echo "SRC_PATH=$LINUX" >>config.mk
+diff -Nur nforce/nvaudio/Makefile nforce.new/nvaudio/Makefile
+--- nforce/nvaudio/Makefile	2004-04-16 20:17:47.000000000 +0000
++++ nforce.new/nvaudio/Makefile	2005-01-07 13:17:03.000000000 +0000
+@@ -4,20 +4,26 @@
+ # Makefile to build nForce audio  driver
+ #
+ 
++ifeq (../config.mk, $(wildcard ../config.mk))
++include ../config.mk
++endif
++
+ MODULE = nvaudio.o
+ 
+ # SYSINCLUDE can be overridden by environment variable or command line argument
+ # TARGET_KERNEL can be overridden by build system
+-TARGET_KERNEL ?= $(shell uname -r)
+-LINUXDIR = $(shell uname -r | awk '{sub(/-.*/,"",$$0); print $$0}')
+-TARGET_CPU ?= $(shell uname -m)
++TARGET_KERNEL := $(SRC_RELEASE)
++LINUXDIR := $(shell uname -r | awk '{sub(/-.*/,"",$$0); print $$0}')
++TARGET_CPU := $(shell uname -m)
+ 
+ # Find kernel sources, if they're installed
+-ifeq ($(filter build, $(notdir $(wildcard /lib/modules/$(TARGET_KERNEL)/*))), build)
+-	KERNSRC = /lib/modules/$(TARGET_KERNEL)/build
+-else
+-	KERNSRC = /usr/src/linux-$(LINUXDIR)
+-endif
++#ifeq ($(filter build, $(notdir $(wildcard /lib/modules/$(TARGET_KERNEL)/*))), build)
++#	KERNSRC = /lib/modules/$(TARGET_KERNEL)/build
++#else
++#	KERNSRC = /usr/src/linux-$(LINUXDIR)
++#endif
++
++KERNSRC := $(SRC_PATH)
+ 
+ SYSINCLUDE ?= $(KERNSRC)/include
+ 
+@@ -94,14 +100,14 @@
+ install:
+ ifeq	($(wildcard $(MODULE)), $(MODULE))
+ 	mkdir -p $(INSTROOT)/$(TARGETDIR)
+-	mkdir -p $(INSTROOT)/usr/include
++	#mkdir -p $(INSTROOT)/usr/include
+ ifeq  "$(UID)" "0"
+ 	install -b -m 755 -o root $(MODULE) $(INSTROOT)/$(TARGETDIR)
+-	install -b -m 444 -o root nvioctl.h $(INSTROOT)/usr/include/nvaudio.h
+-	/sbin/depmod -a
++	#install -b -m 444 -o root nvioctl.h $(INSTROOT)/usr/include/nvaudio.h
++	#/sbin/depmod -a
+ else
+ 	install -b -m 755 $(MODULE) $(INSTROOT)/$(TARGETDIR)
+-	install -b -m 444 nvioctl.h $(INSTROOT)/usr/include/nvaudio.h
++	#install -b -m 444 nvioctl.h $(INSTROOT)/usr/include/nvaudio.h
+ endif # uid is root
+ endif # module
+ 
+diff -Nur nforce/nvnet/Makefile nforce.new/nvnet/Makefile
+--- nforce/nvnet/Makefile	2004-04-16 20:17:46.000000000 +0000
++++ nforce.new/nvnet/Makefile	2005-01-07 13:10:58.000000000 +0000
+@@ -10,6 +10,10 @@
+ #
+ #######################################################################
+ 
++ifeq (../config.mk, $(wildcard ../config.mk))
++include ../config.mk
++endif
++
+ #
+ # Sources 
+ # 
+@@ -35,17 +39,18 @@
+ 
+ # SYSINCLUDE can be overridden by environment variable or command line argument
+ # TARGET_KERNEL can be overridden by build system
+-TARGET_KERNEL ?= $(shell uname -r)
+-LINUXDIR = $(shell uname -r | awk '{sub(/-.*/,"",$$0); print $$0}')
++TARGET_KERNEL := $(SRC_RELEASE)
++LINUXDIR := $(shell uname -r | awk '{sub(/-.*/,"",$$0); print $$0}')
+ 
+ 
+ # Find kernel sources, if they're installed
+-ifeq ($(filter build, $(notdir $(wildcard /lib/modules/$(TARGET_KERNEL)/*))), build)
+-	KERNSRC = /lib/modules/$(TARGET_KERNEL)/build
+-else
+-	KERNSRC = /usr/src/linux-$(LINUXDIR)
+-endif
++#ifeq ($(filter build, $(notdir $(wildcard /lib/modules/$(TARGET_KERNEL)/*))), build)
++#	KERNSRC = /lib/modules/$(TARGET_KERNEL)/build
++#else
++#	KERNSRC = /usr/src/linux-$(LINUXDIR)
++#endif
+ 
++KERNSRC := $(SRC_PATH)
+ 
+ SYSINCLUDE ?= $(KERNSRC)/include
+ 
+@@ -134,7 +139,7 @@
+ 	mkdir -p $(INSTROOT)/$(INSTALL_DIR)
+ ifeq  "$(UID)" "0"
+ 	install -b -m 644 -o root $(TARGET) $(INSTROOT)/$(INSTALL_DIR)
+-	/sbin/depmod -a 
++	#/sbin/depmod -a 
+ else
+ 	install -b -m 644 $(TARGET) $(INSTROOT)/$(INSTALL_DIR)
+ endif

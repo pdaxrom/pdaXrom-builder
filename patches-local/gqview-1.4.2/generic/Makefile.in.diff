@@ -1,0 +1,11 @@
+--- gqview/src/Makefile.in~	2004-04-20 16:02:03.000000000 +0000
++++ gqview/src/Makefile.in	2004-04-20 16:02:09.000000000 +0000
+@@ -162,7 +162,7 @@
+ INCLUDES = -I$(srcdir) -I$(builddir)    \
+ 	-I$(top_srcdir) -I$(top_builddir)       \
+ 	-DLOCALEDIR=\""$(localedir)"\"		\
+-	-I$(includedir) $(GTK_CFLAGS)
++	$(GTK_CFLAGS)
+ 
+ 
+ module_SLIK = \

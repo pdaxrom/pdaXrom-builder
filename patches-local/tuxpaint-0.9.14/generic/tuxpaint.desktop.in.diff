@@ -1,0 +1,12 @@
+--- tuxpaint-0.9.14/src/tuxpaint.desktop.in~	2004-10-20 20:15:21.000000000 +0000
++++ tuxpaint-0.9.14/src/tuxpaint.desktop.in	2004-10-20 20:15:33.000000000 +0000
+@@ -3,7 +3,8 @@
+ _Name=Tux Paint
+ Type=Application
+ Exec=tuxpaint
+-Icon=tuxpaint
++Icon=tuxpaint.png
+ Terminal=false
++Categories=Application;Graphics;
+ _GenericName=Drawing program
+ _Comment=A drawing program for children.

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Mozilla
+Comment=Web browser
+Exec=mozilla
+Terminal=0
+Type=Application
+Icon=mozilla.xpm
+Categories=Network
+StartupNotify=True
+SingleInstance=False

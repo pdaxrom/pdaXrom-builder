@@ -1,0 +1,8 @@
+config GLIB1210
+	bool
+	prompt "glib-1.2.10"
+
+config GLIB1210_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GLIB1210

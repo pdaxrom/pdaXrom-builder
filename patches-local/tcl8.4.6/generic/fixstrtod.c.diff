@@ -1,0 +1,21 @@
+diff -Nur tcl8.4.6/compat/fixstrtod.c tcl8.4.6-patched/compat/fixstrtod.c
+--- tcl8.4.6/compat/fixstrtod.c	1998-09-14 18:39:44.000000000 +0000
++++ tcl8.4.6-patched/compat/fixstrtod.c	2004-03-31 17:38:07.000000000 +0000
+@@ -22,7 +22,7 @@
+  * somes systems (e.g. SunOS 4.1.4) stdlib.h doesn't declare strtod.
+  */
+ 
+-extern double strtod();
++extern double strtod__();
+ 
+ double
+ fixstrtod(string, endPtr)
+@@ -30,7 +30,7 @@
+     char **endPtr;
+ {
+     double d;
+-    d = strtod(string, endPtr);
++    d = strtod__(string, endPtr);
+     if ((endPtr != NULL) && (*endPtr != string) && ((*endPtr)[-1] == 0)) {
+ 	*endPtr -= 1;
+     }

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=xdemineur
+Comment=Yet another mines game
+Exec=xdemineur
+Icon=kmines.png
+Terminal=false
+Type=Application
+Categories=Games
+StartupNotify=false

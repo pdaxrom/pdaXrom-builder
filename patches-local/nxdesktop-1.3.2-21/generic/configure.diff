@@ -1,0 +1,35 @@
+--- nxdesktop/configure~	2004-10-04 11:22:45.000000000 +0000
++++ nxdesktop/configure	2004-10-04 11:26:10.000000000 +0000
+@@ -17,6 +17,7 @@
+ ldflags=''
+ rpath=
+ withsound='yes'
++sysinc=/usr/include
+ 
+ for arg in $*; do
+ optarg=`echo $arg | sed 's/[-a-z]*=//'`
+@@ -83,6 +84,9 @@
+   --with-sound=sun)
+     withsound=$optarg
+     ;;
++  --with-sysinc=*)
++    sysinc=$optarg
++    ;;
+   *)
+     echo "Target directories:"
+     echo " --prefix=PREFIX         location for architecture-independent files"
+@@ -278,12 +282,12 @@
+ 
+ # Check for OSS sound support
+ 
+-if [ -f /usr/include/sys/soundcard.h -a \( "$withsound" = "yes" -o "$withsound" = "oss" \) ]; then
++if [ -f $sysinc/sys/soundcard.h -a \( "$withsound" = "yes" -o "$withsound" = "oss" \) ]; then
+     echo Sound support enabled: Open Sound System
+     echo
+     echo "SOUNDOBJ    = rdpsnd.o rdpsnd_oss.o" >>Makeconf
+     cflags="$cflags -DWITH_RDPSND"
+-elif [ -f /usr/include/sys/audioio.h -a \( "$withsound" = "yes" -o "$withsound" = "sun" \) ]; then
++elif [ -f $(sysinc)/sys/audioio.h -a \( "$withsound" = "yes" -o "$withsound" = "sun" \) ]; then
+     echo Sound support enabled: Sun/BSD
+     echo
+     echo "SOUNDOBJ    = rdpsnd.o rdpsnd_sun.o" >>Makeconf

@@ -1,0 +1,9 @@
+config GPAINT
+	bool
+	prompt "gpaint"
+	depends on GTK22
+
+config GPAINT_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GPAINT

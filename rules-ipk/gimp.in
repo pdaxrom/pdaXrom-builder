@@ -1,0 +1,9 @@
+config GIMP
+	bool
+	prompt "gimp"
+	depends on GTK22
+
+config GIMP_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on GIMP

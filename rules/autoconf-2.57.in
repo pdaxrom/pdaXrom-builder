@@ -1,0 +1,3 @@
+config AUTOCONF257
+	bool
+	prompt "autoconf"

@@ -1,0 +1,9 @@
+config DATENTIME
+	bool
+	prompt "datentime"
+	depends on LIBXML2 && GTK22
+
+config DATENTIME_INSTALL
+	bool
+	prompt "Install in ROM"
+	depends on DATENTIME

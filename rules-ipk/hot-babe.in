@@ -1,0 +1,8 @@
+config HOT-BABE
+	bool
+	prompt "hot-babe"
+
+config HOT-BABE_INSTALL
+	bool
+	prompt "Install on ROM"
+	depends on HOT-BABE

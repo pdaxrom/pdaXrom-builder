@@ -1,0 +1,35 @@
+--- matchbox-desktop-0.8/src/mbdesktop.c~	2004-02-06 23:41:25.000000000 +0000
++++ matchbox-desktop-0.8/src/mbdesktop.c	2004-07-12 22:40:48.000000000 +0000
+@@ -1036,8 +1043,9 @@
+   
+   mb->win_top_level = XCreateWindow(mb->dpy, mb->root, 
+ 		                    0, 0,  
+-				    mb->desktop_width, 
+-				    mb->desktop_height, 0, 
++				    /*mb->desktop_width */ 320, 
++				    /*mb->desktop_height*/ 320, 
++				    0, 
+ 				    CopyFromParent,  
+ 				    CopyFromParent, 
+ 				    mb->pixbuf->vis,
+@@ -1073,6 +1081,11 @@
+   sigaction(SIGRTMIN, &act, NULL);
+ #endif 
+ 
++  act.sa_sigaction = sig_hup_reload_handler;
++  sigemptyset(&act.sa_mask);
++  act.sa_flags = SA_SIGINFO;
++  sigaction(SIGHUP, &act, NULL);
++
+   mb->type_register_cnt = ITEM_TYPE_CNT;
+ 
+   /* get the window ready */
+@@ -1081,7 +1094,7 @@
+ 	       KeyPress | KeyRelease | StructureNotifyMask |
+ 	       FocusChangeMask );
+ 
+-  XSelectInput(mb->dpy, mb->root, PropertyChangeMask );
++  XSelectInput(mb->dpy, mb->root, PropertyChangeMask|StructureNotifyMask );
+ 
+   XMapWindow(mb->dpy, mb->win_top_level);
+ 

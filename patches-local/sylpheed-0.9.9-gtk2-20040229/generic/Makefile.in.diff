@@ -1,0 +1,19 @@
+--- sylpheed-gtk2/src/Makefile.in.sucks	2004-03-01 14:14:52.000000000 +0000
++++ sylpheed-gtk2/src/Makefile.in	2004-06-13 21:20:40.000000000 +0000
+@@ -30,7 +30,6 @@
+ infodir = @infodir@
+ mandir = @mandir@
+ includedir = @includedir@
+-oldincludedir = /usr/include
+ 
+ DESTDIR =
+ 
+@@ -138,7 +137,7 @@
+ EXTRA_DIST =  	sylpheed.ico 	sylpheed-marshal.list 	quote_fmt_parse.h 	version.h.in 	pixmaps/clip.xpm 	pixmaps/deleted.xpm 	pixmaps/dir-close.xpm 	pixmaps/dir-open.xpm 	pixmaps/dir-noselect.xpm 	pixmaps/folder.xpm 	pixmaps/forwarded.xpm 	pixmaps/group.xpm 	pixmaps/inbox.xpm 	pixmaps/mark.xpm 	pixmaps/checkbox_on.xpm 	pixmaps/checkbox_off.xpm 	pixmaps/new.xpm 	pixmaps/offline.xpm 	pixmaps/online.xpm 	pixmaps/outbox.xpm 	pixmaps/regular.xpm 	pixmaps/replied.xpm 	pixmaps/trash.xpm 	pixmaps/unread.xpm 	pixmaps/linewrap.xpm 	pixmaps/continue.xpm 	pixmaps/complete.xpm 	pixmaps/error.xpm 	pixmaps/stock_mail.xpm 	pixmaps/stock_mail_attach.xpm 	pixmaps/stock_mail_receive.xpm 	pixmaps/stock_mail_receive_all.xpm 	pixmaps/stock_mail_send.xpm 	pixmaps/stock_mail_send_queue.xpm 	pixmaps/stock_mail_compose.xpm 	pixmaps/stock_mail_reply.xpm 	pixmaps/stock_mail_reply_to_all.xpm 	pixmaps/stock_mail_forward.xpm 	pixmaps/stock_preferences.xpm 	pixmaps/stock_properties.xpm 	pixmaps/stock_search.xpm 	pixmaps/stock_close.xpm 	pixmaps/stock_exec.xpm 	pixmaps/stock_trash.xpm 	pixmaps/stock_up_arrow.xpm 	pixmaps/stock_down_arrow.xpm 	pixmaps/stock_paste.xpm 	pixmaps/tb_address_book.xpm 	pixmaps/sylpheed-logo.xpm 	pixmaps/address.xpm 	pixmaps/book.xpm 	pixmaps/category.xpm 	pixmaps/interface.xpm 	pixmaps/jpilot.xpm 	pixmaps/ldap.xpm 	pixmaps/vcard.xpm
+ 
+ 
+-INCLUDES =  	-DG_LOG_DOMAIN=\"Sylpheed\" 	-I$(top_srcdir)/intl 	$(GTK_CFLAGS) 	$(GDK_IMLIB_CFLAGS) 	$(GDK_PIXBUF_CFLAGS) 	$(GPGME_CFLAGS) 	-I$(includedir)
++INCLUDES =  	-DG_LOG_DOMAIN=\"Sylpheed\" 	-I$(top_srcdir)/intl 	$(GTK_CFLAGS) 	$(GDK_IMLIB_CFLAGS) 	$(GDK_PIXBUF_CFLAGS) 	$(GPGME_CFLAGS)
+ 
+ 
+ sylpheed_LDADD =  	@GTK_LIBS@ 	$(INTLLIBS) 	$(GPGME_LIBS) 	$(LDAP_LIBS) 	$(LIBICONV) 	$(SYLPHEED_RES)

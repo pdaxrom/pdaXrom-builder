@@ -1,0 +1,60 @@
+--- httpd-2.0.52/support/apxs.in~	2004-02-09 20:59:49.000000000 +0000
++++ httpd-2.0.52/support/apxs.in	2004-11-04 13:03:56.000000000 +0000
+@@ -198,18 +198,18 @@
+     ($httpd = $0) =~ s:support/apxs$::;
+ }
+ 
+-unless (-x "$httpd") {
+-	error("$httpd not found or not executable");
+-	exit 1;
+-}
+-
+-unless (grep /mod_so/, `. $envvars && $httpd -l`) {
+-    error("Sorry, no shared object support for Apache");
+-    error("available under your platform. Make sure");
+-    error("the Apache module mod_so is compiled into");
+-    error("your server binary `$httpd'.");
+-    exit 1;
+-}
++#unless (-x "$httpd") {
++#	error("$httpd not found or not executable");
++#	exit 1;
++#}
++
++#unless (grep /mod_so/, `. $envvars && $httpd -l`) {
++#    error("Sorry, no shared object support for Apache");
++#    error("available under your platform. Make sure");
++#    error("the Apache module mod_so is compiled into");
++#    error("your server binary `$httpd'.");
++#    exit 1;
++#}
+ 
+ sub get_config_vars{
+     my ($file, $rh_config) = @_;
+@@ -323,14 +323,14 @@
+     print "$result\n";
+ }
+ 
+-my $apr_bindir = get_vars("APR_BINDIR");
++my $apr_bindir = "@exp_installbuilddir@/../bin";
+ 
+ if (! -x "$apr_bindir/apr-config") {
+     error("$apr_bindir/apr-config not found!");
+     exit(1);
+ }
+ 
+-my $apu_bindir = get_vars("APU_BINDIR");
++my $apu_bindir = "@exp_installbuilddir@/../bin";
+ 
+ if (! -x "$apu_bindir/apu-config") {
+     error("$apu_bindir/apu-config not found!");
+@@ -684,7 +684,8 @@
+ 
+ #   install and activate shared object by reloading Apache to
+ #   force a reload of the shared object file
+-reload: install restart
++reload: install 
++#restart
+ 
+ #   the general Apache start/restart/stop
+ #   procedures

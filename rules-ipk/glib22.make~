@@ -1,0 +1,268 @@
+# -*-makefile-*-
+# $Id: template,v 1.10 2004/01/24 15:50:34 mkl Exp $
+#
+# Copyright (C) 2004 by Alexander Chukov <sash@cacko.biz>
+#          
+# See CREDITS for details about who has contributed to this project.
+#
+# For further information about the PTXdist project and license conditions
+# see the README file.
+#
+
+#
+# We provide this package
+#
+ifdef PTXCONF_GLIB22
+PACKAGES += glib22
+endif
+
+#
+# Paths and names
+#
+#GLIB22_VERSION_MAJOR	= 2
+#GLIB22_VERSION_MINOR	= 4
+#GLIB22_VERSION_MICRO	= 6
+
+GLIB22_VERSION_MAJOR	= 2
+GLIB22_VERSION_MINOR	= 6
+GLIB22_VERSION_MICRO	= 1
+
+GLIB22_VERSION		= $(GLIB22_VERSION_MAJOR).$(GLIB22_VERSION_MINOR).$(GLIB22_VERSION_MICRO)
+GLIB22			= glib-$(GLIB22_VERSION)
+GLIB22_SUFFIX		= tar.bz2
+GLIB22_URL		= ftp://ftp.gtk.org/pub/gtk/v$(GLIB22_VERSION_MAJOR).$(GLIB22_VERSION_MINOR)/$(GLIB22).$(GLIB22_SUFFIX)
+GLIB22_SOURCE		= $(SRCDIR)/$(GLIB22).$(GLIB22_SUFFIX)
+GLIB22_DIR		= $(BUILDDIR)/$(GLIB22)
+GLIB22_IPKG_TMP		= $(GLIB22_DIR)/ipkg_tmp
+
+# ----------------------------------------------------------------------------
+# Get
+# ----------------------------------------------------------------------------
+
+glib22_get: $(STATEDIR)/glib22.get
+
+glib22_get_deps = $(GLIB22_SOURCE)
+
+$(STATEDIR)/glib22.get: $(glib22_get_deps)
+	@$(call targetinfo, $@)
+	@$(call get_patches, $(GLIB22))
+	touch $@
+
+$(GLIB22_SOURCE):
+	@$(call targetinfo, $@)
+	@$(call get, $(GLIB22_URL))
+
+# ----------------------------------------------------------------------------
+# Extract
+# ----------------------------------------------------------------------------
+
+glib22_extract: $(STATEDIR)/glib22.extract
+
+glib22_extract_deps = $(STATEDIR)/glib22.get
+
+$(STATEDIR)/glib22.extract: $(glib22_extract_deps)
+	@$(call targetinfo, $@)
+	@$(call clean, $(GLIB22_DIR))
+	@$(call extract, $(GLIB22_SOURCE))
+	@$(call patchin, $(GLIB22))
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Prepare
+# ----------------------------------------------------------------------------
+
+glib22_prepare: $(STATEDIR)/glib22.prepare
+
+#
+# dependencies
+#
+glib22_prepare_deps = \
+	$(STATEDIR)/glib22.extract \
+	$(STATEDIR)/xchain-libtool.install \
+	$(STATEDIR)/xchain-glib22.install \
+	$(STATEDIR)/virtual-xchain.install
+
+ifdef PTXCONF_LIBICONV
+glib22_prepare_deps += $(STATEDIR)/libiconv.install
+endif
+
+GLIB22_PATH	=  PATH=$(CROSS_PATH)
+GLIB22_ENV 	=  $(CROSS_ENV)
+ifeq (y, $G(PTXCONF_GLIBC_DL))
+GLIB22_ENV	+= glib_cv_uscore=yes
+else
+GLIB22_ENV	+= glib_cv_uscore=no
+endif
+
+GLIB22_ENV	+= CFLAGS="-O2 -fomit-frame-pointer"
+
+#
+# autoconf
+#
+GLIB22_AUTOCONF = \
+	--build=$(GNU_HOST) \
+	--host=$(PTXCONF_GNU_TARGET) \
+	--prefix=/usr \
+	--disable-included-printf
+
+ifdef PTXCONF_LIBICONV
+GLIB22_AUTOCONF += --with-libiconv=gnu
+else
+GLIB22_AUTOCONF += --without-libiconv
+endif
+
+$(STATEDIR)/glib22.prepare: $(glib22_prepare_deps)
+	@$(call targetinfo, $@)
+	@$(call clean, $(GLIB22_DIR)/config.cache)
+	cd $(GLIB22_DIR) && \
+		$(GLIB22_PATH) $(GLIB22_ENV) \
+		./configure $(GLIB22_AUTOCONF) \
+		--disable-debug --enable-shared --disable-static --sysconfdir=/etc
+	cp -f $(PTXCONF_PREFIX)/bin/libtool $(GLIB22_DIR)/bin
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Compile
+# ----------------------------------------------------------------------------
+
+glib22_compile: $(STATEDIR)/glib22.compile
+
+glib22_compile_deps = $(STATEDIR)/glib22.prepare
+
+$(STATEDIR)/glib22.compile: $(glib22_compile_deps)
+	@$(call targetinfo, $@)
+	$(GLIB22_PATH) $(MAKE) -C $(GLIB22_DIR)
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Install
+# ----------------------------------------------------------------------------
+
+glib22_install: $(STATEDIR)/glib22.install
+
+$(STATEDIR)/glib22.install: $(STATEDIR)/glib22.compile
+	@$(call targetinfo, $@)
+
+	rm -f $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libglib-2.0.so*
+	install $(GLIB22_DIR)/glib/.libs/libglib-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/
+	ln -s libglib-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libglib-2.0.so.0
+	ln -s libglib-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libglib-2.0.so
+	install -d $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/include/glib-2.0/glib
+	cp -a $(GLIB22_DIR)/glib/*.h $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/include/glib-2.0/glib
+	cp -a $(GLIB22_DIR)/glib/glib.h $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/include/glib-2.0/
+	cp -a $(GLIB22_DIR)/glib/glib-object.h $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/include/glib-2.0/
+	
+	rm -f $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libgmodule-2.0.so*
+	install $(GLIB22_DIR)/gmodule/.libs/libgmodule-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/
+	ln -s libgmodule-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libgmodule-2.0.so.0
+	ln -s libgmodule-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libgmodule-2.0.so
+	#install -d $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/include/gmodule
+	cp -a $(GLIB22_DIR)/gmodule/gmodule.h $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/include/glib-2.0/
+
+	rm -f $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libgobject-2.0.so*
+	install $(GLIB22_DIR)/gobject/.libs/libgobject-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/
+	ln -s libgobject-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libgobject-2.0.so.0
+	ln -s libgobject-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libgobject-2.0.so
+	install -d $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/include/glib-2.0/gobject
+	cp -a $(GLIB22_DIR)/gobject/*.h $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/include/glib-2.0/gobject/
+	cp -a $(GLIB22_DIR)/gobject/gobjectnotifyqueue.c $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/include/glib-2.0/gobject/
+
+	rm -f $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libgthread-2.0.so*
+	install $(GLIB22_DIR)/gthread/.libs/libgthread-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/
+	ln -s libgthread-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libgthread-2.0.so.0
+	ln -s libgthread-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/libgthread-2.0.so
+	#install -d $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/include/gthread
+	#cp -a $(GLIB22_DIR)/gthread/*.h $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/include/gthread
+
+	install -D $(GLIB22_DIR)/glibconfig.h $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/glib-2.0/include/glibconfig.h
+
+	mkdir -p $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/pkgconfig
+	install $(GLIB22_DIR)/glib-2.0.pc    $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/pkgconfig
+	install $(GLIB22_DIR)/gmodule-2.0.pc $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/pkgconfig
+	install $(GLIB22_DIR)/gobject-2.0.pc $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/pkgconfig
+	install $(GLIB22_DIR)/gthread-2.0.pc $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/pkgconfig
+
+	perl -p -i -e "s/\/usr/`echo $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET) | sed -e '/\//s//\\\\\//g'`/g" $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/pkgconfig/glib-2.0.pc
+	perl -p -i -e "s/\/usr/`echo $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET) | sed -e '/\//s//\\\\\//g'`/g" $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/pkgconfig/gmodule-2.0.pc
+	perl -p -i -e "s/\/usr/`echo $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET) | sed -e '/\//s//\\\\\//g'`/g" $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/pkgconfig/gobject-2.0.pc
+	perl -p -i -e "s/\/usr/`echo $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET) | sed -e '/\//s//\\\\\//g'`/g" $(PTXCONF_PREFIX)/$(PTXCONF_GNU_TARGET)/lib/pkgconfig/gthread-2.0.pc
+
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Target-Install
+# ----------------------------------------------------------------------------
+
+glib22_targetinstall: $(STATEDIR)/glib22.targetinstall
+
+glib22_targetinstall_deps = $(STATEDIR)/glib22.compile
+
+ifdef PTXCONF_LIBICONV
+glib22_targetinstall_deps += $(STATEDIR)/libiconv.targetinstall
+endif
+
+$(STATEDIR)/glib22.targetinstall: $(glib22_targetinstall_deps)
+	@$(call targetinfo, $@)
+
+	mkdir -p $(GLIB22_IPKG_TMP)/usr/lib
+
+	install $(GLIB22_DIR)/glib/.libs/libglib-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO)        $(GLIB22_IPKG_TMP)/usr/lib/
+	$(CROSSSTRIP) $(GLIB22_IPKG_TMP)/usr/lib/libglib-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO)
+	ln -sf libglib-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(GLIB22_IPKG_TMP)/usr/lib/libglib-2.0.so.0
+	ln -sf libglib-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(GLIB22_IPKG_TMP)/usr/lib/libglib-2.0.so
+	install $(GLIB22_DIR)/gmodule/.libs/libgmodule-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO)  $(GLIB22_IPKG_TMP)/usr/lib/
+	$(CROSSSTRIP) $(GLIB22_IPKG_TMP)/usr/lib/libgmodule-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO)
+	ln -sf libgmodule-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(GLIB22_IPKG_TMP)/usr/lib/libgmodule-2.0.so.0
+	ln -sf libgmodule-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(GLIB22_IPKG_TMP)/usr/lib/libgmodule-2.0.so
+	install $(GLIB22_DIR)/gobject/.libs/libgobject-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO)  $(GLIB22_IPKG_TMP)/usr/lib/
+	$(CROSSSTRIP) $(GLIB22_IPKG_TMP)/usr/lib/libgobject-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO)
+	ln -sf libgobject-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(GLIB22_IPKG_TMP)/usr/lib/libgobject-2.0.so.0
+	ln -sf libgobject-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(GLIB22_IPKG_TMP)/usr/lib/libgobject-2.0.so
+	install $(GLIB22_DIR)/gthread/.libs/libgthread-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO)  $(GLIB22_IPKG_TMP)/usr/lib/
+	$(CROSSSTRIP) $(GLIB22_IPKG_TMP)/usr/lib/libgthread-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO)
+	ln -sf libgthread-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(GLIB22_IPKG_TMP)/usr/lib/libgthread-2.0.so.0
+	ln -sf libgthread-2.0.so.0.$(GLIB22_VERSION_MINOR)00.$(GLIB22_VERSION_MICRO) $(GLIB22_IPKG_TMP)/usr/lib/libgthread-2.0.so
+
+	mkdir -p $(GLIB22_IPKG_TMP)/CONTROL
+	echo "Package: glib2"	 			>$(GLIB22_IPKG_TMP)/CONTROL/control
+	echo "Priority: optional" 			>>$(GLIB22_IPKG_TMP)/CONTROL/control
+	echo "Section: Libraries" 			>>$(GLIB22_IPKG_TMP)/CONTROL/control
+	echo "Maintainer: Alexander Chukov <sash@pdaXrom.org>" >>$(GLIB22_IPKG_TMP)/CONTROL/control
+	echo "Architecture: $(SHORT_TARGET)" 		>>$(GLIB22_IPKG_TMP)/CONTROL/control
+	echo "Version: $(GLIB22_VERSION)" 		>>$(GLIB22_IPKG_TMP)/CONTROL/control
+ifdef PTXCONF_LIBICONV
+	echo "Depends: libiconv" 			>>$(GLIB22_IPKG_TMP)/CONTROL/control
+else
+	echo "Depends: " 				>>$(GLIB22_IPKG_TMP)/CONTROL/control
+endif
+	echo "Description: GLib is the low-level core library that forms the basis for projects such as GTK+ and GNOME.">>$(GLIB22_IPKG_TMP)/CONTROL/control
+	cd $(FEEDDIR) && $(XMKIPKG) $(GLIB22_IPKG_TMP)
+
+	touch $@
+
+# ----------------------------------------------------------------------------
+# Image-Install
+# ----------------------------------------------------------------------------
+
+ifdef PTXCONF_GLIB22_INSTALL
+ROMPACKAGES += $(STATEDIR)/glib22.imageinstall
+endif
+
+glib22_imageinstall_deps = $(STATEDIR)/glib22.targetinstall \
+	$(STATEDIR)/virtual-image.install
+
+$(STATEDIR)/glib22.imageinstall: $(glib22_imageinstall_deps)
+	@$(call targetinfo, $@)
+	cd $(FEEDDIR) && $(XIPKG) install glib2
+	touch $@
+
+
+# ----------------------------------------------------------------------------
+# Clean
+# ----------------------------------------------------------------------------
+
+glib22_clean:
+	rm -rf $(STATEDIR)/glib22.*
+	rm -rf $(GLIB22_DIR)
+
+# vim: syntax=make

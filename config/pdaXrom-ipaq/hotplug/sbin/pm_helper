@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# This is the script that gets called when the power button on the iPaq is hit.
+# Please do not edit this. Add your scripts in SysV fashion to /etc/resume and /etc/suspend.
+#
+case $1 in
+suspend)
+	run-parts /etc/hotplug/suspend-scripts
+    ;;
+resume)
+	run-parts /etc/hotplug/resume-scripts
+    ;;
+esac

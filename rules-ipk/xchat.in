@@ -1,0 +1,8 @@
+config XCHAT
+	bool
+	prompt "xchat"
+
+config XCHAT_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XCHAT

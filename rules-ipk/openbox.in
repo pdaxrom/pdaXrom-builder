@@ -1,0 +1,9 @@
+config OPENBOX
+	bool
+	prompt "Compile openbox / X11"
+	depends on XFREE430
+
+config OPENBOX_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on OPENBOX

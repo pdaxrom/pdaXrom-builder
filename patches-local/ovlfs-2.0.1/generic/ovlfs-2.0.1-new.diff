@@ -1,0 +1,272 @@
+diff -Nur ovlfs-2.0.1/configure ovlfs-2.0.1-new/configure
+--- ovlfs-2.0.1/configure	2003-07-28 02:20:45.000000000 +0000
++++ ovlfs-2.0.1-new/configure	2004-10-12 00:48:33.000000000 +0000
+@@ -34,6 +34,56 @@
+ CONFIG_MODVERS=1
+ CONFIG_FILE=config.current
+ 
++CONFIG_MK=config.mk
++
++LINUX=/lib/modules/`uname -r`/build
++
++arg () {
++    VALUE="`echo X"$2" | sed -e 's/^X--[a-zA-Z_]*=//'`"
++    eval $1=\"$VALUE\"
++}
++
++version () {
++    expr $1 \* 65536 + $2 \* 256 + $3
++}
++
++write_str () {
++    value=`eval echo '$'$1`
++    echo "$1"=\"$value\" >> $CONFIG
++    echo "$1=$value" >> $CONFIG_MK
++    echo "#define $1 \"$value\"" >> $CONFIG_H
++}
++
++while [ $# -gt 0 ] ; do
++    case "$1" in
++    --kernel=*)		arg LINUX $1 		;;
++    --target=*)		arg PREFIX $1		;;
++    *)			usage			;;
++    esac
++    shift
++done
++
++echo $LINUX
++
++for TAG in VERSION PATCHLEVEL SUBLEVEL EXTRAVERSION ; do
++    eval `sed -ne "/^$TAG/s/[ 	]//gp" $LINUX/Makefile`
++done
++if [ "$EXTRAVER" != "" ] ; then
++    EXTRAVERSION=$EXTRAVER
++fi
++SRC_RELEASE=$VERSION.$PATCHLEVEL.$SUBLEVEL$EXTRAVERSION
++SRC_BASE=$VERSION.$PATCHLEVEL.$SUBLEVEL
++VERSION_CODE=`version $VERSION $PATCHLEVEL $SUBLEVEL`
++echo "The kernel source tree is version $SRC_RELEASE."
++echo "OS_REV=$SRC_RELEASE" >config.mk
++echo "KERNEL_PATH=$LINUX" >>config.mk
++echo "KERNEL_INCLUDE_DIR=$LINUX/include" >>config.mk
++
++KERNEL_PATH=$LINUX
++
++if [ "X$KERNEL_PATH" = "X" ]; then
++    KERNEL_PATH="/lib/modules/`uname -r`/build"
++fi
+ 
+ ##
+ ## FUNCTION: check_root_dir
+@@ -86,7 +136,7 @@
+ 
+ check_modvers ()
+ {
+-	if tools/modver_test
++	if tools/modver_test -k $KERNEL_PATH
+ 	then
+ 		set_config_value CONFIG_MODVERS 1
+ 	else
+diff -Nur ovlfs-2.0.1/doc/Makefile ovlfs-2.0.1-new/doc/Makefile
+--- ovlfs-2.0.1/doc/Makefile	2003-07-28 02:20:32.000000000 +0000
++++ ovlfs-2.0.1-new/doc/Makefile	2004-10-12 01:06:56.000000000 +0000
+@@ -124,22 +124,22 @@
+ 
+ install:
+ 	@echo "Installing ovl.8 to $(MAN8_INST_DIR)"
+-	@$(INSTALL) -d -m 755 -o root -g root $(MAN8_INST_DIR)
+-	@$(INSTALL) -m444 -o root -g root ovl.8 $(MAN8_INST_DIR)/ovl.8
++	@$(INSTALL) -d -m 755 $(MAN8_INST_DIR)
++	@$(INSTALL) -m444 ovl.8 $(MAN8_INST_DIR)/ovl.8
+ 	@$(RM) -f $(MAN8_INST_DIR)/ovlfs.8
+ 	@$(LN) -s ovl.8 $(MAN8_INST_DIR)/ovlfs.8
+ 	@:
+ 	@echo "Installing ovlmount.8 to $(MAN8_INST_DIR)"
+-	@$(INSTALL) -d -m 755 -o root -g root $(MAN8_INST_DIR)
++	@$(INSTALL) -d -m 755 $(MAN8_INST_DIR)
+ 	@$(INSTALL) -m444 ovlmount.8 $(MAN8_INST_DIR)/ovlmount.8
+ 	@:
+ 	@echo "Installing ovlfstab.5 to $(MAN5_INST_DIR)"
+-	@$(INSTALL) -d -m 755 -o root -g root $(MAN5_INST_DIR)
++	@$(INSTALL) -d -m 755 $(MAN5_INST_DIR)
+ 	@$(INSTALL) -m444 ovlfstab.5 $(MAN5_INST_DIR)/ovlfstab.5
+ 	@:
+ 	@echo "Installing $(DOC_FILES) to $(DOC_INST_DIR)"
+-	@$(INSTALL) -d -m 755 -o root -g root $(DOC_INST_DIR)
+-	@$(INSTALL) -m 444 -o root -g root $(DOC_FILES) $(DOC_INST_DIR)/
++	@$(INSTALL) -d -m 755 $(DOC_INST_DIR)
++	@$(INSTALL) -m 444 $(DOC_FILES) $(DOC_INST_DIR)/
+ 
+ 
+ 
+diff -Nur ovlfs-2.0.1/file_io/Makefile ovlfs-2.0.1-new/file_io/Makefile
+--- ovlfs-2.0.1/file_io/Makefile	2003-07-28 02:20:33.000000000 +0000
++++ ovlfs-2.0.1-new/file_io/Makefile	2004-10-12 00:51:15.000000000 +0000
+@@ -31,6 +31,10 @@
+ 
+ TOP=..
+ 
++ifeq ($(TOP)/config.mk, $(wildcard $(TOP)/config.mk))
++include $(TOP)/config.mk
++endif
++
+ ################################# Rules.mk #################################
+ include $(TOP)/Rules.mk
+ 
+diff -Nur ovlfs-2.0.1/fs/Makefile ovlfs-2.0.1-new/fs/Makefile
+--- ovlfs-2.0.1/fs/Makefile	2003-07-28 02:20:33.000000000 +0000
++++ ovlfs-2.0.1-new/fs/Makefile	2004-10-12 00:51:35.000000000 +0000
+@@ -58,6 +58,10 @@
+ 
+ TOP=..
+ 
++ifeq ($(TOP)/config.mk, $(wildcard $(TOP)/config.mk))
++include $(TOP)/config.mk
++endif
++
+ include $(TOP)/Rules.mk
+ 
+ -include Override.mk
+diff -Nur ovlfs-2.0.1/lib/Makefile ovlfs-2.0.1-new/lib/Makefile
+--- ovlfs-2.0.1/lib/Makefile	2003-07-28 02:20:36.000000000 +0000
++++ ovlfs-2.0.1-new/lib/Makefile	2004-10-12 00:51:47.000000000 +0000
+@@ -31,6 +31,10 @@
+ 
+ TOP=..
+ 
++ifeq ($(TOP)/config.mk, $(wildcard $(TOP)/config.mk))
++include $(TOP)/config.mk
++endif
++
+ ################################# Rules.mk #################################
+ include $(TOP)/Rules.mk
+ 
+diff -Nur ovlfs-2.0.1/lists/Makefile ovlfs-2.0.1-new/lists/Makefile
+--- ovlfs-2.0.1/lists/Makefile	2003-07-28 02:20:36.000000000 +0000
++++ ovlfs-2.0.1-new/lists/Makefile	2004-10-12 00:51:57.000000000 +0000
+@@ -35,6 +35,10 @@
+ 
+ TOP=..
+ 
++ifeq ($(TOP)/config.mk, $(wildcard $(TOP)/config.mk))
++include $(TOP)/config.mk
++endif
++
+ ################################# Rules.mk #################################
+ include $(TOP)/Rules.mk
+ 
+diff -Nur ovlfs-2.0.1/Makefile ovlfs-2.0.1-new/Makefile
+--- ovlfs-2.0.1/Makefile	2003-07-28 02:20:30.000000000 +0000
++++ ovlfs-2.0.1-new/Makefile	2004-10-12 00:50:50.000000000 +0000
+@@ -55,6 +55,10 @@
+ 
+ TOP=.
+ 
++ifeq ($(TOP)/config.mk, $(wildcard $(TOP)/config.mk))
++include $(TOP)/config.mk
++endif
++
+ ################################# Rules.mk #################################
+ include $(TOP)/Rules.mk
+ 
+diff -Nur ovlfs-2.0.1/mount/Makefile ovlfs-2.0.1-new/mount/Makefile
+--- ovlfs-2.0.1/mount/Makefile	2003-07-28 02:20:37.000000000 +0000
++++ ovlfs-2.0.1-new/mount/Makefile	2004-10-12 01:06:22.000000000 +0000
+@@ -33,6 +33,10 @@
+ 
+ TOP=..
+ 
++ifeq ($(TOP)/config.mk, $(wildcard $(TOP)/config.mk))
++include $(TOP)/config.mk
++endif
++
+ ################################# Rules.mk #################################
+ include $(TOP)/Rules.mk
+ 
+@@ -118,8 +122,8 @@
+ 
+ install:
+ 	@echo "Installing ovlmount in $(OVLFS_BINDIR)"
+-	@$(INSTALL) -d -m755 -o root -g root $(OVLFS_BINDIR)
+-	@$(INSTALL) -m555 -o root -g root ovlmount $(OVLFS_BINDIR)/ovlmount
++	@$(INSTALL) -d -m755 $(OVLFS_BINDIR)
++	@$(INSTALL) -m555 ovlmount $(OVLFS_BINDIR)/ovlmount
+ 
+ 
+ ##
+diff -Nur ovlfs-2.0.1/Suffix.mk ovlfs-2.0.1-new/Suffix.mk
+--- ovlfs-2.0.1/Suffix.mk	2003-07-28 02:20:31.000000000 +0000
++++ ovlfs-2.0.1-new/Suffix.mk	2004-10-12 01:00:47.000000000 +0000
+@@ -38,15 +38,15 @@
+ 
+ 
+ $(OVLFS_BINDIR) $(FS_MOD_INST_DIR):
+-	@$(INSTALL) -d -m 755 -o root -g root "$@"
++	@$(INSTALL) -d -m 755 "$@"
+ 
+ $(FS_MOD_INST_DIR)/%: % $(FS_MOD_INST_DIR)
+ 	@echo "Installing $@"
+-	@$(INSTALL) -m 444 -o root -g root "$<" "$@"
++	@$(INSTALL) -m 444 "$<" "$@"
+ 
+ $(OVLFS_BINDIR)/%: % $(OVLFS_BINDIR)
+ 	@echo "Installing $@"
+-	@$(INSTALL) -m 555 -o root -g root "$<" "$@"
++	@$(INSTALL) -m 555 "$<" "$@"
+ 
+ 
+ # Prevent duplicate rule warnings when the two module directories are the same.
+@@ -54,10 +54,10 @@
+ ifneq "$(FS_MOD_INST_DIR)" "$(MISC_MOD_INST_DIR)"
+ 
+ $(MISC_MOD_INST_DIR):
+-	@$(INSTALL) -d -m 755 -o root -g root "$@"
++	@$(INSTALL) -d -m 755 "$@"
+ 
+ $(MISC_MOD_INST_DIR)/%: % $(MISC_MOD_INST_DIR)
+ 	@echo "Installing $@"
+-	@$(INSTALL) -m 444 -o root -g root "$<" "$@"
++	@$(INSTALL) -m 444 "$<" "$@"
+ 
+ endif
+diff -Nur ovlfs-2.0.1/third_party/Makefile ovlfs-2.0.1-new/third_party/Makefile
+--- ovlfs-2.0.1/third_party/Makefile	2003-07-28 02:20:37.000000000 +0000
++++ ovlfs-2.0.1-new/third_party/Makefile	2004-10-12 00:52:17.000000000 +0000
+@@ -31,6 +31,10 @@
+ 
+ TOP=..
+ 
++ifeq ($(TOP)/config.mk, $(wildcard $(TOP)/config.mk))
++include $(TOP)/config.mk
++endif
++
+ ################################# Rules.mk #################################
+ include $(TOP)/Rules.mk
+ 
+diff -Nur ovlfs-2.0.1/tools/file_test_getents.c ovlfs-2.0.1-new/tools/file_test_getents.c
+--- ovlfs-2.0.1/tools/file_test_getents.c	2003-07-28 02:20:38.000000000 +0000
++++ ovlfs-2.0.1-new/tools/file_test_getents.c	2004-10-12 01:50:55.000000000 +0000
+@@ -28,6 +28,7 @@
+ #include <linux/types.h>
+ #include <linux/dirent.h>
+ #include <linux/unistd.h>
++#include <errno.h>
+ 
+ #include "file_test.h"
+ 
+Двоичные файлы ovlfs-2.0.1/tools/file_test_getents.o и ovlfs-2.0.1-new/tools/file_test_getents.o различаются
+Двоичные файлы ovlfs-2.0.1/tools/file_test.o и ovlfs-2.0.1-new/tools/file_test.o различаются
+diff -Nur ovlfs-2.0.1/tools/Makefile ovlfs-2.0.1-new/tools/Makefile
+--- ovlfs-2.0.1/tools/Makefile	2003-07-28 02:20:37.000000000 +0000
++++ ovlfs-2.0.1-new/tools/Makefile	2004-10-12 00:52:27.000000000 +0000
+@@ -46,6 +46,10 @@
+ 
+ TOP=..
+ 
++ifeq ($(TOP)/config.mk, $(wildcard $(TOP)/config.mk))
++include $(TOP)/config.mk
++endif
++
+ ################################# Rules.mk #################################
+ include $(TOP)/Rules.mk
+ 

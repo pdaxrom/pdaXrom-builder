@@ -1,0 +1,9 @@
+config MATCHBOX-DESKTOP
+	bool
+	prompt "Compile matchbox desktop"
+	depends on XFREE430
+
+config MATCHBOX-DESKTOP_INSTALL
+	bool
+	prompt "Install in ROM image"
+	depends on MATCHBOX-DESKTOP

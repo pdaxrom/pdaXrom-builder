@@ -1,0 +1,19 @@
+diff -rNu dosfstools-2.10.orig/dosfsck/boot.c dosfstools-2.10/dosfsck/boot.c
+--- dosfstools-2.10.orig/dosfsck/boot.c	2003-06-15 08:03:20.000000000 +1200
++++ dosfstools-2.10/dosfsck/boot.c	2004-10-16 14:59:27.000000000 +1300
+@@ -34,13 +34,13 @@
+     { 0xff, "5.25\" 320k floppy 2s/40tr/8sec" },
+ };
+ 
+-#if defined __alpha || defined __ia64__ || defined __s390x__ || defined __x86_64__ || defined __ppc64__
++#if defined __alpha || defined __ia64__ || defined __s390x__ || defined __x86_64__ || defined __ppc64__ || __arm__
+ /* Unaligned fields must first be copied byte-wise */
+ #define GET_UNALIGNED_W(f)			\
+     ({						\
+ 	unsigned short __v;			\
+ 	memcpy( &__v, &f, sizeof(__v) );	\
+-	CF_LE_W( *(unsigned short *)&f );	\
++	CF_LE_W( *(unsigned short *)&__v );	\
+     })
+ #else
+ #define GET_UNALIGNED_W(f) CF_LE_W( *(unsigned short *)&f )

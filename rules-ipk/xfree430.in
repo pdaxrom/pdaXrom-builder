@@ -1,0 +1,87 @@
+menu "XFree86-4.3.0       "
+
+config XFREE430
+	bool
+	prompt "Compile XFree86-4.3.0"
+
+config XFREE430_CONFIG
+        prompt "Name of host.def file to be used"
+	string
+	default "config/xfree/FB-host.def"
+	depends on XFREE430
+
+config XFREE430_XFBDEV
+	bool
+	prompt "create symlink to FB XServer"
+	depends on XFREE430 && !ARCH_ARM
+
+config XFREE430_SCREENSIZE
+	bool
+	prompt "optimization for screen size"
+	depends on XFREE430 && !ARCH_X86
+
+config XFREE430_SCREENWIDTH
+	string
+	default 640
+	prompt "Width"
+	depends on XFREE430_SCREENSIZE
+
+config XFREE430_SCREENHEIGHT
+	string
+	default 480
+	prompt "Height"
+	depends on XFREE430_SCREENSIZE
+
+choice
+	prompt "Screen orientation"
+	depends on XFREE430_SCREENSIZE
+	
+config XFREE430_ROTATE0
+	bool
+	prompt "0"
+
+config XFREE430_ROTATE90
+	bool
+	prompt "90"
+
+config XFREE430_ROTATE180
+	bool
+	prompt "180"
+
+config XFREE430_ROTATE240
+	bool
+	prompt "240"
+
+endchoice
+
+config XFREE430_ROTATION
+	depends on XFREE430_SCREENSIZE
+	string
+	default "0"   if XFREE430_ROTATE0
+	default "90"  if XFREE430_ROTATE90
+	default "180" if XFREE430_ROTATE180
+	default "240" if XFREE430_ROTATE240
+
+config XFREE430_INSTALL
+	bool
+	prompt "install in ROM"
+	depends on XFREE430
+
+config XFREE430_INSTALL_ADDON
+	bool
+	prompt "install addon files in ROM"
+	depends on XFREE430 && XFREE430_INSTALL
+
+config XFREE430_INSTALL_XKB
+	bool
+	prompt "install xkb utilities in ROM"
+	depends on XFREE430 && XFREE430_INSTALL
+
+config XFREE430_XDM
+	bool
+	prompt "Enable booting in X11"
+	depends on XFREE430
+
+source "rules-ipk/xfree-svga.in"
+
+endmenu
